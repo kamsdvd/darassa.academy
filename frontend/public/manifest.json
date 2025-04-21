@@ -1,0 +1,21 @@
+{
+  "short_name": "Darassa Academy",
+  "name": "Darassa Academy - Formation Certifiante en RDC",
+  "description": "Darassa Academy offre des formations certifiantes avec garantie d'emploi en RDC et en Afrique",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon",
+      "purpose": "any"
+    }
+  ],
+  "id": "/",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#007BFF",
+  "background_color": "#ffffff",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "fr-FR"
+} 
