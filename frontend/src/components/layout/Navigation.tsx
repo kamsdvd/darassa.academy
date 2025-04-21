@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, Home, LogIn, LogOut, User } from 'lucide-react';
 import { useStore } from '../../store/useStore';
@@ -51,33 +51,28 @@ const Navigation: React.FC = () => {
             <Link to="/entreprises" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
               Entreprises
             </Link>
-            <Link to="/blog" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
-              Blog
-            </Link>
-            <Link to="/contact" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
-              Contact
-            </Link>
-            
+
+            {/* Boutons d'authentification */}
             {isAuthenticated ? (
-              <div className="flex items-center space-x-4">
-                <Link 
-                  to={user?.role === 'entreprise' ? '/entreprises/dashboard' : '/dashboard'} 
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
-                >
-                  <User className="w-4 h-4 mr-2" />
-                  {user?.name || 'Mon compte'}
+              <>
+                <Link to="/dashboard" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
+                  <User className="inline-block w-5 h-5 mr-1" />
+                  Dashboard
                 </Link>
-                <button 
+                <button
                   onClick={handleLogout}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700"
+                  className="flex items-center text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
+                  <LogOut className="w-5 h-5 mr-1" />
                   Déconnexion
                 </button>
-              </div>
+              </>
             ) : (
-              <Link to="/connexion" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700">
-                <LogIn className="w-4 h-4 mr-2" />
+              <Link
+                to="/connexion"
+                className="flex items-center bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 transition-colors"
+              >
+                <LogIn className="w-5 h-5 mr-1" />
                 Connexion
               </Link>
             )}
@@ -87,14 +82,10 @@ const Navigation: React.FC = () => {
           <div className="md:hidden flex items-center">
             <button
               onClick={toggleMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-primary-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
             >
-              <span className="sr-only">Open main menu</span>
-              {isOpen ? (
-                <X className="block h-6 w-6" aria-hidden="true" />
-              ) : (
-                <Menu className="block h-6 w-6" aria-hidden="true" />
-              )}
+              <span className="sr-only">Ouvrir le menu</span>
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
@@ -109,6 +100,7 @@ const Navigation: React.FC = () => {
               className="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium"
               onClick={toggleMenu}
             >
+              <Home className="inline-block w-5 h-5 mr-2" />
               Accueil
             </Link>
             <Link
@@ -139,32 +131,17 @@ const Navigation: React.FC = () => {
             >
               Entreprises
             </Link>
-            <Link
-              to="/blog"
-              className="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium"
-              onClick={toggleMenu}
-            >
-              Blog
-            </Link>
-            <Link
-              to="/contact"
-              className="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium"
-              onClick={toggleMenu}
-            >
-              Contact
-            </Link>
-            
+
+            {/* Boutons d'authentification mobile */}
             {isAuthenticated ? (
               <>
                 <Link
-                  to={user?.role === 'entreprise' ? '/entreprises/dashboard' : '/dashboard'}
+                  to="/dashboard"
                   className="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium"
                   onClick={toggleMenu}
                 >
-                  <div className="flex items-center">
-                    <User className="w-4 h-4 mr-2" />
-                    {user?.name || 'Mon compte'}
-                  </div>
+                  <User className="inline-block w-5 h-5 mr-2" />
+                  Dashboard
                 </Link>
                 <button
                   onClick={() => {
@@ -173,19 +150,17 @@ const Navigation: React.FC = () => {
                   }}
                   className="w-full text-left text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium"
                 >
-                  <div className="flex items-center">
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Déconnexion
-                  </div>
+                  <LogOut className="inline-block w-5 h-5 mr-2" />
+                  Déconnexion
                 </button>
               </>
             ) : (
               <Link
                 to="/connexion"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
+                className="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium"
                 onClick={toggleMenu}
               >
-                <LogIn className="w-4 h-4 mr-2" />
+                <LogIn className="inline-block w-5 h-5 mr-2" />
                 Connexion
               </Link>
             )}
