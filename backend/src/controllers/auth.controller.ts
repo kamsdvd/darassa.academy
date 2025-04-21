@@ -19,37 +19,70 @@ const generateToken = (id: string): string => {
 // @access  Public
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, email, password } = req.body;
+    console.log('Registration attempt:', {
+      ...req.body,
+      password: req.body.password ? '***' : undefined
+    });
+
+    const { name, email, password, role, phone, company, position } = req.body;
 
     // Check if user exists
     const userExists = await User.findOne({ email });
     if (userExists) {
+      console.log('Registration failed: User already exists');
       res.status(400).json({ message: 'Un utilisateur avec cet email existe déjà' });
       return;
     }
 
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Create user
-    const user = await User.create({
+    // Create user with role-specific fields
+    const userData: any = {
       name,
       email,
-      password: hashedPassword,
-      role: 'user'
+      password,
+      role: role || 'user'
+    };
+
+    // Add enterprise-specific fields if role is 'entreprise'
+    if (role === 'entreprise') {
+      if (!phone || !company || !position) {
+        console.log('Registration failed: Missing enterprise fields');
+        res.status(400).json({ message: 'Tous les champs de l\'entreprise sont requis' });
+        return;
+      }
+      userData.phone = phone;
+      userData.company = company;
+      userData.position = position;
+    }
+
+    console.log('Creating user with data:', {
+      ...userData,
+      password: '***'
     });
 
-    res.status(201).json({
-      _id: user.id,
-      name: user.name,
+    const user = await User.create(userData);
+
+    console.log('User created successfully:', {
+      id: user._id,
       email: user.email,
-      role: user.role,
-      token: generateToken(user.id),
+      role: user.role
+    });
+
+    // Return user data without password
+    res.status(201).json({
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        company: user.company,
+        position: user.position,
+        token: generateToken(user._id),
+      }
     });
   } catch (error) {
     console.error('Register error:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    res.status(500).json({ message: 'Une erreur est survenue lors de l\'inscription' });
   }
 };
 

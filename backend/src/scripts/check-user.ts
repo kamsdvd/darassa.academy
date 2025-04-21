@@ -8,23 +8,24 @@ dotenv.config();
 const checkUser = async () => {
   try {
     console.log('Connexion à MongoDB...');
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/darassa-academy';
+    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/darassa_academy';
     await mongoose.connect(mongoURI);
     console.log('Connecté à MongoDB');
 
     // Rechercher l'utilisateur test
-    const user = await User.findOne({ email: 'test@example.com' });
+    const user = await User.findOne({ email: 'david.kalambay@darassa.academy' });
     
     if (user) {
-      console.log('Utilisateur test trouvé:');
-      console.log({
+      console.log('Utilisateur trouvé:', {
         id: user._id,
-        name: user.name,
         email: user.email,
-        role: user.role
+        name: user.name,
+        role: user.role,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
       });
     } else {
-      console.log('Utilisateur test non trouvé');
+      console.log('Utilisateur non trouvé');
     }
 
     // Créer l'utilisateur test s'il n'existe pas
@@ -42,7 +43,7 @@ const checkUser = async () => {
     await mongoose.disconnect();
     console.log('Déconnecté de MongoDB');
   } catch (error) {
-    console.error('Erreur:', error);
+    console.error('Erreur lors de la vérification:', error);
   }
 };
 
