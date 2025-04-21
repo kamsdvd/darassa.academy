@@ -2,20 +2,21 @@ import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '../shared/Button';
 import { Link } from 'react-router-dom';
+import { LazyImage } from '../shared/LazyImage';
 import heroImage from '../../assets/images/hero-image.png';
 
 export const Hero: React.FC = () => {
   return (
     <header className="relative min-h-[600px] flex items-center bg-gradient-to-r from-primary-600 to-primary-700">
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#007BFF]/90 to-[#007BFF]/70"></div>
-        <img 
+        <LazyImage 
           src={heroImage}
           alt="Étudiants africains en situation d'apprentissage"
-          className="w-full h-full object-cover"
+          className="w-full h-full"
         />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#007BFF]/90 to-[#007BFF]/70 z-10"></div>
       </div>
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 z-20">
         <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
           Formez-vous aux métiers d'avenir
         </h1>
