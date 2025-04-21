@@ -2,25 +2,38 @@ import React, { useEffect, useState, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Layout from './components/layout/Layout';
+import { reportWebVitals } from './utils/webVitals';
 import Connexion from './pages/auth/Connexion';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/shared/ProtectedRoute';
 import { useStore } from './store/useStore';
 import { AuthService } from './services/authService';
 
-// Lazy load components
-const Home = React.lazy(() => import('./pages/Home'));
-const Formations = React.lazy(() => import('./pages/formations/Formations'));
-const ProgrammeMLM = React.lazy(() => import('./pages/programme-mlm/ProgrammeMLM'));
-const Blog = React.lazy(() => import('./pages/blog/Blog'));
-const Contact = React.lazy(() => import('./pages/contact/Contact'));
-const Opportunites = React.lazy(() => import('./pages/opportunites/Opportunites'));
-const JobDetail = React.lazy(() => import('./pages/opportunites/JobDetail'));
-const Entreprises = React.lazy(() => import('./pages/entreprises/Entreprises'));
-const Inscription = React.lazy(() => import('./pages/entreprises/Inscription'));
-const Dashboard = React.lazy(() => import('./pages/entreprises/Dashboard'));
+// Lazy loading avec prefetch
+const lazyWithPrefetch = (factory: () => Promise<any>, preload = false) => {
+  const Component = React.lazy(factory);
+  Component.preload = factory;
+  
+  if (preload) {
+    factory();
+  }
+  
+  return Component;
+};
 
-// Loading component
+// Composants avec lazy loading
+const Home = lazyWithPrefetch(() => import('./pages/Home'), true);
+const Formations = lazyWithPrefetch(() => import('./pages/formations/Formations'));
+const ProgrammeMLM = lazyWithPrefetch(() => import('./pages/programme-mlm/ProgrammeMLM'));
+const Blog = lazyWithPrefetch(() => import('./pages/blog/Blog'));
+const Contact = lazyWithPrefetch(() => import('./pages/contact/Contact'));
+const Opportunites = lazyWithPrefetch(() => import('./pages/opportunites/Opportunites'));
+const JobDetail = lazyWithPrefetch(() => import('./pages/opportunites/JobDetail'));
+const Entreprises = lazyWithPrefetch(() => import('./pages/entreprises/Entreprises'));
+const Inscription = lazyWithPrefetch(() => import('./pages/entreprises/Inscription'));
+const Dashboard = lazyWithPrefetch(() => import('./pages/entreprises/Dashboard'));
+
+// Composant de chargement
 const LoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center">
     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
@@ -110,6 +123,24 @@ const AuthCheck: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
+// Composant pour gérer le prefetching des routes
+const RoutePrefetcher = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Précharger les routes connexes en fonction de la route actuelle
+    if (location.pathname === '/') {
+      Formations.preload?.();
+      ProgrammeMLM.preload?.();
+    } else if (location.pathname.startsWith('/formations')) {
+      Contact.preload?.();
+      Inscription.preload?.();
+    }
+  }, [location]);
+
+  return null;
+};
+
 function AnimatedRoutes() {
   const location = useLocation();
 
@@ -145,10 +176,16 @@ function AnimatedRoutes() {
 }
 
 function App() {
+  useEffect(() => {
+    // Démarrer le monitoring des Web Vitals
+    reportWebVitals();
+  }, []);
+
   return (
     <ErrorBoundary>
       <Router future={{ v7_startTransition: true }}>
         <AuthCheck>
+          <RoutePrefetcher />
           <Layout>
             <AnimatedRoutes />
           </Layout>
