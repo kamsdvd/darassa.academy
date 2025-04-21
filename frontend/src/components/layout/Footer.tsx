@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { GraduationCap, Facebook, Twitter, Linkedin, Instagram, Mail, Phone, MapPin } from 'lucide-react';
 
 const Footer: React.FC = () => {
@@ -16,16 +17,16 @@ const Footer: React.FC = () => {
               Votre partenaire de confiance pour une formation professionnelle de qualité en RDC et en Afrique.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-[#007BFF]">
+              <a href="https://facebook.com/darassaacademy" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#007BFF]">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-[#007BFF]">
+              <a href="https://twitter.com/darassaacademy" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#007BFF]">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-[#007BFF]">
+              <a href="https://linkedin.com/company/darassaacademy" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#007BFF]">
                 <Linkedin className="h-5 w-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-[#007BFF]">
+              <a href="https://instagram.com/darassaacademy" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#007BFF]">
                 <Instagram className="h-5 w-5" />
               </a>
             </div>
@@ -35,11 +36,12 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Liens Rapides</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white">À propos</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white">Nos formations</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white">Programme d'affiliation</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white">Blog</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white">FAQ</a></li>
+              <li><Link to="/a-propos" className="text-gray-400 hover:text-white">À propos</Link></li>
+              <li><Link to="/formations" className="text-gray-400 hover:text-white">Formations</Link></li>
+              <li><Link to="/affiliation" className="text-gray-400 hover:text-white">Programme d'affiliation</Link></li>
+              <li><Link to="/opportunites" className="text-gray-400 hover:text-white">Opportunités</Link></li>
+              <li><Link to="/blog" className="text-gray-400 hover:text-white">Blog</Link></li>
+              <li><Link to="/faq" className="text-gray-400 hover:text-white">FAQ</Link></li>
             </ul>
           </div>
 
@@ -60,6 +62,9 @@ const Footer: React.FC = () => {
                 <span>contact@darassa.academy</span>
               </li>
             </ul>
+            <Link to="/contact" className="mt-4 inline-block text-[#007BFF] hover:text-[#0056b3]">
+              Nous contacter
+            </Link>
           </div>
 
           {/* Newsletter */}
@@ -91,9 +96,9 @@ const Footer: React.FC = () => {
               © 2024 Darassa Academy. Tous droits réservés.
             </p>
             <div className="flex space-x-4 mt-4 md:mt-0">
-              <a href="#" className="text-gray-400 hover:text-white text-sm">Mentions légales</a>
-              <a href="#" className="text-gray-400 hover:text-white text-sm">Politique de confidentialité</a>
-              <a href="#" className="text-gray-400 hover:text-white text-sm">Conditions d'utilisation</a>
+              <Link to="/mentions-legales" className="text-gray-400 hover:text-white text-sm">Mentions légales</Link>
+              <Link to="/politique-confidentialite" className="text-gray-400 hover:text-white text-sm">Politique de confidentialité</Link>
+              <Link to="/conditions-utilisation" className="text-gray-400 hover:text-white text-sm">Conditions d'utilisation</Link>
             </div>
           </div>
         </div>

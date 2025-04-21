@@ -23,7 +23,7 @@ const lazyWithPrefetch = (factory: () => Promise<any>, preload = false) => {
 // Composants avec lazy loading
 const Home = lazyWithPrefetch(() => import('./pages/Home'), true);
 const Formations = lazyWithPrefetch(() => import('./pages/formations/Formations'));
-const ProgrammeMLM = lazyWithPrefetch(() => import('./pages/programme-mlm/ProgrammeMLM'));
+const Affiliation = lazyWithPrefetch(() => import('./pages/affiliation/Affiliation'));
 const Blog = lazyWithPrefetch(() => import('./pages/blog/Blog'));
 const Contact = lazyWithPrefetch(() => import('./pages/contact/Contact'));
 const Opportunites = lazyWithPrefetch(() => import('./pages/opportunites/Opportunites'));
@@ -34,6 +34,11 @@ const EntrepriseDashboard = lazyWithPrefetch(() => import('./pages/entreprises/D
 const UserDashboard = lazyWithPrefetch(() => import('./pages/dashboard/Dashboard'));
 const InscriptionParticulier = lazyWithPrefetch(() => import('./pages/auth/Inscription'));
 const Connexion = lazyWithPrefetch(() => import('./pages/auth/Connexion'), true);
+const APropos = lazyWithPrefetch(() => import('./pages/a-propos/APropos'));
+const FAQ = lazyWithPrefetch(() => import('./pages/faq/FAQ'));
+const MentionsLegales = lazyWithPrefetch(() => import('./pages/legal/MentionsLegales'));
+const PolitiqueConfidentialite = lazyWithPrefetch(() => import('./pages/legal/PolitiqueConfidentialite'));
+const ConditionsUtilisation = lazyWithPrefetch(() => import('./pages/legal/ConditionsUtilisation'));
 
 // Composant de chargement
 const LoadingFallback = () => (
@@ -133,7 +138,7 @@ const RoutePrefetcher = () => {
     // Précharger les routes connexes en fonction de la route actuelle
     if (location.pathname === '/') {
       Formations.preload?.();
-      ProgrammeMLM.preload?.();
+      Affiliation.preload?.();
     } else if (location.pathname.startsWith('/formations')) {
       Contact.preload?.();
       InscriptionEntreprise.preload?.();
@@ -151,8 +156,9 @@ function AnimatedRoutes() {
       <Suspense fallback={<LoadingFallback />}>
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Home />} />
+          <Route path="/a-propos" element={<APropos />} />
           <Route path="/formations" element={<Formations />} />
-          <Route path="/programme-mlm" element={<ProgrammeMLM />} />
+          <Route path="/affiliation" element={<Affiliation />} />
           <Route path="/opportunites" element={<Opportunites />} />
           <Route path="/opportunites/:id" element={<JobDetail />} />
           <Route path="/entreprises" element={<Entreprises />} />
@@ -171,6 +177,10 @@ function AnimatedRoutes() {
           <Route path="/blog" element={<Blog />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/connexion" element={<Connexion />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/mentions-legales" element={<MentionsLegales />} />
+          <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
+          <Route path="/conditions-utilisation" element={<ConditionsUtilisation />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

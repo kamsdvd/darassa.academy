@@ -34,13 +34,21 @@ export const Hero: React.FC = () => {
               S'inscrire maintenant
             </Button>
           </Link>
-          <Link to="/programme-mlm">
+          <Link to="/affiliation">
             <Button
               variant="outline"
               size="lg"
             >
-              Devenir représentant
+              Programme d'affiliation
             </Button>
+          </Link>
+        </div>
+        <div className="mt-8 flex gap-4">
+          <Link to="/formations" className="btn btn-primary">
+            Découvrir nos formations
+          </Link>
+          <Link to="/affiliation" className="btn btn-outline">
+            Programme d'affiliation
           </Link>
         </div>
       </div>

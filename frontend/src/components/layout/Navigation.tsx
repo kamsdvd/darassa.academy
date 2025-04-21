@@ -42,8 +42,8 @@ const Navigation: React.FC = () => {
             <Link to="/formations" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
               Formations
             </Link>
-            <Link to="/programme-mlm" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
-              Programme MLM
+            <Link to="/affiliation" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
+              Affiliation
             </Link>
             <Link to="/opportunites" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
               Opportunités
@@ -111,11 +111,11 @@ const Navigation: React.FC = () => {
               Formations
             </Link>
             <Link
-              to="/programme-mlm"
+              to="/affiliation"
               className="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium"
               onClick={toggleMenu}
             >
-              Programme MLM
+              Affiliation
             </Link>
             <Link
               to="/opportunites"
