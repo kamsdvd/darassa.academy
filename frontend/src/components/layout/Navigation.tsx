@@ -15,9 +15,10 @@ const Navigation: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await AuthService.logout();
+      const authService = AuthService.getInstance();
+      await authService.logout();
       logout();
-      navigate('/');
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
     }

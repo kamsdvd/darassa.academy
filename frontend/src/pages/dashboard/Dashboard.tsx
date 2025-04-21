@@ -1,114 +1,75 @@
-import React, { useState } from 'react';
-import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Users, 
-  BookOpen, 
-  Briefcase, 
-  FileText, 
-  Settings, 
-  LogOut,
-  Menu,
-  X
-} from 'lucide-react';
+import React from 'react';
+import { useStore } from '../../store/useStore';
 import PageTransition from '../../components/shared/PageTransition';
 
-// Import des pages du dashboard
-import DashboardHome from './DashboardHome';
-import UsersManagement from './UsersManagement';
-import FormationsManagement from './FormationsManagement';
-import JobsManagement from './JobsManagement';
-import BlogManagement from './BlogManagement';
-import SettingsPage from './SettingsPage';
-
 const Dashboard: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const menuItems = [
-    { path: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
-    { path: '/dashboard/users', icon: Users, label: 'Utilisateurs' },
-    { path: '/dashboard/formations', icon: BookOpen, label: 'Formations' },
-    { path: '/dashboard/jobs', icon: Briefcase, label: 'Offres d\'emploi' },
-    { path: '/dashboard/blog', icon: FileText, label: 'Blog' },
-    { path: '/dashboard/settings', icon: Settings, label: 'Paramètres' },
-  ];
-
-  const handleLogout = () => {
-    // Logique de déconnexion
-    navigate('/connexion');
-  };
+  const { user } = useStore();
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-gray-100">
-        {/* Sidebar mobile toggle */}
-        <div className="lg:hidden fixed top-0 left-0 z-20 p-4 bg-white shadow-md w-full">
-          <div className="flex justify-between items-center">
-            <h1 className="text-xl font-bold text-primary-600">Darassa Academy</h1>
-            <button 
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-md hover:bg-gray-100"
-            >
-              {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Sidebar */}
-        <div className={`fixed inset-y-0 left-0 z-10 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-          <div className="flex flex-col h-full">
-            <div className="p-6 border-b">
-              <h1 className="text-xl font-bold text-primary-600">Darassa Academy</h1>
-              <p className="text-sm text-gray-500">Administration</p>
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-6">
+            Bienvenue, {user?.name}!
+          </h1>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Carte des formations */}
+            <div className="bg-primary-50 rounded-lg p-6">
+              <h2 className="text-xl font-semibold text-primary-900 mb-4">
+                Mes formations
+              </h2>
+              <p className="text-primary-700 mb-4">
+                Accédez à vos formations en cours et suivez votre progression.
+              </p>
+              <button className="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 transition-colors">
+                Voir mes formations
+              </button>
             </div>
-            
-            <nav className="flex-1 p-4 space-y-1">
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.path;
-                
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`flex items-center p-3 rounded-lg transition-colors ${
-                      isActive 
-                        ? 'bg-primary-50 text-primary-600' 
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    <Icon className="w-5 h-5 mr-3" />
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-            </nav>
-            
-            <div className="p-4 border-t">
-              <button
-                onClick={handleLogout}
-                className="flex items-center w-full p-3 text-gray-700 rounded-lg hover:bg-gray-50"
-              >
-                <LogOut className="w-5 h-5 mr-3" />
-                <span>Déconnexion</span>
+
+            {/* Carte des certificats */}
+            <div className="bg-green-50 rounded-lg p-6">
+              <h2 className="text-xl font-semibold text-green-900 mb-4">
+                Mes certificats
+              </h2>
+              <p className="text-green-700 mb-4">
+                Consultez et téléchargez vos certificats obtenus.
+              </p>
+              <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
+                Voir mes certificats
+              </button>
+            </div>
+
+            {/* Carte du profil */}
+            <div className="bg-blue-50 rounded-lg p-6">
+              <h2 className="text-xl font-semibold text-blue-900 mb-4">
+                Mon profil
+              </h2>
+              <p className="text-blue-700 mb-4">
+                Mettez à jour vos informations personnelles et préférences.
+              </p>
+              <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                Gérer mon profil
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Main content */}
-        <div className="lg:pl-64">
-          <div className="p-8">
-            <Routes>
-              <Route path="/" element={<DashboardHome />} />
-              <Route path="/users" element={<UsersManagement />} />
-              <Route path="/formations" element={<FormationsManagement />} />
-              <Route path="/jobs" element={<JobsManagement />} />
-              <Route path="/blog" element={<BlogManagement />} />
-              <Route path="/settings" element={<SettingsPage />} />
-            </Routes>
+          {/* Section des formations recommandées */}
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              Formations recommandées
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Placeholder pour les formations recommandées */}
+              <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                <h3 className="text-lg font-semibold mb-2">Formation 1</h3>
+                <p className="text-gray-600 mb-4">Description de la formation...</p>
+                <button className="text-primary-600 hover:text-primary-700">
+                  En savoir plus →
+                </button>
+              </div>
+              {/* Ajoutez d'autres formations recommandées ici */}
+            </div>
           </div>
         </div>
       </div>

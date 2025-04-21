@@ -1,19 +1,35 @@
 import { API_CONFIG } from '../config/api.config';
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 
 export class AuthService {
   private static instance: AuthService;
   private token: string | null = null;
+  private axiosInstance: AxiosInstance;
 
   private constructor() {
     this.token = localStorage.getItem('token');
+    this.axiosInstance = axios.create({
+      baseURL: API_CONFIG.BASE_URL,
+      timeout: API_CONFIG.TIMEOUT,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
     if (this.token) {
       this.setupAxiosInterceptors();
     }
   }
 
   private setupAxiosInterceptors() {
-    axios.interceptors.request.use(
+    // Supprimer les anciens intercepteurs s'ils existent
+    if (this.axiosInstance.interceptors) {
+      this.axiosInstance.interceptors.request.clear();
+      this.axiosInstance.interceptors.response.clear();
+    }
+
+    // Ajouter le token à chaque requête
+    this.axiosInstance.interceptors.request.use(
       (config) => {
         if (this.token) {
           config.headers.Authorization = `Bearer ${this.token}`;
@@ -25,11 +41,13 @@ export class AuthService {
       }
     );
 
-    axios.interceptors.response.use(
+    // Gérer les erreurs d'authentification
+    this.axiosInstance.interceptors.response.use(
       (response) => response,
-      (error) => {
+      async (error) => {
         if (error.response?.status === 401) {
-          this.logout();
+          await this.logout();
+          window.location.href = '/connexion';
         }
         return Promise.reject(error);
       }
@@ -45,41 +63,57 @@ export class AuthService {
 
   public async login(email: string, password: string): Promise<any> {
     try {
-      const response = await axios.post(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.LOGIN}`, {
+      console.log('Tentative de connexion avec:', { email }); // Log pour le débogage
+      
+      const response = await this.axiosInstance.post(API_CONFIG.ENDPOINTS.AUTH.LOGIN, {
         email,
         password,
       });
+      
+      console.log('Réponse du serveur:', response.data); // Log pour le débogage
+
+      if (!response.data.token) {
+        throw new Error('Token manquant dans la réponse');
+      }
+
       this.token = response.data.token;
       localStorage.setItem('token', this.token);
       this.setupAxiosInterceptors();
-      return response.data;
+      
+      return {
+        token: this.token,
+        user: response.data.user || response.data // Gestion des deux formats possibles
+      };
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Une erreur est survenue lors de la connexion';
+      console.error('Erreur de connexion:', error.response?.data || error.message);
+      const message = error.response?.data?.message || error.response?.data || 'Une erreur est survenue lors de la connexion';
       throw new Error(message);
     }
   }
 
   public async register(userData: any): Promise<any> {
     try {
-      const response = await axios.post(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.REGISTER}`, userData);
+      const response = await this.axiosInstance.post(API_CONFIG.ENDPOINTS.AUTH.REGISTER, userData);
       return response.data;
     } catch (error: any) {
+      console.error('Erreur d\'inscription:', error.response?.data || error.message);
       const message = error.response?.data?.message || 'Une erreur est survenue lors de l\'inscription';
       throw new Error(message);
     }
   }
 
   public async logout(): Promise<void> {
-    if (this.token) {
-      try {
-        await axios.post(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.LOGOUT}`);
-      } catch (error) {
-        console.error('Erreur lors de la déconnexion:', error);
+    try {
+      if (this.token) {
+        await this.axiosInstance.post(API_CONFIG.ENDPOINTS.AUTH.LOGOUT);
       }
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    } finally {
+      this.token = null;
+      localStorage.removeItem('token');
+      this.axiosInstance.defaults.headers.common['Authorization'] = '';
     }
-    this.token = null;
-    localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
   }
 
   public async getCurrentUser(): Promise<any> {
@@ -88,9 +122,10 @@ export class AuthService {
     }
 
     try {
-      const response = await axios.get(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.ME}`);
+      const response = await this.axiosInstance.get(API_CONFIG.ENDPOINTS.AUTH.ME);
       return response.data;
     } catch (error: any) {
+      console.error('Erreur de récupération du profil:', error.response?.data || error.message);
       const message = error.response?.data?.message || 'Une erreur est survenue lors de la récupération du profil';
       throw new Error(message);
     }

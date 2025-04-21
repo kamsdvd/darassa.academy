@@ -17,6 +17,13 @@ interface AppState {
 export const useStore = create<AppState>((set) => ({
   user: null,
   isAuthenticated: false,
-  setUser: (user) => set({ user, isAuthenticated: !!user }),
-  logout: () => set({ user: null, isAuthenticated: false }),
+  setUser: (user) => {
+    console.log('Setting user in store:', user); // Debug log
+    set({ user, isAuthenticated: !!user });
+    console.log('Store updated, isAuthenticated:', !!user); // Debug log
+  },
+  logout: () => {
+    console.log('Logging out user'); // Debug log
+    set({ user: null, isAuthenticated: false });
+  },
 })); 

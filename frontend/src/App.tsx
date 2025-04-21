@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { AnimatePresence } from 'framer-motion';
 import Layout from './components/layout/Layout';
 import { reportWebVitals } from './utils/webVitals';
-import Connexion from './pages/auth/Connexion';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/shared/ProtectedRoute';
 import { useStore } from './store/useStore';
@@ -30,8 +29,11 @@ const Contact = lazyWithPrefetch(() => import('./pages/contact/Contact'));
 const Opportunites = lazyWithPrefetch(() => import('./pages/opportunites/Opportunites'));
 const JobDetail = lazyWithPrefetch(() => import('./pages/opportunites/JobDetail'));
 const Entreprises = lazyWithPrefetch(() => import('./pages/entreprises/Entreprises'));
-const Inscription = lazyWithPrefetch(() => import('./pages/entreprises/Inscription'));
-const Dashboard = lazyWithPrefetch(() => import('./pages/entreprises/Dashboard'));
+const InscriptionEntreprise = lazyWithPrefetch(() => import('./pages/entreprises/Inscription'));
+const EntrepriseDashboard = lazyWithPrefetch(() => import('./pages/entreprises/Dashboard'));
+const UserDashboard = lazyWithPrefetch(() => import('./pages/dashboard/Dashboard'));
+const InscriptionParticulier = lazyWithPrefetch(() => import('./pages/auth/Inscription'));
+const Connexion = lazyWithPrefetch(() => import('./pages/auth/Connexion'), true);
 
 // Composant de chargement
 const LoadingFallback = () => (
@@ -134,7 +136,7 @@ const RoutePrefetcher = () => {
       ProgrammeMLM.preload?.();
     } else if (location.pathname.startsWith('/formations')) {
       Contact.preload?.();
-      Inscription.preload?.();
+      InscriptionEntreprise.preload?.();
     }
   }, [location]);
 
@@ -154,15 +156,16 @@ function AnimatedRoutes() {
           <Route path="/opportunites" element={<Opportunites />} />
           <Route path="/opportunites/:id" element={<JobDetail />} />
           <Route path="/entreprises" element={<Entreprises />} />
-          <Route path="/entreprises/inscription" element={<Inscription />} />
+          <Route path="/entreprises/inscription" element={<InscriptionEntreprise />} />
+          <Route path="/inscription" element={<InscriptionParticulier />} />
           <Route path="/entreprises/dashboard" element={
             <ProtectedRoute roles={['entreprise']}>
-              <Dashboard />
+              <EntrepriseDashboard />
             </ProtectedRoute>
           } />
           <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
+            <ProtectedRoute roles={['user']}>
+              <UserDashboard />
             </ProtectedRoute>
           } />
           <Route path="/blog" element={<Blog />} />

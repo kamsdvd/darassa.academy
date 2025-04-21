@@ -65,15 +65,19 @@ export default defineConfig({
     target: 'esnext'
   },
   server: {
-    port: 3001,
-    strictPort: true,
-    host: true,
-    hmr: {
-      port: 3001
-    }
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    },
+    historyApiFallback: true
   },
   preview: {
-    port: 3001,
+    port: 5173,
     strictPort: true,
     host: true
   }
