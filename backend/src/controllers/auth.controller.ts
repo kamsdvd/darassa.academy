@@ -70,14 +70,14 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     // Return user data without password
     res.status(201).json({
       user: {
-        _id: user._id,
+        _id: user._id.toString(),
         name: user.name,
         email: user.email,
         role: user.role,
         phone: user.phone,
         company: user.company,
         position: user.position,
-        token: generateToken(user._id),
+        token: generateToken(user._id.toString()),
       }
     });
   } catch (error) {
