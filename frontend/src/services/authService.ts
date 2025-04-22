@@ -1,5 +1,5 @@
 import { API_CONFIG } from '../config/api.config';
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosError } from 'axios';
 
 export class AuthService {
   private static instance: AuthService;
@@ -44,8 +44,9 @@ export class AuthService {
     // Gérer les erreurs d'authentification
     this.axiosInstance.interceptors.response.use(
       (response) => response,
-      async (error) => {
+      async (error: AxiosError) => {
         if (error.response?.status === 401) {
+          // Token expiré ou invalide
           await this.logout();
           window.location.href = '/connexion';
         }
@@ -63,26 +64,28 @@ export class AuthService {
 
   public async login(email: string, password: string): Promise<any> {
     try {
-      console.log('Tentative de connexion avec:', { email }); // Log pour le débogage
+      console.log('Tentative de connexion avec:', { email });
       
       const response = await this.axiosInstance.post(API_CONFIG.ENDPOINTS.AUTH.LOGIN, {
         email,
         password,
       });
       
-      console.log('Réponse du serveur:', response.data); // Log pour le débogage
+      console.log('Réponse du serveur:', response.data);
 
-      if (!response.data.token) {
+      const { token, ...userData } = response.data;
+      
+      if (!token) {
         throw new Error('Token manquant dans la réponse');
       }
 
-      this.token = response.data.token;
+      this.token = token;
       localStorage.setItem('token', this.token);
       this.setupAxiosInterceptors();
       
       return {
         token: this.token,
-        user: response.data.user || response.data // Gestion des deux formats possibles
+        user: userData
       };
     } catch (error: any) {
       console.error('Erreur de connexion:', error.response?.data || error.message);
@@ -94,7 +97,19 @@ export class AuthService {
   public async register(userData: any): Promise<any> {
     try {
       const response = await this.axiosInstance.post(API_CONFIG.ENDPOINTS.AUTH.REGISTER, userData);
-      return response.data;
+      
+      const { token, ...user } = response.data;
+      
+      if (token) {
+        this.token = token;
+        localStorage.setItem('token', this.token);
+        this.setupAxiosInterceptors();
+      }
+      
+      return {
+        token: this.token,
+        user
+      };
     } catch (error: any) {
       console.error('Erreur d\'inscription:', error.response?.data || error.message);
       const message = error.response?.data?.message || 'Une erreur est survenue lors de l\'inscription';

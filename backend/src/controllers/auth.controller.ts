@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import User from '../models/user.model';
+import User, { IUser } from '../models/user.model';
 import InvalidToken from '../models/invalidToken.model';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
+import { Types } from 'mongoose';
 
 // Generate JWT Token
 const generateToken = (id: string): string => {
@@ -35,7 +35,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Create user with role-specific fields
-    const userData: any = {
+    const userData: Partial<IUser> = {
       name,
       email,
       password,
@@ -67,18 +67,20 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       role: user.role
     });
 
+    // Assurez-vous que user._id est un ObjectId et convertissez-le en string
+    const userId = user._id instanceof Types.ObjectId ? user._id.toString() : String(user._id);
+    const token = generateToken(userId);
+
     // Return user data without password
     res.status(201).json({
-      user: {
-        _id: user._id.toString(),
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        phone: user.phone,
-        company: user.company,
-        position: user.position,
-        token: generateToken(user._id.toString()),
-      }
+      _id: userId,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      phone: user.phone,
+      company: user.company,
+      position: user.position,
+      token,
     });
   } catch (error) {
     console.error('Register error:', error);
@@ -121,14 +123,19 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     console.log('Password match result:', isMatch);
 
     if (isMatch) {
-      const token = generateToken(user.id);
+      // Assurez-vous que user._id est un ObjectId et convertissez-le en string
+      const userId = user._id instanceof Types.ObjectId ? user._id.toString() : String(user._id);
+      const token = generateToken(userId);
       console.log('Token generated successfully');
       
       const response = {
-        _id: user.id,
+        _id: userId,
         name: user.name,
         email: user.email,
         role: user.role,
+        phone: user.phone,
+        company: user.company,
+        position: user.position,
         token,
       };
       console.log('Login successful, sending response:', { ...response, token: '***' });

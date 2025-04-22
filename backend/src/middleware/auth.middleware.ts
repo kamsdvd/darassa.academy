@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '../models/user.model';
-import { IUser } from '../interfaces/user.interface';
+import User, { IUser } from '../models/user.model';
 import InvalidToken from '../models/invalidToken.model';
 
 // Déclaration de type pour la requête authentifiée
