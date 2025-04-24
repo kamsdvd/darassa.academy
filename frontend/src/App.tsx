@@ -39,6 +39,7 @@ const FAQ = lazyWithPrefetch(() => import('./pages/faq/FAQ'));
 const MentionsLegales = lazyWithPrefetch(() => import('./pages/legal/MentionsLegales'));
 const PolitiqueConfidentialite = lazyWithPrefetch(() => import('./pages/legal/PolitiqueConfidentialite'));
 const ConditionsUtilisation = lazyWithPrefetch(() => import('./pages/legal/ConditionsUtilisation'));
+const AdminDashboard = lazyWithPrefetch(() => import('./pages/admin/Dashboard'));
 
 // Composant de chargement
 const LoadingFallback = () => (
@@ -170,7 +171,7 @@ function AnimatedRoutes() {
             </ProtectedRoute>
           } />
           <Route path="/dashboard" element={
-            <ProtectedRoute roles={['user']}>
+            <ProtectedRoute roles={['user', 'admin']}>
               <UserDashboard />
             </ProtectedRoute>
           } />
@@ -181,6 +182,11 @@ function AnimatedRoutes() {
           <Route path="/mentions-legales" element={<MentionsLegales />} />
           <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
           <Route path="/conditions-utilisation" element={<ConditionsUtilisation />} />
+          <Route path="/admin/dashboard" element={
+            <ProtectedRoute roles={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

@@ -58,14 +58,7 @@ export class AuthService {
       
       if (response.data.success && response.data.data) {
         this.setToken(response.data.data.token);
-        
-        return {
-          success: true,
-          data: {
-            user: response.data.data,
-            token: response.data.data.token
-          }
-        };
+        return response.data;
       }
       
       throw new Error('Format de réponse invalide');
@@ -110,21 +103,25 @@ export class AuthService {
     }
   }
 
-  public async getCurrentUser(): Promise<LoginResponse> {
+  public async getCurrentUser(): Promise<User | null> {
     try {
       const token = this.getToken();
-      if (!token) {
-        throw new Error('Token non trouvé');
-      }
-      
+      if (!token) return null;
+
       const response = await axios.get(`${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.ME}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      return response.data;
+
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      
+      return null;
     } catch (error) {
-      throw this.handleError(error);
+      console.error('Erreur lors de la récupération de l\'utilisateur:', error);
+      return null;
     }
   }
 
