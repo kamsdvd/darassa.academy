@@ -81,15 +81,17 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     res.status(201).json({
       success: true,
       data: {
-        _id: userId,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        phone: user.phone,
-        company: user.company,
-        position: user.position,
-      },
-      token,
+        token,
+        user: {
+          _id: userId,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          phone: user.phone,
+          company: user.company,
+          position: user.position,
+        }
+      }
     });
   } catch (error) {
     console.error('Register error:', error);
@@ -140,15 +142,17 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       const response = {
         success: true,
         data: {
-          _id: userId,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          phone: user.phone,
-          company: user.company,
-          position: user.position,
-        },
-        token,
+          token,
+          user: {
+            _id: userId,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            phone: user.phone,
+            company: user.company,
+            position: user.position,
+          }
+        }
       };
       console.log('Login successful, sending response:', { ...response, token: '***' });
       
