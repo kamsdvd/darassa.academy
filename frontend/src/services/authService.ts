@@ -93,8 +93,21 @@ export class AuthService {
   }
 
   public async logout(): Promise<void> {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    try {
+      // Appel à l'API de déconnexion si nécessaire
+      const token = this.getToken();
+      if (token) {
+        await axios.post(`${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.LOGOUT}`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    } finally {
+      // Nettoyage complet des données d'authentification
+      localStorage.clear(); // Nettoie tout le localStorage
+      sessionStorage.clear(); // Nettoie aussi le sessionStorage par précaution
+    }
   }
 
   public async getCurrentUser(): Promise<LoginResponse> {

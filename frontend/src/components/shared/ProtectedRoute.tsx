@@ -20,10 +20,14 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, roles 
           const userData = await authService.getCurrentUser();
           if (userData.success && userData.data && userData.data.user) {
             setUser(userData.data.user);
+          } else {
+            // Si la vérification échoue, on nettoie l'état
+            setUser(null);
           }
         }
       } catch (error) {
         console.error('Erreur de vérification de l\'authentification:', error);
+        setUser(null);
       }
     };
 
@@ -31,7 +35,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, roles 
   }, [isAuthenticated, setUser]);
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/connexion" state={{ from: location }} replace />;
   }
 
   if (roles && user && user.role && !roles.includes(user.role)) {
