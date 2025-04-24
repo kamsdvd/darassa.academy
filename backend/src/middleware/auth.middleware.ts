@@ -1,19 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import User, { IUser } from '../models/user.model';
+import User from '../models/user.model';
 import InvalidToken from '../models/invalidToken.model';
 
 // Déclaration de type pour la requête authentifiée
 export interface AuthenticatedRequest extends Request {
-  user?: IUser;
+  user?: {
+    id: string;
+    email: string;
+    role: string;
+  };
 }
 
 export const protect = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     let token;
 
-    // Vérifier le token dans les headers
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    if (req.headers.authorization?.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
     }
 
@@ -23,25 +26,25 @@ export const protect = async (req: AuthenticatedRequest, res: Response, next: Ne
     }
 
     try {
-      // Vérifier si le token n'a pas été invalidé
-      const isInvalidated = await InvalidToken.findOne({ token });
-      if (isInvalidated) {
-        res.status(401).json({ message: 'Non autorisé - Token invalidé' });
-        return;
-      }
-
       // Vérifier le token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { id: string };
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { id: string; email: string; role: string };
 
       // Récupérer l'utilisateur
       const user = await User.findById(decoded.id).select('-password');
       if (!user) {
-        res.status(401).json({ message: 'Non autorisé - Utilisateur non trouvé' });
+        res.status(401).json({ message: 'Utilisateur non trouvé' });
         return;
       }
 
-      // Ajouter l'utilisateur à la requête
-      req.user = user;
+      // Vérifier si le token n'est pas invalidé
+      const invalidToken = await InvalidToken.findOne({ token });
+      if (invalidToken) {
+        res.status(401).json({ message: 'Token invalide' });
+        return;
+      }
+
+      // Assigner l'utilisateur décodé à la requête
+      req.user = decoded;
       next();
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {

@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface SkeletonProps {
+export interface SkeletonProps {
   className?: string;
   variant?: 'text' | 'circular' | 'rectangular';
   width?: string | number;

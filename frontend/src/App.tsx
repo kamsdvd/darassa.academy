@@ -4,7 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import Layout from './components/layout/Layout';
 import { reportWebVitals } from './utils/webVitals';
 import NotFound from './pages/NotFound';
-import ProtectedRoute from './components/shared/ProtectedRoute';
+import { ProtectedRoute } from './components/shared/ProtectedRoute';
 import { useStore } from './store/useStore';
 import { AuthService } from './services/authService';
 

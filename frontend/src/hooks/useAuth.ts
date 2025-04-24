@@ -1,4 +1,7 @@
 import { useState, useEffect, createContext, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useStore } from '../store/useStore';
+import { API_CONFIG } from '../config/api.config';
 import axios from 'axios';
 
 // Types
@@ -18,8 +21,6 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
-
 // Créer le contexte
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -36,10 +37,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Vérifier le token et charger l'utilisateur
       const checkAuth = async () => {
         try {
-          const response = await axios.get(`${API_URL}/api/auth/me`, {
+          const response = await axios.get(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.ME}`, {
             headers: { Authorization: `Bearer ${token}` }
           });
-          setUser(response.data);
+          setUser(response.data.data);
           setIsAuthenticated(true);
         } catch (error) {
           localStorage.removeItem('token');
@@ -56,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Fonction de connexion
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post(`${API_URL}/api/auth/login`, { email, password });
+      const response = await axios.post(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.LOGIN}`, { email, password });
       const { token, ...userData } = response.data;
       
       localStorage.setItem('token', token);
@@ -78,7 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Fonction d'inscription
   const register = async (name: string, email: string, password: string) => {
     try {
-      const response = await axios.post(`${API_URL}/api/auth/register`, {
+      const response = await axios.post(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.REGISTER}`, {
         name,
         email,
         password
@@ -106,7 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const token = localStorage.getItem('token');
       if (token) {
-        await axios.post(`${API_URL}/api/auth/logout`, {}, {
+        await axios.post(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.LOGOUT}`, {}, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }

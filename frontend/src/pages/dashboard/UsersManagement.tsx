@@ -8,6 +8,7 @@ import {
   UserPlus,
   Filter
 } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 // Types pour les utilisateurs
 interface User {
@@ -140,7 +141,7 @@ const UsersManagement: React.FC = () => {
             {filteredUsers.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                  <div className="text-sm font-medium text-gray-900" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(user.name) }} />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-500">{user.email}</div>
@@ -182,4 +183,4 @@ const UsersManagement: React.FC = () => {
   );
 };
 
-export default UsersManagement; 
+export default UsersManagement;

@@ -53,16 +53,20 @@ const Connexion: React.FC = () => {
         const response = await authService.login(email, password);
         
         // Mettre à jour l'état global avec les données de l'utilisateur
-        setUser(response.user);
-        
-        // Redirection immédiate en fonction du rôle
-        const redirectPath = response.user.role === 'entreprise'
-          ? '/entreprises/dashboard'
-          : response.user.role === 'admin'
-          ? '/admin/dashboard'
-          : '/dashboard';
+        if (response.success && response.data && response.data.user) {
+          setUser(response.data.user);
+          
+          // Redirection immédiate en fonction du rôle
+          const redirectPath = response.data.user.role === 'entreprise'
+            ? '/entreprises/dashboard'
+            : response.data.user.role === 'admin'
+            ? '/admin/dashboard'
+            : '/dashboard';
 
-        navigate(redirectPath, { replace: true });
+          navigate(redirectPath, { replace: true });
+        } else {
+          throw new Error('Format de réponse invalide');
+        }
       } catch (error: any) {
         setErrors({ 
           general: error.message || 'Email ou mot de passe incorrect' 

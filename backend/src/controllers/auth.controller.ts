@@ -6,11 +6,17 @@ import { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { Types } from 'mongoose';
 
 // Generate JWT Token
-const generateToken = (id: string): string => {
+const generateToken = (user: IUser): string => {
+  const payload = {
+    id: user._id,
+    email: user.email,
+    role: user.role
+  };
+  
   return jwt.sign(
-    { id },
+    payload,
     process.env.JWT_SECRET || 'your-secret-key',
-    { expiresIn: '7d' }
+    { expiresIn: '24h' }
   );
 };
 
@@ -69,22 +75,25 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     // Assurez-vous que user._id est un ObjectId et convertissez-le en string
     const userId = user._id instanceof Types.ObjectId ? user._id.toString() : String(user._id);
-    const token = generateToken(userId);
+    const token = generateToken(user);
 
     // Return user data without password
     res.status(201).json({
-      _id: userId,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      phone: user.phone,
-      company: user.company,
-      position: user.position,
+      success: true,
+      data: {
+        _id: userId,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        company: user.company,
+        position: user.position,
+      },
       token,
     });
   } catch (error) {
     console.error('Register error:', error);
-    res.status(500).json({ message: 'Une erreur est survenue lors de l\'inscription' });
+    res.status(500).json({ success: false, message: 'Une erreur est survenue lors de l\'inscription' });
   }
 };
 
@@ -114,7 +123,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     
     if (!user) {
       console.log('Login failed: User not found');
-      res.status(401).json({ message: 'Email ou mot de passe incorrect' });
+      res.status(401).json({ success: false, message: 'Email ou mot de passe incorrect' });
       return;
     }
 
@@ -125,17 +134,20 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (isMatch) {
       // Assurez-vous que user._id est un ObjectId et convertissez-le en string
       const userId = user._id instanceof Types.ObjectId ? user._id.toString() : String(user._id);
-      const token = generateToken(userId);
+      const token = generateToken(user);
       console.log('Token generated successfully');
       
       const response = {
-        _id: userId,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        phone: user.phone,
-        company: user.company,
-        position: user.position,
+        success: true,
+        data: {
+          _id: userId,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          phone: user.phone,
+          company: user.company,
+          position: user.position,
+        },
         token,
       };
       console.log('Login successful, sending response:', { ...response, token: '***' });
@@ -143,11 +155,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       res.json(response);
     } else {
       console.log('Login failed: Password does not match');
-      res.status(401).json({ message: 'Email ou mot de passe incorrect' });
+      res.status(401).json({ success: false, message: 'Email ou mot de passe incorrect' });
     }
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
   }
 };
 
@@ -158,13 +170,13 @@ export const getMe = async (req: AuthenticatedRequest, res: Response): Promise<v
   try {
     const user = await User.findById(req.user?.id).select('-password');
     if (!user) {
-      res.status(404).json({ message: 'Utilisateur non trouvé' });
+      res.status(404).json({ success: false, message: 'Utilisateur non trouvé' });
       return;
     }
-    res.json(user);
+    res.json({ success: true, data: user });
   } catch (error) {
     console.error('Get me error:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
   }
 };
 
@@ -177,9 +189,9 @@ export const logout = async (req: AuthenticatedRequest, res: Response): Promise<
     if (token) {
       await InvalidToken.create({ token });
     }
-    res.json({ message: 'Déconnexion réussie' });
+    res.json({ success: true, message: 'Déconnexion réussie' });
   } catch (error) {
     console.error('Logout error:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
   }
 }; 

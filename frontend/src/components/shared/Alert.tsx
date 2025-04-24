@@ -3,7 +3,7 @@ import { AlertCircle, CheckCircle, Info, XCircle, X } from 'lucide-react';
 
 export type AlertType = 'error' | 'success' | 'warning' | 'info';
 
-interface AlertProps {
+export interface AlertProps {
   children: React.ReactNode;
   type?: AlertType;
   title?: string;
