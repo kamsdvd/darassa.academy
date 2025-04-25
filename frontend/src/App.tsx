@@ -11,12 +11,9 @@ import { AuthService } from './services/authService';
 // Lazy loading avec prefetch
 const lazyWithPrefetch = (factory: () => Promise<any>, preload = false) => {
   const Component = React.lazy(factory);
-  Component.preload = factory;
-  
   if (preload) {
     factory();
   }
-  
   return Component;
 };
 
@@ -31,7 +28,7 @@ const JobDetail = lazyWithPrefetch(() => import('./pages/opportunites/JobDetail'
 const Entreprises = lazyWithPrefetch(() => import('./pages/entreprises/Entreprises'));
 const InscriptionEntreprise = lazyWithPrefetch(() => import('./pages/entreprises/Inscription'));
 const EntrepriseDashboard = lazyWithPrefetch(() => import('./pages/entreprises/Dashboard'));
-const UserDashboard = lazyWithPrefetch(() => import('./pages/dashboard/Dashboard'));
+const Dashboard = lazyWithPrefetch(() => import('./pages/dashboard/Dashboard'));
 const InscriptionParticulier = lazyWithPrefetch(() => import('./pages/auth/Inscription'));
 const Connexion = lazyWithPrefetch(() => import('./pages/auth/Connexion'), true);
 const APropos = lazyWithPrefetch(() => import('./pages/a-propos/APropos'));
@@ -39,7 +36,6 @@ const FAQ = lazyWithPrefetch(() => import('./pages/faq/FAQ'));
 const MentionsLegales = lazyWithPrefetch(() => import('./pages/legal/MentionsLegales'));
 const PolitiqueConfidentialite = lazyWithPrefetch(() => import('./pages/legal/PolitiqueConfidentialite'));
 const ConditionsUtilisation = lazyWithPrefetch(() => import('./pages/legal/ConditionsUtilisation'));
-const AdminDashboard = lazyWithPrefetch(() => import('./pages/admin/Dashboard'));
 
 // Composant de chargement
 const LoadingFallback = () => (
@@ -138,11 +134,11 @@ const RoutePrefetcher = () => {
   useEffect(() => {
     // Précharger les routes connexes en fonction de la route actuelle
     if (location.pathname === '/') {
-      Formations.preload?.();
-      Affiliation.preload?.();
+      import('./pages/formations/Formations');
+      import('./pages/affiliation/Affiliation');
     } else if (location.pathname.startsWith('/formations')) {
-      Contact.preload?.();
-      InscriptionEntreprise.preload?.();
+      import('./pages/contact/Contact');
+      import('./pages/entreprises/Inscription');
     }
   }, [location]);
 
@@ -172,7 +168,7 @@ function AnimatedRoutes() {
           } />
           <Route path="/dashboard" element={
             <ProtectedRoute roles={['user', 'admin']}>
-              <UserDashboard />
+              <Dashboard />
             </ProtectedRoute>
           } />
           <Route path="/blog" element={<Blog />} />
@@ -182,11 +178,6 @@ function AnimatedRoutes() {
           <Route path="/mentions-legales" element={<MentionsLegales />} />
           <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
           <Route path="/conditions-utilisation" element={<ConditionsUtilisation />} />
-          <Route path="/admin/dashboard" element={
-            <ProtectedRoute roles={['admin']}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

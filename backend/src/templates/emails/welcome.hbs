@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Bienvenue sur Darassa Academy</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .content {
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 5px;
+    }
+    .button {
+      display: inline-block;
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+    .features {
+      margin: 20px 0;
+    }
+    .feature {
+      margin-bottom: 10px;
+      padding-left: 20px;
+      position: relative;
+    }
+    .feature:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #4CAF50;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Bienvenue sur Darassa Academy</h1>
+  </div>
+  <div class="content">
+    <p>Bonjour {{name}},</p>
+    <p>Nous sommes ravis de vous accueillir sur Darassa Academy ! Votre compte a été créé avec succès.</p>
+    <p>Voici ce que vous pouvez faire dès maintenant :</p>
+    <div class="features">
+      <div class="feature">Accéder à tous nos cours et formations</div>
+      <div class="feature">Suivre votre progression</div>
+      <div class="feature">Interagir avec la communauté</div>
+      <div class="feature">Obtenir des certifications</div>
+    </div>
+    <p style="text-align: center;">
+      <a href="{{loginUrl}}" class="button">Commencer votre apprentissage</a>
+    </p>
+    <p>Si vous avez des questions, n'hésitez pas à nous contacter.</p>
+    <p>Cordialement,<br>L'équipe Darassa Academy</p>
+  </div>
+  <div class="footer">
+    <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+  </div>
+</body>
+</html> 

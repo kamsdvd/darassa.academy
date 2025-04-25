@@ -1,16 +1,23 @@
-import express from 'express';
-import { register, login, getMe, logout } from '../controllers/auth.controller';
-import { protect } from '../middleware/auth.middleware';
-import { validateLogin, validateRegister } from '../middleware/validate.middleware';
+import express, { Request, Response } from 'express';
+import { Router } from 'express';
 
-const router = express.Router();
+const router: Router = express.Router();
 
-// Public routes
-router.post('/register', validateRegister, register);
-router.post('/login', validateLogin, login);
+// Routes temporaires pour l'authentification
+router.post('/register', (_req: Request, res: Response) => {
+  res.json({ message: 'Register endpoint' });
+});
 
-// Protected routes
-router.get('/me', protect, getMe);
-router.post('/logout', protect, logout);
+router.post('/login', (_req: Request, res: Response) => {
+  res.json({ message: 'Login endpoint' });
+});
+
+router.get('/me', (_req: Request, res: Response) => {
+  res.json({ message: 'Me endpoint' });
+});
+
+router.post('/logout', (_req: Request, res: Response) => {
+  res.json({ message: 'Logout endpoint' });
+});
 
 export default router; 
