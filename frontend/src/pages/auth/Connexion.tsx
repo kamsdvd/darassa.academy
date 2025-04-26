@@ -17,13 +17,27 @@ const Connexion: React.FC = () => {
   // Rediriger si déjà authentifié
   useEffect(() => {
     if (isAuthenticated && user) {
-      const redirectPath = user.role === 'admin' 
-        ? '/admin/dashboard'
-        : '/dashboard';
-      
+      const redirectPath = getUserDashboardPath(user.role);
       navigate(redirectPath, { replace: true });
     }
   }, [isAuthenticated, user, navigate]);
+
+  const getUserDashboardPath = (role: string): string => {
+    switch (role) {
+      case 'admin':
+        return '/admin/dashboard';
+      case 'centre_manager':
+        return '/centre/dashboard';
+      case 'formateur':
+        return '/formateur/dashboard';
+      case 'entreprise':
+        return '/entreprise/dashboard';
+      case 'etudiant':
+      case 'demandeur':
+      default:
+        return '/dashboard';
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,10 +69,7 @@ const Connexion: React.FC = () => {
           setUser(response.user);
           
           // Redirection immédiate en fonction du rôle
-          const redirectPath = response.user.role === 'admin'
-            ? '/admin/dashboard'
-            : '/dashboard';
-
+          const redirectPath = getUserDashboardPath(response.user.role);
           navigate(redirectPath, { replace: true });
         } else {
           throw new Error('Format de réponse invalide');
@@ -75,10 +86,7 @@ const Connexion: React.FC = () => {
 
   // Si déjà authentifié, rediriger
   if (isAuthenticated && user) {
-    const redirectPath = user.role === 'admin'
-      ? '/admin/dashboard'
-      : '/dashboard';
-    
+    const redirectPath = getUserDashboardPath(user.role);
     return <Navigate to={redirectPath} replace />;
   }
 

@@ -7,6 +7,26 @@ import NotFound from './pages/NotFound';
 import { ProtectedRoute } from './components/shared/ProtectedRoute';
 import { useStore } from './store/useStore';
 import { AuthService } from './services/authService';
+import LoadingFallback from './components/common/LoadingFallback';
+import AdminDashboard from './pages/admin/Dashboard';
+import UsersManagement from './pages/admin/UsersManagement';
+import CentresManagement from './pages/admin/CentresManagement';
+import AdminStats from './pages/admin/AdminStats';
+import CentreDashboard from './pages/centre/Dashboard';
+import FormateursManagement from './pages/centre/FormateursManagement';
+import FormationsManagement from './pages/centre/FormationsManagement';
+import PlanningManagement from './pages/centre/PlanningManagement';
+import FormateurDashboard from './pages/formateur/Dashboard';
+import FormateurCours from './pages/formateur/Cours';
+import FormateurRessources from './pages/formateur/Ressources';
+import FormateurEvaluations from './pages/formateur/Evaluations';
+import EmployesManagement from './pages/entreprise/EmployesManagement';
+import EntrepriseFormations from './pages/entreprise/Formations';
+import EntrepriseRapports from './pages/entreprise/Rapports';
+import UserDashboard from './pages/user/Dashboard';
+import UserFormations from './pages/user/Formations';
+import Certificats from './pages/user/Certificats';
+import UserOpportunites from './pages/user/Opportunites';
 
 // Lazy loading avec prefetch
 const lazyWithPrefetch = (factory: () => Promise<any>, preload = false) => {
@@ -36,13 +56,6 @@ const FAQ = lazyWithPrefetch(() => import('./pages/faq/FAQ'));
 const MentionsLegales = lazyWithPrefetch(() => import('./pages/legal/MentionsLegales'));
 const PolitiqueConfidentialite = lazyWithPrefetch(() => import('./pages/legal/PolitiqueConfidentialite'));
 const ConditionsUtilisation = lazyWithPrefetch(() => import('./pages/legal/ConditionsUtilisation'));
-
-// Composant de chargement
-const LoadingFallback = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
-  </div>
-);
 
 // Error component
 const ErrorFallback = ({ error }: { error: Error }) => (
@@ -147,11 +160,13 @@ const RoutePrefetcher = () => {
 
 function AnimatedRoutes() {
   const location = useLocation();
+  const { user } = useStore();
 
   return (
     <AnimatePresence mode="wait">
       <Suspense fallback={<LoadingFallback />}>
         <Routes location={location} key={location.pathname}>
+          {/* Routes publiques */}
           <Route path="/" element={<Home />} />
           <Route path="/a-propos" element={<APropos />} />
           <Route path="/formations" element={<Formations />} />
@@ -161,23 +176,127 @@ function AnimatedRoutes() {
           <Route path="/entreprises" element={<Entreprises />} />
           <Route path="/entreprises/inscription" element={<InscriptionEntreprise />} />
           <Route path="/inscription" element={<InscriptionParticulier />} />
-          <Route path="/entreprises/dashboard" element={
-            <ProtectedRoute roles={['entreprise']}>
-              <EntrepriseDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard" element={
-            <ProtectedRoute roles={['user', 'admin']}>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
+          <Route path="/connexion" element={<Connexion />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/connexion" element={<Connexion />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/mentions-legales" element={<MentionsLegales />} />
           <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
           <Route path="/conditions-utilisation" element={<ConditionsUtilisation />} />
+          <Route path="/user/dashboard" element={<UserDashboard />} />
+          <Route path="/user/formations" element={<UserFormations />} />
+
+          {/* Routes administrateur */}
+          <Route path="/admin/dashboard" element={
+            <ProtectedRoute roles={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/users" element={
+            <ProtectedRoute roles={['admin']}>
+              <UsersManagement />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/centres" element={
+            <ProtectedRoute roles={['admin']}>
+              <CentresManagement />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/stats" element={
+            <ProtectedRoute roles={['admin']}>
+              <AdminStats />
+            </ProtectedRoute>
+          } />
+
+          {/* Routes centre de formation */}
+          <Route path="/centre/dashboard" element={
+            <ProtectedRoute roles={['centre_manager']}>
+              <CentreDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/centre/formateurs" element={
+            <ProtectedRoute roles={['centre_manager']}>
+              <FormateursManagement />
+            </ProtectedRoute>
+          } />
+          <Route path="/centre/formations" element={
+            <ProtectedRoute roles={['centre_manager']}>
+              <FormationsManagement />
+            </ProtectedRoute>
+          } />
+          <Route path="/centre/planning" element={
+            <ProtectedRoute roles={['centre_manager']}>
+              <PlanningManagement />
+            </ProtectedRoute>
+          } />
+
+          {/* Routes formateur */}
+          <Route path="/formateur/dashboard" element={
+            <ProtectedRoute roles={['formateur']}>
+              <FormateurDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/formateur/cours" element={
+            <ProtectedRoute roles={['formateur']}>
+              <FormateurCours />
+            </ProtectedRoute>
+          } />
+          <Route path="/formateur/ressources" element={
+            <ProtectedRoute roles={['formateur']}>
+              <FormateurRessources />
+            </ProtectedRoute>
+          } />
+          <Route path="/formateur/evaluations" element={
+            <ProtectedRoute roles={['formateur']}>
+              <FormateurEvaluations />
+            </ProtectedRoute>
+          } />
+
+          {/* Routes entreprise */}
+          <Route path="/entreprise/dashboard" element={
+            <ProtectedRoute roles={['entreprise']}>
+              <EntrepriseDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/entreprise/employes" element={
+            <ProtectedRoute roles={['entreprise']}>
+              <EmployesManagement />
+            </ProtectedRoute>
+          } />
+          <Route path="/entreprise/formations" element={
+            <ProtectedRoute roles={['entreprise']}>
+              <EntrepriseFormations />
+            </ProtectedRoute>
+          } />
+          <Route path="/entreprise/rapports" element={
+            <ProtectedRoute roles={['entreprise']}>
+              <EntrepriseRapports />
+            </ProtectedRoute>
+          } />
+
+          {/* Routes utilisateur standard */}
+          <Route path="/dashboard" element={
+            <ProtectedRoute roles={['etudiant', 'demandeur']}>
+              <UserDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/formations" element={
+            <ProtectedRoute roles={['etudiant', 'demandeur']}>
+              <UserFormations />
+            </ProtectedRoute>
+          } />
+          <Route path="/certificats" element={
+            <ProtectedRoute roles={['etudiant', 'demandeur']}>
+              <Certificats />
+            </ProtectedRoute>
+          } />
+          <Route path="/opportunites" element={
+            <ProtectedRoute roles={['etudiant', 'demandeur']}>
+              <UserOpportunites />
+            </ProtectedRoute>
+          } />
+
+          {/* Route par défaut */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
