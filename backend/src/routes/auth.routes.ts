@@ -1,14 +1,14 @@
-import express, { RequestHandler } from 'express';
-import { register, login, getMe } from '../controllers/auth.controller';
-import { auth } from '../middleware/auth.middleware';
+import express from 'express';
+import { register, login, getProfile } from '../controllers/auth.controller';
+import { authMiddleware } from '../middleware/auth.middleware';
 
 const router = express.Router();
 
-// Public routes
-router.post('/register', register as RequestHandler);
-router.post('/login', login as RequestHandler);
+// Routes publiques
+router.post('/register', register);
+router.post('/login', login);
 
-// Protected routes
-router.get('/me', auth, getMe as RequestHandler);
+// Routes protégées
+router.get('/profile', authMiddleware, getProfile);
 
 export default router; 

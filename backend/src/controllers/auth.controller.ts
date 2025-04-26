@@ -1,39 +1,42 @@
 import { Request, Response } from 'express';
-import jwt, { SignOptions } from 'jsonwebtoken';
 import { User } from '../models/user.model';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
-
-const signOptions: SignOptions = {
-  expiresIn: '1d'
-};
+const JWT_EXPIRES_IN = '24h';
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { email, password, firstName, lastName } = req.body;
+    console.log('📝 Tentative d\'inscription avec les données:', req.body);
+    const { email, password, firstName, lastName, userType } = req.body;
 
-    // Check if user already exists
+    // Vérifier si l'utilisateur existe déjà
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+      console.log('❌ Email déjà utilisé:', email);
+      return res.status(400).json({ message: 'Cet email est déjà utilisé' });
     }
 
-    // Create new user
-    const user = new User({
+    // Créer le nouvel utilisateur
+    const user = await User.create({
       email,
       password,
       firstName,
-      lastName
+      lastName,
+      userType
     });
 
-    await user.save();
+    console.log('✅ Utilisateur créé avec succès:', user._id);
 
-    // Generate token
+    // Générer le token JWT
     const token = jwt.sign(
-      { id: user._id },
+      { 
+        id: user._id,
+        userType: user.userType
+      },
       JWT_SECRET,
-      signOptions
+      { expiresIn: JWT_EXPIRES_IN }
     );
 
     res.status(201).json({
@@ -43,35 +46,57 @@ export const register = async (req: Request, res: Response) => {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        role: user.role
+        userType: user.userType
       }
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error creating user' });
+    console.error('❌ Erreur lors de l\'inscription:', error);
+    res.status(500).json({ message: 'Erreur lors de l\'inscription' });
   }
 };
 
 export const login = async (req: Request, res: Response) => {
   try {
+    console.log('🔑 Tentative de connexion avec les données:', req.body);
     const { email, password } = req.body;
 
-    // Find user
+    // Trouver l'utilisateur
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      console.log('❌ Utilisateur non trouvé:', email);
+      return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
     }
 
-    // Check password
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+    console.log('👤 Utilisateur trouvé:', {
+      id: user._id,
+      email: user.email,
+      userType: user.userType,
+      hashedPassword: user.password
+    });
+
+    // Vérifier le mot de passe
+    console.log('🔐 Vérification du mot de passe...');
+    console.log('Mot de passe fourni:', password);
+    console.log('Mot de passe hashé en base:', user.password);
+
+    const isPasswordValid = await user.comparePassword(password);
+    console.log('Résultat de la comparaison:', isPasswordValid);
+
+    if (!isPasswordValid) {
+      console.log('❌ Mot de passe invalide pour:', email);
+      return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
     }
 
-    // Generate token
+    console.log('✅ Connexion réussie pour:', email);
+
+    // Générer le token JWT
     const token = jwt.sign(
-      { id: user._id },
+      { 
+        id: user._id,
+        userType: user.userType
+      },
       JWT_SECRET,
-      signOptions
+      { expiresIn: JWT_EXPIRES_IN }
     );
 
     res.json({
@@ -81,19 +106,27 @@ export const login = async (req: Request, res: Response) => {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        role: user.role
+        userType: user.userType
       }
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error logging in' });
+    console.error('❌ Erreur lors de la connexion:', error);
+    res.status(500).json({ message: 'Erreur lors de la connexion' });
   }
 };
 
-export const getMe = async (req: Request, res: Response) => {
+export const getProfile = async (req: Request, res: Response) => {
   try {
+    console.log('👤 Récupération du profil pour:', req.user.id);
     const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      console.log('❌ Utilisateur non trouvé:', req.user.id);
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+    console.log('✅ Profil récupéré avec succès');
     res.json(user);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching user data' });
+    console.error('❌ Erreur lors de la récupération du profil:', error);
+    res.status(500).json({ message: 'Erreur lors de la récupération du profil' });
   }
 }; 

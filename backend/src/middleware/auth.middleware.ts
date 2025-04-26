@@ -16,24 +16,30 @@ declare global {
   }
 }
 
-export const auth = async (req: Request, res: Response, next: NextFunction) => {
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-
-    if (!token) {
-      throw new Error();
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Token d\'authentification non fourni' });
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
-    const user = await User.findById(decoded.id);
+    const token = authHeader.split(' ')[1];
 
-    if (!user) {
-      throw new Error();
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+      
+      const user = await User.findById(decoded.id).select('-password');
+      if (!user) {
+        return res.status(401).json({ message: 'Utilisateur non trouvé' });
+      }
+
+      req.user = user;
+      next();
+    } catch (error) {
+      return res.status(401).json({ message: 'Token invalide ou expiré' });
     }
-
-    req.user = user;
-    next();
   } catch (error) {
-    res.status(401).json({ message: 'Please authenticate.' });
+    console.error('Erreur dans le middleware d\'authentification:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 }; 
