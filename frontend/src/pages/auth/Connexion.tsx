@@ -17,9 +17,7 @@ const Connexion: React.FC = () => {
   // Rediriger si déjà authentifié
   useEffect(() => {
     if (isAuthenticated && user) {
-      const redirectPath = user.role === 'entreprise' 
-        ? '/entreprises/dashboard'
-        : user.role === 'admin'
+      const redirectPath = user.role === 'admin' 
         ? '/admin/dashboard'
         : '/dashboard';
       
@@ -53,13 +51,11 @@ const Connexion: React.FC = () => {
         const response = await authService.login(email, password);
         
         // Mettre à jour l'état global avec les données de l'utilisateur
-        if (response.success && response.data && response.data.user) {
-          setUser(response.data.user);
+        if (response && response.user) {
+          setUser(response.user);
           
           // Redirection immédiate en fonction du rôle
-          const redirectPath = response.data.user.role === 'entreprise'
-            ? '/entreprises/dashboard'
-            : response.data.user.role === 'admin'
+          const redirectPath = response.user.role === 'admin'
             ? '/admin/dashboard'
             : '/dashboard';
 
@@ -79,9 +75,7 @@ const Connexion: React.FC = () => {
 
   // Si déjà authentifié, rediriger
   if (isAuthenticated && user) {
-    const redirectPath = user.role === 'entreprise'
-      ? '/entreprises/dashboard'
-      : user.role === 'admin'
+    const redirectPath = user.role === 'admin'
       ? '/admin/dashboard'
       : '/dashboard';
     
@@ -225,24 +219,13 @@ const Connexion: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <div>
-                <Link
-                  to="/entreprises/inscription"
-                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                >
-                  <span>Entreprise</span>
-                </Link>
-              </div>
-
-              <div>
-                <Link
-                  to="/inscription"
-                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                >
-                  <span>Particulier</span>
-                </Link>
-              </div>
+            <div className="mt-6">
+              <Link
+                to="/inscription"
+                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              >
+                <span>Créer un compte</span>
+              </Link>
             </div>
           </div>
         </div>

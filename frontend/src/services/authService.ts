@@ -2,36 +2,25 @@ import axios from 'axios';
 import { API_CONFIG } from '../config/api.config';
 
 interface LoginResponse {
-  success: boolean;
-  data: {
-    token: string;
-    user: {
-      _id: string;
-      name: string;
-      email: string;
-      role: string;
-      phone?: string;
-      company?: string;
-      position?: string;
-    };
+  token: string;
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
   };
-  message?: string;
 }
 
 interface RegisterResponse {
-  success: boolean;
-  data: {
-    user: {
-      _id: string;
-      name: string;
-      email: string;
-      role: string;
-      phone?: string;
-      company?: string;
-      position?: string;
-    };
+  token: string;
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
   };
-  message?: string;
 }
 
 export class AuthService {
@@ -56,30 +45,33 @@ export class AuthService {
         password,
       });
       
-      if (response.data.success && response.data.data) {
-        this.setToken(response.data.data.token);
+      if (response.data && response.data.token) {
+        this.setToken(response.data.token);
         return response.data;
       }
       
       throw new Error('Format de réponse invalide');
     } catch (error: any) {
       console.error('Erreur de connexion:', error);
-      throw error;
+      throw this.handleError(error);
     }
   }
 
   public async register(userData: {
-    name: string;
     email: string;
     password: string;
-    role: string;
-    phone?: string;
-    company?: string;
-    position?: string;
+    firstName: string;
+    lastName: string;
   }): Promise<RegisterResponse> {
     try {
       const response = await axios.post(`${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.REGISTER}`, userData);
-      return response.data;
+      
+      if (response.data && response.data.token) {
+        this.setToken(response.data.token);
+        return response.data;
+      }
+      
+      throw new Error('Format de réponse invalide');
     } catch (error) {
       throw this.handleError(error);
     }
@@ -87,23 +79,15 @@ export class AuthService {
 
   public async logout(): Promise<void> {
     try {
-      // Appel à l'API de déconnexion si nécessaire
-      const token = this.getToken();
-      if (token) {
-        await axios.post(`${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.LOGOUT}`, {}, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      }
+      // Nettoyage des données d'authentification
+      localStorage.removeItem('token');
+      sessionStorage.clear();
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
-    } finally {
-      // Nettoyage complet des données d'authentification
-      localStorage.clear(); // Nettoie tout le localStorage
-      sessionStorage.clear(); // Nettoie aussi le sessionStorage par précaution
     }
   }
 
-  public async getCurrentUser(): Promise<User | null> {
+  public async getCurrentUser(): Promise<any | null> {
     try {
       const token = this.getToken();
       if (!token) return null;
@@ -114,8 +98,8 @@ export class AuthService {
         }
       });
 
-      if (response.data.success && response.data.data) {
-        return response.data.data;
+      if (response.data) {
+        return response.data;
       }
       
       return null;

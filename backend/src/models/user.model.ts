@@ -1,69 +1,51 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
-export interface IUser extends Document {
-  name: string;
+export interface IUser extends mongoose.Document {
   email: string;
   password: string;
-  role: 'user' | 'admin' | 'entreprise';
-  phone?: string;
-  address?: string;
-  company?: string;
-  position?: string;
+  firstName: string;
+  lastName: string;
+  role: 'user' | 'admin';
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const userSchema = new Schema<IUser>(
-  {
-    name: {
-      type: String,
-      required: [true, 'Le nom est requis'],
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: [true, 'L\'email est requis'],
-      unique: true,
-      trim: true,
-      lowercase: true,
-      match: [/^\S+@\S+\.\S+$/, 'Veuillez fournir un email valide'],
-    },
-    password: {
-      type: String,
-      required: [true, 'Le mot de passe est requis'],
-      minlength: [6, 'Le mot de passe doit contenir au moins 6 caractères'],
-    },
-    role: {
-      type: String,
-      enum: ['user', 'admin', 'entreprise'],
-      default: 'user',
-    },
-    phone: {
-      type: String,
-      trim: true,
-    },
-    address: {
-      type: String,
-      trim: true,
-    },
-    company: {
-      type: String,
-      trim: true,
-    },
-    position: {
-      type: String,
-      trim: true,
-    },
+const userSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true
   },
-  {
-    timestamps: true,
+  password: {
+    type: String,
+    required: true,
+    minlength: 6
+  },
+  firstName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  lastName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
   }
-);
+}, {
+  timestamps: true
+});
 
-// Hash le mot de passe avant de sauvegarder
-userSchema.pre('save', async function (next) {
+// Hash password before saving
+userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
   try {
@@ -75,11 +57,13 @@ userSchema.pre('save', async function (next) {
   }
 });
 
-// Méthode pour comparer les mots de passe
-userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
-  return bcrypt.compare(candidatePassword, this.password);
+// Method to compare password
+userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
+  try {
+    return await bcrypt.compare(candidatePassword, this.password);
+  } catch (error) {
+    return false;
+  }
 };
 
-const User = mongoose.model<IUser>('User', userSchema);
-
-export default User; 
+export const User = mongoose.model<IUser>('User', userSchema); 
