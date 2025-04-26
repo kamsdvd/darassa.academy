@@ -61,7 +61,7 @@ const Navigation: React.FC = () => {
                   className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   <User className="inline-block w-5 h-5 mr-1" />
-                  Dashboard
+                  {user?.firstName || 'Dashboard'}
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -145,7 +145,7 @@ const Navigation: React.FC = () => {
                   onClick={toggleMenu}
                 >
                   <User className="inline-block w-5 h-5 mr-2" />
-                  Dashboard
+                  {user?.firstName || 'Dashboard'}
                 </Link>
                 <button
                   onClick={() => {
