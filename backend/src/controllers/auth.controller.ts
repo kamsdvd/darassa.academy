@@ -36,7 +36,7 @@ export const register = async (req: Request, res: Response) => {
         userType: user.userType
       },
       JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
+      { expiresIn: JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'] }
     );
 
     res.status(201).json({
@@ -96,10 +96,10 @@ export const login = async (req: Request, res: Response) => {
         userType: user.userType
       },
       JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
+      { expiresIn: JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'] }
     );
 
-    res.json({
+    res.status(200).json({
       token,
       user: {
         id: user._id,
@@ -117,13 +117,10 @@ export const login = async (req: Request, res: Response) => {
 
 export const getProfile = async (req: Request, res: Response) => {
   try {
-    console.log('👤 Récupération du profil pour:', req.user.id);
     const user = await User.findById(req.user.id).select('-password');
     if (!user) {
-      console.log('❌ Utilisateur non trouvé:', req.user.id);
       return res.status(404).json({ message: 'Utilisateur non trouvé' });
     }
-    console.log('✅ Profil récupéré avec succès');
     res.json(user);
   } catch (error) {
     console.error('❌ Erreur lors de la récupération du profil:', error);

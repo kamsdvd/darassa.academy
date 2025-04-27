@@ -9,7 +9,8 @@ import {
   UserPlus,
   AlertCircle,
   Building2,
-  Settings
+  Settings,
+  BarChart3
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -71,15 +72,15 @@ const AdminDashboard: React.FC = () => {
           <div className="mt-8">
             <h2 className="text-xl font-semibold mb-4">Actions rapides</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <button className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                Ajouter un utilisateur
-              </button>
-              <button className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                Créer un centre
-              </button>
-              <button className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                Générer un rapport
-              </button>
+              <Link to="/admin/users" className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                Gérer les utilisateurs
+              </Link>
+              <Link to="/admin/centres" className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                Gérer les centres
+              </Link>
+              <Link to="/admin/stats" className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                Voir les statistiques
+              </Link>
             </div>
           </div>
 

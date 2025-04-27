@@ -66,6 +66,13 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    host: true,
+    hmr: {
+      protocol: 'ws',
+      host: 'localhost',
+      port: 24678,
+      clientPort: 24678
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:5000',

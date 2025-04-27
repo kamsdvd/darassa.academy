@@ -2,13 +2,16 @@ import React from 'react';
 import { useStore } from '../../store/useStore';
 import PageTransition from '../../components/shared/PageTransition';
 import { 
+  Users, 
+  BookOpen, 
   Calendar,
-  BookOpen,
-  Users,
   FileText,
+  Award,
   Clock,
+  AlertCircle,
   TrendingUp,
-  AlertCircle
+  UserPlus,
+  CheckCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -20,106 +23,64 @@ const FormateurDashboard: React.FC = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">
-            Tableau de bord formateur
+            Tableau de bord du formateur
           </h1>
 
           {/* Statistiques rapides */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-primary-50 rounded-lg p-6">
+            <div className="bg-white p-6 rounded-lg shadow-md">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-primary-600">Cours aujourd'hui</p>
-                  <p className="text-2xl font-bold text-primary-900">3</p>
+                  <p className="text-gray-500">Formations en cours</p>
+                  <h3 className="text-2xl font-bold">3</h3>
                 </div>
-                <div className="bg-primary-100 rounded-full p-3">
-                  <Calendar className="w-6 h-6 text-primary-600" />
-                </div>
-              </div>
-              <div className="mt-4 flex items-center text-sm text-primary-600">
-                <Clock className="w-4 h-4 mr-1" />
-                <span>Prochain cours dans 30min</span>
+                <BookOpen className="h-8 w-8 text-primary-600" />
               </div>
             </div>
 
-            <div className="bg-green-50 rounded-lg p-6">
+            <div className="bg-white p-6 rounded-lg shadow-md">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-600">Formations actives</p>
-                  <p className="text-2xl font-bold text-green-900">4</p>
+                  <p className="text-gray-500">Apprenants</p>
+                  <h3 className="text-2xl font-bold">45</h3>
                 </div>
-                <div className="bg-green-100 rounded-full p-3">
-                  <BookOpen className="w-6 h-6 text-green-600" />
-                </div>
-              </div>
-              <div className="mt-4 flex items-center text-sm text-green-600">
-                <TrendingUp className="w-4 h-4 mr-1" />
-                <span>2 nouvelles formations</span>
+                <Users className="h-8 w-8 text-primary-600" />
               </div>
             </div>
 
-            <div className="bg-blue-50 rounded-lg p-6">
+            <div className="bg-white p-6 rounded-lg shadow-md">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-600">Apprenants</p>
-                  <p className="text-2xl font-bold text-blue-900">45</p>
+                  <p className="text-gray-500">Heures de formation</p>
+                  <h3 className="text-2xl font-bold">120</h3>
                 </div>
-                <div className="bg-blue-100 rounded-full p-3">
-                  <Users className="w-6 h-6 text-blue-600" />
-                </div>
-              </div>
-              <div className="mt-4 flex items-center text-sm text-blue-600">
-                <span>4 groupes</span>
+                <Clock className="h-8 w-8 text-primary-600" />
               </div>
             </div>
 
-            <div className="bg-yellow-50 rounded-lg p-6">
+            <div className="bg-white p-6 rounded-lg shadow-md">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-yellow-600">Évaluations en attente</p>
-                  <p className="text-2xl font-bold text-yellow-900">8</p>
+                  <p className="text-gray-500">Taux de réussite</p>
+                  <h3 className="text-2xl font-bold">92%</h3>
                 </div>
-                <div className="bg-yellow-100 rounded-full p-3">
-                  <FileText className="w-6 h-6 text-yellow-600" />
-                </div>
-              </div>
-              <div className="mt-4 flex items-center text-sm text-yellow-600">
-                <span>À évaluer cette semaine</span>
+                <TrendingUp className="h-8 w-8 text-primary-600" />
               </div>
             </div>
           </div>
 
           {/* Actions rapides */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-center w-12 h-12 bg-primary-100 rounded-lg mb-4">
-                <Calendar className="w-6 h-6 text-primary-600" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Planning des cours</h3>
-              <p className="text-sm text-gray-500 mb-4">Consultez votre emploi du temps</p>
-              <Link to="/formateur/planning" className="text-primary-600 hover:text-primary-900 text-sm font-medium">
-                Voir le planning →
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold mb-4">Actions rapides</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Link to="/formateur/cours" className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                Gérer mes cours
               </Link>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-lg mb-4">
-                <BookOpen className="w-6 h-6 text-green-600" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Ressources pédagogiques</h3>
-              <p className="text-sm text-gray-500 mb-4">Accédez aux supports de cours</p>
-              <Link to="/formateur/ressources" className="text-green-600 hover:text-green-900 text-sm font-medium">
-                Voir les ressources →
+              <Link to="/formateur/planning" className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                Voir mon planning
               </Link>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg mb-4">
-                <FileText className="w-6 h-6 text-blue-600" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Évaluations</h3>
-              <p className="text-sm text-gray-500 mb-4">Gérez les évaluations des apprenants</p>
-              <Link to="/formateur/evaluations" className="text-blue-600 hover:text-blue-900 text-sm font-medium">
-                Gérer les évaluations →
+              <Link to="/formateur/ressources" className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                Ressources pédagogiques
               </Link>
             </div>
           </div>
@@ -130,50 +91,89 @@ const FormateurDashboard: React.FC = () => {
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Développement Web - Groupe A</p>
-                    <p className="text-sm text-gray-500">Salle B12 - 14:00 - 16:00</p>
+                  <div className="flex items-center">
+                    <div className="bg-primary-100 rounded-full p-2 mr-3">
+                      <Calendar className="w-4 h-4 text-primary-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Développement Web</p>
+                      <p className="text-sm text-gray-500">Aujourd'hui, 14h00 - 17h00</p>
+                    </div>
                   </div>
-                  <div className="bg-primary-100 rounded-full px-3 py-1">
-                    <span className="text-sm font-medium text-primary-600">Dans 30min</span>
-                  </div>
+                  <span className="text-sm text-gray-500">Salle 101</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Base de données - Groupe B</p>
-                    <p className="text-sm text-gray-500">Salle A05 - 16:30 - 18:30</p>
+                  <div className="flex items-center">
+                    <div className="bg-primary-100 rounded-full p-2 mr-3">
+                      <Calendar className="w-4 h-4 text-primary-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Design UI/UX</p>
+                      <p className="text-sm text-gray-500">Demain, 09h00 - 12h00</p>
+                    </div>
                   </div>
-                  <div className="bg-gray-100 rounded-full px-3 py-1">
-                    <span className="text-sm font-medium text-gray-600">Dans 2h30</span>
+                  <span className="text-sm text-gray-500">Salle 203</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="bg-primary-100 rounded-full p-2 mr-3">
+                      <Calendar className="w-4 h-4 text-primary-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Marketing Digital</p>
+                      <p className="text-sm text-gray-500">Jeudi, 13h00 - 16h00</p>
+                    </div>
+                  </div>
+                  <span className="text-sm text-gray-500">Salle 105</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tâches à faire */}
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Tâches à faire</h2>
+            <div className="space-y-4">
+              <div className="bg-yellow-50 rounded-lg p-4">
+                <div className="flex items-start">
+                  <AlertCircle className="w-5 h-5 text-yellow-600 mt-1 mr-3" />
+                  <div>
+                    <p className="text-sm font-medium text-yellow-800">Évaluation</p>
+                    <p className="text-sm text-yellow-700">Corriger les devoirs du module React</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-blue-50 rounded-lg p-4">
+                <div className="flex items-start">
+                  <FileText className="w-5 h-5 text-blue-600 mt-1 mr-3" />
+                  <div>
+                    <p className="text-sm font-medium text-blue-800">Préparation</p>
+                    <p className="text-sm text-blue-700">Préparer le support de cours pour UI/UX</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Évaluations en attente */}
+          {/* Alertes système */}
           <div className="mt-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Évaluations en attente</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Alertes système</h2>
             <div className="space-y-4">
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center justify-between">
+              <div className="bg-red-50 rounded-lg p-4">
+                <div className="flex items-start">
+                  <AlertCircle className="w-5 h-5 text-red-600 mt-1 mr-3" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Développement Web - Groupe A</p>
-                    <p className="text-sm text-gray-500">5 apprenants à évaluer</p>
-                  </div>
-                  <div className="bg-yellow-100 rounded-full px-3 py-1">
-                    <span className="text-sm font-medium text-yellow-600">À faire</span>
+                    <p className="text-sm font-medium text-red-800">Planning</p>
+                    <p className="text-sm text-red-700">Conflit d'horaire détecté pour le cours de jeudi</p>
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center justify-between">
+              <div className="bg-yellow-50 rounded-lg p-4">
+                <div className="flex items-start">
+                  <AlertCircle className="w-5 h-5 text-yellow-600 mt-1 mr-3" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Base de données - Groupe B</p>
-                    <p className="text-sm text-gray-500">3 apprenants à évaluer</p>
-                  </div>
-                  <div className="bg-yellow-100 rounded-full px-3 py-1">
-                    <span className="text-sm font-medium text-yellow-600">À faire</span>
+                    <p className="text-sm font-medium text-yellow-800">Ressources</p>
+                    <p className="text-sm text-yellow-700">Mise à jour du matériel pédagogique requise</p>
                   </div>
                 </div>
               </div>

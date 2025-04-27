@@ -18,10 +18,8 @@ const Navigation: React.FC = () => {
       const authService = AuthService.getInstance();
       await authService.logout();
       logout();
-      window.location.href = '/';
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
-      window.location.href = '/';
     }
   };
 
@@ -57,7 +55,7 @@ const Navigation: React.FC = () => {
             {isAuthenticated ? (
               <>
                 <Link 
-                  to={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'entreprise' ? '/entreprises/dashboard' : '/dashboard'} 
+                  to={user?.userType === 'admin' ? '/admin/dashboard' : user?.userType === 'entreprise' ? '/entreprises/dashboard' : '/dashboard'} 
                   className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   <User className="inline-block w-5 h-5 mr-1" />
@@ -140,7 +138,7 @@ const Navigation: React.FC = () => {
             {isAuthenticated ? (
               <>
                 <Link
-                  to={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'entreprise' ? '/entreprises/dashboard' : '/dashboard'}
+                  to={user?.userType === 'admin' ? '/admin/dashboard' : user?.userType === 'entreprise' ? '/entreprises/dashboard' : '/dashboard'}
                   className="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium"
                   onClick={toggleMenu}
                 >
