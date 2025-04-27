@@ -5,7 +5,7 @@ import { useAuth } from '../../hooks/useAuth';
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const [credentials, setCredentials] = useState({
     email: '',
     password: ''
@@ -13,12 +13,30 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
 
+  const getUserDashboardPath = (role: string): string => {
+    switch (role) {
+      case 'admin':
+        return '/admin/dashboard';
+      case 'centre_manager':
+        return '/centre/dashboard';
+      case 'formateur':
+        return '/formateur/dashboard';
+      case 'entreprise':
+        return '/entreprise/dashboard';
+      case 'etudiant':
+      case 'demandeur':
+      default:
+        return '/dashboard';
+    }
+  };
+
   useEffect(() => {
     // Vérifier si l'utilisateur est déjà connecté
-    if (isAuthenticated) {
-      navigate('/dashboard');
+    if (isAuthenticated && user) {
+      const redirectPath = getUserDashboardPath(user.role);
+      navigate(redirectPath);
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, user, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -34,10 +52,10 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      await login(credentials.email, credentials.password);
-      // Rediriger vers la page précédente ou le dashboard
-      const from = (location.state as any)?.from?.pathname || '/dashboard';
-      navigate(from, { replace: true });
+      const response = await login(credentials.email, credentials.password);
+      // Rediriger vers le tableau de bord approprié en fonction du rôle
+      const redirectPath = getUserDashboardPath(response.user.role);
+      navigate(redirectPath, { replace: true });
     } catch (err: any) {
       setError(err.message || 'Une erreur est survenue lors de la connexion');
     } finally {

@@ -13,6 +13,23 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, roles 
   const location = useLocation();
   const authService = AuthService.getInstance();
 
+  const getUserDashboardPath = (role: string): string => {
+    switch (role) {
+      case 'admin':
+        return '/admin/dashboard';
+      case 'centre_manager':
+        return '/centre/dashboard';
+      case 'formateur':
+        return '/formateur/dashboard';
+      case 'entreprise':
+        return '/entreprise/dashboard';
+      case 'etudiant':
+      case 'demandeur':
+      default:
+        return '/dashboard';
+    }
+  };
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -39,7 +56,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, roles 
   }
 
   if (roles && user && user.role && !roles.includes(user.role)) {
-    return <Navigate to="/" replace />;
+    // Rediriger vers le tableau de bord approprié de l'utilisateur
+    const redirectPath = getUserDashboardPath(user.role);
+    return <Navigate to={redirectPath} replace />;
   }
 
   return <>{children}</>;
