@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { getRedirectPath } from '../../utils/auth';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isAuthenticated, user } = useAuth();
+  const { login, isAuthenticated, user, setUser } = useAuth();
   const [credentials, setCredentials] = useState({
     email: '',
     password: ''
@@ -13,27 +14,10 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
 
-  const getUserDashboardPath = (role: string): string => {
-    switch (role) {
-      case 'admin':
-        return '/admin/dashboard';
-      case 'centre_manager':
-        return '/centre/dashboard';
-      case 'formateur':
-        return '/formateur/dashboard';
-      case 'entreprise':
-        return '/entreprise/dashboard';
-      case 'etudiant':
-      case 'demandeur':
-      default:
-        return '/dashboard';
-    }
-  };
-
   useEffect(() => {
     // Vérifier si l'utilisateur est déjà connecté
-    if (isAuthenticated && user) {
-      const redirectPath = getUserDashboardPath(user.role);
+    if (isAuthenticated && user && user.roles && Array.isArray(user.roles)) {
+      const redirectPath = getRedirectPath(user.roles);
       navigate(redirectPath);
     }
   }, [isAuthenticated, user, navigate]);
@@ -53,11 +37,20 @@ const Login: React.FC = () => {
 
     try {
       const response = await login(credentials.email, credentials.password);
-      // Rediriger vers le tableau de bord approprié en fonction du rôle
-      const redirectPath = getUserDashboardPath(response.user.role);
-      navigate(redirectPath, { replace: true });
-    } catch (err: any) {
-      setError(err.message || 'Une erreur est survenue lors de la connexion');
+      if (response && response.user) {
+        // S'assurer que l'utilisateur a un tableau de rôles
+        const userWithRoles = {
+          ...response.user,
+          roles: Array.isArray(response.user.roles) ? response.user.roles : [response.user.role]
+        };
+        setUser(userWithRoles);
+        const redirectPath = getRedirectPath(userWithRoles.roles);
+        navigate(redirectPath);
+      } else {
+        setError('Réponse de connexion invalide');
+      }
+    } catch (error) {
+      setError('Email ou mot de passe incorrect');
     } finally {
       setLoading(false);
     }

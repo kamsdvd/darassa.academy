@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, Home, LogIn, LogOut, User } from 'lucide-react';
+import { Menu, X, Home, LogIn, LogOut, User, ChevronDown, GraduationCap, Briefcase } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { AuthService } from '../../services/authService';
 
 const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { user, isAuthenticated, logout } = useStore();
   const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
+  };
+
+  const toggleUserMenu = () => {
+    setIsUserMenuOpen(!isUserMenuOpen);
   };
 
   const handleLogout = async () => {
@@ -20,6 +25,25 @@ const Navigation: React.FC = () => {
       logout();
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
+    }
+  };
+
+  // Déterminer les rôles disponibles pour l'utilisateur
+  const availableRoles = user?.roles || [];
+  // Si l'utilisateur est étudiant ou apprenant, il a accès à l'espace apprenant
+  const isApprenant = availableRoles.includes('apprenant') || availableRoles.includes('etudiant');
+  // Si l'utilisateur est demandeur d'emploi ou étudiant/apprenant, il a accès à l'espace demandeur
+  const isDemandeur = availableRoles.includes('demandeur') || isApprenant;
+
+  const handleRoleSelect = (role: string) => {
+    setIsUserMenuOpen(false);
+    switch (role) {
+      case 'apprenant':
+        navigate('/apprenant/dashboard');
+        break;
+      case 'demandeur':
+        navigate('/demandeur/dashboard');
+        break;
     }
   };
 
@@ -51,28 +75,54 @@ const Navigation: React.FC = () => {
               Entreprises
             </Link>
 
-            {/* Boutons d'authentification */}
-            {isAuthenticated ? (
-              <>
-                <Link 
-                  to={user?.role === 'admin' ? '/admin/dashboard' : 
-                      user?.role === 'centre_manager' ? '/centre/dashboard' : 
-                      user?.role === 'formateur' ? '/formateur/dashboard' : 
-                      user?.role === 'entreprise' ? '/entreprise/dashboard' : 
-                      '/dashboard'} 
-                  className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  <User className="inline-block w-5 h-5 mr-1" />
-                  {user?.firstName || 'Dashboard'}
-                </Link>
+            {/* Menu utilisateur */}
+            {isAuthenticated && user ? (
+              <div className="relative">
                 <button
-                  onClick={handleLogout}
-                  className="flex items-center text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+                  onClick={toggleUserMenu}
+                  className="flex items-center space-x-2 text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  <LogOut className="w-5 h-5 mr-1" />
-                  Déconnexion
+                  <User className="w-5 h-5" />
+                  <span>{user.firstName || 'Mon compte'}</span>
+                  <ChevronDown className="w-4 h-4" />
                 </button>
-              </>
+
+                {/* Menu déroulant */}
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                    <div className="py-1" role="menu" aria-orientation="vertical">
+                      {isApprenant && (
+                        <button
+                          onClick={() => handleRoleSelect('apprenant')}
+                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          role="menuitem"
+                        >
+                          <GraduationCap className="w-5 h-5 mr-2" />
+                          Espace Apprenant
+                        </button>
+                      )}
+                      {isDemandeur && (
+                        <button
+                          onClick={() => handleRoleSelect('demandeur')}
+                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          role="menuitem"
+                        >
+                          <Briefcase className="w-5 h-5 mr-2" />
+                          Espace Demandeur d'emploi
+                        </button>
+                      )}
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        role="menuitem"
+                      >
+                        <LogOut className="w-5 h-5 mr-2" />
+                        Déconnexion
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <Link
                 to="/connexion"
@@ -138,39 +188,51 @@ const Navigation: React.FC = () => {
               Entreprises
             </Link>
 
-            {/* Boutons d'authentification mobile */}
-            {isAuthenticated ? (
+            {/* Menu utilisateur mobile */}
+            {isAuthenticated && user ? (
               <>
-                <Link
-                  to={user?.role === 'admin' ? '/admin/dashboard' : 
-                      user?.role === 'centre_manager' ? '/centre/dashboard' : 
-                      user?.role === 'formateur' ? '/formateur/dashboard' : 
-                      user?.role === 'entreprise' ? '/entreprise/dashboard' : 
-                      '/dashboard'}
-                  className="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium"
-                  onClick={toggleMenu}
-                >
-                  <User className="inline-block w-5 h-5 mr-2" />
-                  {user?.firstName || 'Dashboard'}
-                </Link>
+                {isApprenant && (
+                  <button
+                    onClick={() => {
+                      handleRoleSelect('apprenant');
+                      toggleMenu();
+                    }}
+                    className="flex items-center w-full text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-base font-medium"
+                  >
+                    <GraduationCap className="w-5 h-5 mr-2" />
+                    Espace Apprenant
+                  </button>
+                )}
+                {isDemandeur && (
+                  <button
+                    onClick={() => {
+                      handleRoleSelect('demandeur');
+                      toggleMenu();
+                    }}
+                    className="flex items-center w-full text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-base font-medium"
+                  >
+                    <Briefcase className="w-5 h-5 mr-2" />
+                    Espace Demandeur d'emploi
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     handleLogout();
                     toggleMenu();
                   }}
-                  className="w-full text-left text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium"
+                  className="flex items-center w-full text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-base font-medium"
                 >
-                  <LogOut className="inline-block w-5 h-5 mr-2" />
+                  <LogOut className="w-5 h-5 mr-2" />
                   Déconnexion
                 </button>
               </>
             ) : (
               <Link
                 to="/connexion"
-                className="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium"
+                className="flex items-center text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-base font-medium"
                 onClick={toggleMenu}
               >
-                <LogIn className="inline-block w-5 h-5 mr-2" />
+                <LogIn className="w-5 h-5 mr-2" />
                 Connexion
               </Link>
             )}

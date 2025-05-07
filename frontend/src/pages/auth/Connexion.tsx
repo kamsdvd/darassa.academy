@@ -32,8 +32,12 @@ const Connexion: React.FC = () => {
         return '/formateur/dashboard';
       case 'entreprise':
         return '/entreprise/dashboard';
-      case 'etudiant':
+      case 'apprenant':
+        return '/apprenant/dashboard';
       case 'demandeur':
+        return '/demandeur/dashboard';
+      case 'etudiant':
+        return '/apprenant/dashboard';
       default:
         return '/dashboard';
     }

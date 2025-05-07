@@ -6,7 +6,7 @@ interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'admin' | 'centre_manager' | 'formateur' | 'etudiant' | 'demandeur' | 'entreprise';
+  roles: string[];
 }
 
 interface AuthState {
@@ -21,7 +21,31 @@ export const useStore = create<AuthState>()(
     (set) => ({
       user: null,
       isAuthenticated: false,
-      setUser: (user) => set({ user, isAuthenticated: !!user }),
+      setUser: (user) => {
+        if (!user) {
+          set({ user: null, isAuthenticated: false });
+          return;
+        }
+
+        // S'assurer que user.roles est un tableau
+        const roles = Array.isArray(user.roles) ? user.roles : [user.role];
+
+        // Ajouter les rôles automatiques
+        if (roles.includes('etudiant') && !roles.includes('demandeur')) {
+          roles.push('demandeur');
+        }
+        if (roles.includes('demandeur') && !roles.includes('etudiant')) {
+          roles.push('etudiant');
+        }
+
+        // Créer un nouvel objet utilisateur avec les rôles mis à jour
+        const updatedUser = {
+          ...user,
+          roles: roles
+        };
+
+        set({ user: updatedUser, isAuthenticated: true });
+      },
       logout: () => set({ user: null, isAuthenticated: false }),
     }),
     {

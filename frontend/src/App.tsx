@@ -23,10 +23,9 @@ import FormateurEvaluations from './pages/formateur/Evaluations';
 import EmployesManagement from './pages/entreprise/EmployesManagement';
 import EntrepriseFormations from './pages/entreprise/Formations';
 import EntrepriseRapports from './pages/entreprise/Rapports';
-import UserDashboard from './pages/user/Dashboard';
-import UserFormations from './pages/user/Formations';
 import Certificats from './pages/user/Certificats';
 import UserOpportunites from './pages/user/Opportunites';
+import MultiRoleDashboard from './pages/dashboard/MultiRoleDashboard';
 
 // Lazy loading avec prefetch
 const lazyWithPrefetch = (factory: () => Promise<any>, preload = false) => {
@@ -48,7 +47,6 @@ const JobDetail = lazyWithPrefetch(() => import('./pages/opportunites/JobDetail'
 const Entreprises = lazyWithPrefetch(() => import('./pages/entreprises/Entreprises'));
 const InscriptionEntreprise = lazyWithPrefetch(() => import('./pages/entreprises/Inscription'));
 const EntrepriseDashboard = lazyWithPrefetch(() => import('./pages/entreprises/Dashboard'));
-const Dashboard = lazyWithPrefetch(() => import('./pages/dashboard/Dashboard'));
 const InscriptionParticulier = lazyWithPrefetch(() => import('./pages/auth/Inscription'));
 const Connexion = lazyWithPrefetch(() => import('./pages/auth/Connexion'), true);
 const APropos = lazyWithPrefetch(() => import('./pages/a-propos/APropos'));
@@ -56,6 +54,8 @@ const FAQ = lazyWithPrefetch(() => import('./pages/faq/FAQ'));
 const MentionsLegales = lazyWithPrefetch(() => import('./pages/legal/MentionsLegales'));
 const PolitiqueConfidentialite = lazyWithPrefetch(() => import('./pages/legal/PolitiqueConfidentialite'));
 const ConditionsUtilisation = lazyWithPrefetch(() => import('./pages/legal/ConditionsUtilisation'));
+const ApprenantDashboard = lazyWithPrefetch(() => import('./pages/apprenant/Dashboard'));
+const DemandeurDashboard = lazyWithPrefetch(() => import('./pages/demandeur/Dashboard'));
 
 // Error component
 const ErrorFallback = ({ error }: { error: Error }) => (
@@ -183,8 +183,6 @@ function AnimatedRoutes() {
           <Route path="/mentions-legales" element={<MentionsLegales />} />
           <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
           <Route path="/conditions-utilisation" element={<ConditionsUtilisation />} />
-          <Route path="/user/dashboard" element={<UserDashboard />} />
-          <Route path="/user/formations" element={<UserFormations />} />
 
           {/* Routes administrateur */}
           <Route path="/admin/dashboard" element={
@@ -274,25 +272,23 @@ function AnimatedRoutes() {
             </ProtectedRoute>
           } />
 
-          {/* Routes utilisateur standard */}
+          {/* Route unifiée pour les utilisateurs multi-rôles */}
           <Route path="/dashboard" element={
-            <ProtectedRoute roles={['etudiant', 'demandeur']}>
-              <UserDashboard />
+            <ProtectedRoute roles={['apprenant', 'etudiant', 'demandeur']}>
+              <MultiRoleDashboard />
             </ProtectedRoute>
           } />
-          <Route path="/formations" element={
-            <ProtectedRoute roles={['etudiant', 'demandeur']}>
-              <UserFormations />
+
+          {/* Routes spécifiques aux rôles */}
+          <Route path="/apprenant/dashboard" element={
+            <ProtectedRoute roles={['apprenant', 'etudiant']}>
+              <ApprenantDashboard />
             </ProtectedRoute>
           } />
-          <Route path="/certificats" element={
-            <ProtectedRoute roles={['etudiant', 'demandeur']}>
-              <Certificats />
-            </ProtectedRoute>
-          } />
-          <Route path="/opportunites" element={
-            <ProtectedRoute roles={['etudiant', 'demandeur']}>
-              <UserOpportunites />
+
+          <Route path="/demandeur/dashboard" element={
+            <ProtectedRoute roles={['demandeur']}>
+              <DemandeurDashboard />
             </ProtectedRoute>
           } />
 
