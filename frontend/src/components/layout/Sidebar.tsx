@@ -260,40 +260,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
             path: '/centre/planning/week'
           }
         ]
-      },
-      {
-        icon: <GraduationCap className="h-5 w-5" />,
-        label: 'Gestion des étudiants',
-        path: '/centre/etudiants',
-        subItems: [
-          {
-            icon: <UserPlus className="h-4 w-4" />,
-            label: 'Inscrire un étudiant',
-            path: '/centre/etudiants/inscription'
-          },
-          {
-            icon: <ClipboardList className="h-4 w-4" />,
-            label: 'Suivi des progrès',
-            path: '/centre/etudiants/progres'
-          }
-        ]
-      },
-      {
-        icon: <FileText className="h-5 w-5" />,
-        label: 'Rapports',
-        path: '/centre/reports',
-        subItems: [
-          {
-            icon: <BarChart className="h-4 w-4" />,
-            label: 'Statistiques',
-            path: '/centre/reports/stats'
-          },
-          {
-            icon: <FileText className="h-4 w-4" />,
-            label: 'Rapports détaillés',
-            path: '/centre/reports/detailed'
-          }
-        ]
       }
     ];
 
@@ -302,7 +268,51 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
         <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
           Gestion du centre
         </div>
-        {centreItems.map(renderMenuItem)}
+        {centreItems.map((item) => (
+          <div key={item.path}>
+            <Link
+              to={item.path}
+              className={`flex items-center px-4 py-2 text-sm ${
+                isActive(item.path) ? 'bg-primary-50 text-primary-600' : 'text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={(e) => {
+                if (item.subItems) {
+                  toggleSection(item.path);
+                }
+              }}
+            >
+              {item.icon}
+              {isOpen && (
+                <>
+                  <span className="ml-3">{item.label}</span>
+                  {item.subItems && (
+                    <ChevronRight 
+                      className={`h-4 w-4 ml-auto transition-transform duration-200 ${
+                        (isActive(item.path) || expandedSections.includes(item.path)) ? 'transform rotate-90' : ''
+                      }`}
+                    />
+                  )}
+                </>
+              )}
+            </Link>
+            {item.subItems && (isActive(item.path) || expandedSections.includes(item.path)) && (
+              <div className="ml-4 mt-1 space-y-1">
+                {item.subItems.map((subItem) => (
+                  <Link
+                    key={subItem.path}
+                    to={subItem.path}
+                    className={`flex items-center px-4 py-2 text-sm ${
+                      isActive(subItem.path) ? 'bg-primary-50 text-primary-600' : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {subItem.icon}
+                    {isOpen && <span className="ml-3">{subItem.label}</span>}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     );
   };
