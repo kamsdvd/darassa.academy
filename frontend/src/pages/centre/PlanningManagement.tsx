@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
-import { Calendar, Search, Filter, Plus, Clock, Users, MapPin, MoreVertical } from 'lucide-react';
+import { Calendar, List, Search, Filter, Plus, Clock, Users, MapPin, MoreVertical } from 'lucide-react';
+import { useGoogleCalendar } from '../../hooks/useGoogleCalendar';
+import PlanningMonth from './PlanningMonth';
+import PlanningWeek from './PlanningWeek';
 
 const PlanningManagement: React.FC = () => {
+  const [view, setView] = useState<'month' | 'week'>('month');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const { connectGoogleCalendar, isConnecting, error } = useGoogleCalendar();
 
   // Données fictives pour l'exemple
   const seances = [
@@ -76,118 +81,62 @@ const PlanningManagement: React.FC = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Gestion du planning</h1>
-        <button className="bg-primary-600 text-white px-4 py-2 rounded-md flex items-center">
-          <Plus className="w-4 h-4 mr-2" />
-          Ajouter une séance
-        </button>
+        <div className="flex space-x-4">
+          <button
+            onClick={() => setView('month')}
+            className={`flex items-center px-4 py-2 rounded-lg ${
+              view === 'month'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <Calendar className="w-5 h-5 mr-2" />
+            Vue mensuelle
+          </button>
+          <button
+            onClick={() => setView('week')}
+            className={`flex items-center px-4 py-2 rounded-lg ${
+              view === 'week'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <List className="w-5 h-5 mr-2" />
+            Vue hebdomadaire
+          </button>
+          <button
+            onClick={connectGoogleCalendar}
+            disabled={isConnecting}
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {isConnecting ? (
+              <>
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Connexion en cours...
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
+                </svg>
+                Connecter avec Google Calendar
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="relative flex-grow">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Rechercher une séance..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <div className="flex items-center">
-            <Filter className="w-5 h-5 text-gray-500 mr-2" />
-            <select
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
-              <option value="all">Tous les statuts</option>
-              <option value="planifie">Planifié</option>
-              <option value="en_cours">En cours</option>
-              <option value="termine">Terminé</option>
-              <option value="annule">Annulé</option>
-            </select>
-          </div>
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
+          {error}
         </div>
+      )}
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Formation
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Formateur
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Horaires
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Salle
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Apprenants
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Statut
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {seances.map((seance) => (
-                <tr key={seance.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{seance.formation}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{seance.formateur}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      <Calendar className="inline-block w-4 h-4 mr-1" />
-                      {seance.date}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      <Clock className="inline-block w-4 h-4 mr-1" />
-                      {seance.heureDebut} - {seance.heureFin}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      <MapPin className="inline-block w-4 h-4 mr-1" />
-                      {seance.salle}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      <Users className="inline-block w-4 h-4 mr-1" />
-                      {seance.apprenants}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(seance.status)}`}>
-                      {getStatusText(seance.status)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button className="text-gray-600 hover:text-gray-900">
-                      <MoreVertical className="h-5 w-5" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div className="bg-white rounded-lg shadow-md p-6">
+        {view === 'month' ? <PlanningMonth /> : <PlanningWeek />}
       </div>
     </div>
   );
