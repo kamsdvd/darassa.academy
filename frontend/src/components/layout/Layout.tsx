@@ -67,27 +67,43 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
   
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navigation />
-      <div className="flex flex-1">
-        {shouldShowSidebar && (
-          <div className={`fixed left-0 top-16 h-[calc(100vh-4rem)] z-50 transition-all duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-            <Sidebar isOpen={isSidebarOpen} />
-          </div>
-        )}
-        <button
-          onClick={toggleSidebar}
-          className="fixed left-4 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-r-lg shadow-md z-50"
-          style={{ top: 'calc(50% + 2rem)' }}
-        >
-          {isSidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
-        </button>
-        <main className={`flex-1 transition-all duration-300 ${shouldShowSidebar ? 'ml-64' : ''}`}>
-          <div className="container mx-auto px-4 py-8">
-            {children}
-          </div>
-        </main>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header fixe */}
+      <div className="fixed top-0 left-0 right-0 z-50">
+        <Navigation />
       </div>
+
+      {/* Contenu principal avec padding-top pour compenser le header */}
+      <div className="pt-16 min-h-screen">
+        <div className="flex">
+          {/* Sidebar */}
+          {shouldShowSidebar && (
+            <div 
+              className={`
+                fixed left-0 top-16 h-[calc(100vh-4rem)] z-40
+                transition-all duration-300 ease-in-out
+                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+              `}
+            >
+              <Sidebar isOpen={isSidebarOpen} onToggle={toggleSidebar} />
+            </div>
+          )}
+
+          {/* Contenu principal */}
+          <main 
+            className={`
+              flex-1 transition-all duration-300 ease-in-out
+              ${shouldShowSidebar ? (isSidebarOpen ? 'ml-64' : 'ml-16') : ''}
+            `}
+          >
+            <div className="container mx-auto px-4 py-8">
+              {children}
+            </div>
+          </main>
+        </div>
+      </div>
+
+      {/* Footer */}
       <Footer />
     </div>
   );

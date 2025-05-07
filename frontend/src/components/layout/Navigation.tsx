@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, Home, LogIn, LogOut, User, ChevronDown, GraduationCap, Briefcase } from 'lucide-react';
+import { Menu, X, Home, LogIn, LogOut, User, ChevronDown, GraduationCap, Briefcase, LayoutDashboard } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { AuthService } from '../../services/authService';
 
@@ -9,12 +9,28 @@ const Navigation: React.FC = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { user, isAuthenticated, logout } = useStore();
   const navigate = useNavigate();
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Gérer le clic en dehors du menu pour le fermer
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
 
-  const toggleUserMenu = () => {
+  const toggleUserMenu = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setIsUserMenuOpen(!isUserMenuOpen);
   };
 
@@ -23,6 +39,7 @@ const Navigation: React.FC = () => {
       const authService = AuthService.getInstance();
       await authService.logout();
       logout();
+      setIsUserMenuOpen(false);
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
     }
@@ -30,21 +47,111 @@ const Navigation: React.FC = () => {
 
   // Déterminer les rôles disponibles pour l'utilisateur
   const availableRoles = user?.roles || [];
-  // Si l'utilisateur est étudiant ou apprenant, il a accès à l'espace apprenant
+  const isAdmin = availableRoles.includes('admin');
+  const isCentreManager = availableRoles.includes('centre_manager');
+  const isFormateur = availableRoles.includes('formateur');
   const isApprenant = availableRoles.includes('apprenant') || availableRoles.includes('etudiant');
-  // Si l'utilisateur est demandeur d'emploi ou étudiant/apprenant, il a accès à l'espace demandeur
   const isDemandeur = availableRoles.includes('demandeur') || isApprenant;
+  const isEntreprise = availableRoles.includes('entreprise');
 
   const handleRoleSelect = (role: string) => {
     setIsUserMenuOpen(false);
     switch (role) {
+      case 'admin':
+        navigate('/admin/dashboard');
+        break;
+      case 'centre_manager':
+        navigate('/centre/dashboard');
+        break;
+      case 'formateur':
+        navigate('/formateur/dashboard');
+        break;
       case 'apprenant':
         navigate('/apprenant/dashboard');
         break;
       case 'demandeur':
         navigate('/demandeur/dashboard');
         break;
+      case 'entreprise':
+        navigate('/entreprise/dashboard');
+        break;
     }
+  };
+
+  const renderDashboardLink = () => {
+    if (isAdmin) {
+      return (
+        <button
+          onClick={() => handleRoleSelect('admin')}
+          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          role="menuitem"
+        >
+          <LayoutDashboard className="w-5 h-5 mr-2" />
+          Tableau de bord Admin
+        </button>
+      );
+    }
+    if (isCentreManager) {
+      return (
+        <button
+          onClick={() => handleRoleSelect('centre_manager')}
+          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          role="menuitem"
+        >
+          <LayoutDashboard className="w-5 h-5 mr-2" />
+          Tableau de bord Centre
+        </button>
+      );
+    }
+    if (isFormateur) {
+      return (
+        <button
+          onClick={() => handleRoleSelect('formateur')}
+          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          role="menuitem"
+        >
+          <LayoutDashboard className="w-5 h-5 mr-2" />
+          Tableau de bord Formateur
+        </button>
+      );
+    }
+    if (isApprenant) {
+      return (
+        <button
+          onClick={() => handleRoleSelect('apprenant')}
+          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          role="menuitem"
+        >
+          <LayoutDashboard className="w-5 h-5 mr-2" />
+          Tableau de bord Apprenant
+        </button>
+      );
+    }
+    if (isDemandeur) {
+      return (
+        <button
+          onClick={() => handleRoleSelect('demandeur')}
+          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          role="menuitem"
+        >
+          <LayoutDashboard className="w-5 h-5 mr-2" />
+          Tableau de bord Demandeur
+        </button>
+      );
+    }
+    if (isEntreprise) {
+      return (
+        <button
+          onClick={() => handleRoleSelect('entreprise')}
+          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          role="menuitem"
+        >
+          <LayoutDashboard className="w-5 h-5 mr-2" />
+          Tableau de bord Entreprise
+        </button>
+      );
+    }
+    return null;
   };
 
   return (
@@ -77,20 +184,21 @@ const Navigation: React.FC = () => {
 
             {/* Menu utilisateur */}
             {isAuthenticated && user ? (
-              <div className="relative">
+              <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={toggleUserMenu}
                   className="flex items-center space-x-2 text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   <User className="w-5 h-5" />
                   <span>{user.firstName || 'Mon compte'}</span>
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isUserMenuOpen ? 'transform rotate-180' : ''}`} />
                 </button>
 
                 {/* Menu déroulant */}
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                     <div className="py-1" role="menu" aria-orientation="vertical">
+                      {renderDashboardLink()}
                       {isApprenant && (
                         <button
                           onClick={() => handleRoleSelect('apprenant')}
@@ -191,6 +299,7 @@ const Navigation: React.FC = () => {
             {/* Menu utilisateur mobile */}
             {isAuthenticated && user ? (
               <>
+                {renderDashboardLink()}
                 {isApprenant && (
                   <button
                     onClick={() => {

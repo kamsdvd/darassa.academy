@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 import { 
@@ -16,20 +16,40 @@ import {
   ClipboardList,
   BarChart,
   UserCog,
-  Home
+  Home,
+  ChevronRight,
+  Menu,
+  X
 } from 'lucide-react';
 import { authService } from '../../services/auth.service';
 
 interface SidebarProps {
   isOpen: boolean;
+  onToggle: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
+interface MenuItem {
+  icon: React.ReactNode;
+  label: string;
+  path: string;
+  subItems?: MenuItem[];
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
   const { user, logout } = useStore();
   const location = useLocation();
+  const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
   const isActive = (path: string) => {
-    return location.pathname === path;
+    return location.pathname.startsWith(path);
+  };
+
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => 
+      prev.includes(section) 
+        ? prev.filter(s => s !== section)
+        : [...prev, section]
+    );
   };
 
   const handleLogout = async () => {
@@ -41,191 +61,413 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
     }
   };
 
-  const renderAdminMenu = () => (
-    <>
-      <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-        Administration
-      </div>
-      <Link 
-        to="/admin/dashboard" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/admin/dashboard') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <Home className="mr-3 h-5 w-5" />
-        {isOpen && <span>Tableau de bord</span>}
-      </Link>
-      <Link 
-        to="/admin/users" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/admin/users') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <Users className="mr-3 h-5 w-5" />
-        {isOpen && <span>Gestion des utilisateurs</span>}
-      </Link>
-      <Link 
-        to="/admin/centres" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/admin/centres') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <Building className="mr-3 h-5 w-5" />
-        {isOpen && <span>Gestion des centres</span>}
-      </Link>
-      <Link 
-        to="/admin/formations" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/admin/formations') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <BookOpen className="mr-3 h-5 w-5" />
-        {isOpen && <span>Gestion des formations</span>}
-      </Link>
-      <Link 
-        to="/admin/reports" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/admin/reports') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <FileText className="mr-3 h-5 w-5" />
-        {isOpen && <span>Rapports</span>}
-      </Link>
-      <Link 
-        to="/admin/settings" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/admin/settings') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <Settings className="mr-3 h-5 w-5" />
-        {isOpen && <span>Paramètres</span>}
-      </Link>
-    </>
-  );
+  const getAccountType = () => {
+    if (!user) return '';
+    if (user.roles.includes('admin')) return 'Administrateur';
+    if (user.roles.includes('centre_manager')) return 'Centre de formation';
+    if (user.roles.includes('formateur')) return 'Formateur';
+    if (user.roles.includes('apprenant') || user.roles.includes('etudiant')) return 'Apprenant';
+    if (user.roles.includes('demandeur')) return 'Demandeur d\'emploi';
+    if (user.roles.includes('entreprise')) return 'Entreprise';
+    return '';
+  };
 
-  const renderCentreManagerMenu = () => (
-    <>
-      <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-        Gestion du centre
-      </div>
-      <Link 
-        to="/centre/dashboard" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/centre/dashboard') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <Home className="mr-3 h-5 w-5" />
-        {isOpen && <span>Tableau de bord</span>}
-      </Link>
-      <Link 
-        to="/centre/formateurs" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/centre/formateurs') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <Users className="mr-3 h-5 w-5" />
-        {isOpen && <span>Gestion des formateurs</span>}
-      </Link>
-      <Link 
-        to="/centre/formations" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/centre/formations') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <BookOpen className="mr-3 h-5 w-5" />
-        {isOpen && <span>Gestion des formations</span>}
-      </Link>
-      <Link 
-        to="/centre/planning" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/centre/planning') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <Calendar className="mr-3 h-5 w-5" />
-        {isOpen && <span>Planning</span>}
-      </Link>
-      <Link 
-        to="/centre/etudiants" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/centre/etudiants') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <GraduationCap className="mr-3 h-5 w-5" />
-        {isOpen && <span>Gestion des étudiants</span>}
-      </Link>
-      <Link 
-        to="/centre/reports" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/centre/reports') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <FileText className="mr-3 h-5 w-5" />
-        {isOpen && <span>Rapports</span>}
-      </Link>
-    </>
-  );
+  const getAccountName = () => {
+    if (!user) return '';
+    if (user.roles.includes('admin')) return 'Administration';
+    if (user.roles.includes('centre_manager')) return 'Centre de formation';
+    if (user.roles.includes('formateur')) return 'Formation';
+    if (user.roles.includes('apprenant') || user.roles.includes('etudiant')) return 'Apprentissage';
+    if (user.roles.includes('demandeur')) return 'Emploi';
+    if (user.roles.includes('entreprise')) return 'Entreprise';
+    return '';
+  };
 
-  const renderFormateurMenu = () => (
-    <>
-      <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-        Espace formateur
-      </div>
-      <Link 
-        to="/formateur/dashboard" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/formateur/dashboard') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <Home className="mr-3 h-5 w-5" />
-        {isOpen && <span>Tableau de bord</span>}
-      </Link>
-      <Link 
-        to="/formateur/cours" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/formateur/cours') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <BookOpen className="mr-3 h-5 w-5" />
-        {isOpen && <span>Mes cours</span>}
-      </Link>
-      <Link 
-        to="/formateur/etudiants" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/formateur/etudiants') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <Users className="mr-3 h-5 w-5" />
-        {isOpen && <span>Mes étudiants</span>}
-      </Link>
-      <Link 
-        to="/formateur/evaluations" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/formateur/evaluations') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <ClipboardList className="mr-3 h-5 w-5" />
-        {isOpen && <span>Évaluations</span>}
-      </Link>
-      <Link 
-        to="/formateur/planning" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/formateur/planning') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <Calendar className="mr-3 h-5 w-5" />
-        {isOpen && <span>Mon planning</span>}
-      </Link>
-    </>
-  );
+  const renderMenuItem = (item: MenuItem, index: number) => {
+    const isItemActive = isActive(item.path);
+    const hasSubItems = item.subItems && item.subItems.length > 0;
+    const isExpanded = expandedSections.includes(item.path);
 
-  const renderEtudiantMenu = () => (
-    <>
-      <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-        Espace étudiant
+    return (
+      <div key={index} className="relative">
+        <Link 
+          to={item.path}
+          className={`
+            flex items-center px-4 py-2.5 text-sm transition-all duration-200
+            ${isItemActive 
+              ? 'bg-blue-50 text-blue-600 font-medium' 
+              : 'text-gray-700 hover:bg-gray-50'
+            }
+            ${hasSubItems ? 'cursor-pointer' : ''}
+          `}
+          onClick={(e) => {
+            if (hasSubItems) {
+              e.preventDefault();
+              toggleSection(item.path);
+            }
+          }}
+          title={!isOpen ? item.label : undefined}
+        >
+          <span className="flex-shrink-0">{item.icon}</span>
+          {isOpen && (
+            <>
+              <span className="ml-3 flex-grow">{item.label}</span>
+              {hasSubItems && (
+                <ChevronRight 
+                  className={`h-4 w-4 transition-transform duration-200 ${
+                    isExpanded ? 'transform rotate-90' : ''
+                  }`}
+                />
+              )}
+            </>
+          )}
+        </Link>
+        {hasSubItems && isExpanded && isOpen && (
+          <div className="ml-8 mt-1 space-y-1">
+            {item.subItems?.map((subItem, subIndex) => (
+              <Link
+                key={subIndex}
+                to={subItem.path}
+                className={`
+                  flex items-center px-3 py-2 text-sm transition-all duration-200
+                  ${isActive(subItem.path)
+                    ? 'text-blue-600 font-medium'
+                    : 'text-gray-600 hover:text-gray-900'
+                  }
+                `}
+                title={!isOpen ? subItem.label : undefined}
+              >
+                <span className="flex-shrink-0">{subItem.icon}</span>
+                {isOpen && <span className="ml-2">{subItem.label}</span>}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
-      <Link 
-        to="/user/dashboard" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/user/dashboard') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <Home className="mr-3 h-5 w-5" />
-        {isOpen && <span>Tableau de bord</span>}
-      </Link>
-      <Link 
-        to="/user/formations" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/user/formations') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <BookOpen className="mr-3 h-5 w-5" />
-        {isOpen && <span>Mes formations</span>}
-      </Link>
-      <Link 
-        to="/user/certificats" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/user/certificats') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <Award className="mr-3 h-5 w-5" />
-        {isOpen && <span>Mes certificats</span>}
-      </Link>
-      <Link 
-        to="/user/opportunites" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/user/opportunites') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <Briefcase className="mr-3 h-5 w-5" />
-        {isOpen && <span>Opportunités</span>}
-      </Link>
-      <Link 
-        to="/user/planning" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/user/planning') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
-      >
-        <Calendar className="mr-3 h-5 w-5" />
-        {isOpen && <span>Mon planning</span>}
-      </Link>
-    </>
-  );
+    );
+  };
+
+  const renderAdminMenu = () => {
+    const adminItems: MenuItem[] = [
+      {
+        icon: <Home className="h-5 w-5" />,
+        label: 'Tableau de bord',
+        path: '/admin/dashboard'
+      },
+      {
+        icon: <Users className="h-5 w-5" />,
+        label: 'Gestion des utilisateurs',
+        path: '/admin/users',
+        subItems: [
+          {
+            icon: <UserPlus className="h-4 w-4" />,
+            label: 'Ajouter un utilisateur',
+            path: '/admin/users/add'
+          },
+          {
+            icon: <UserCog className="h-4 w-4" />,
+            label: 'Gérer les rôles',
+            path: '/admin/users/roles'
+          }
+        ]
+      },
+      {
+        icon: <Building className="h-5 w-5" />,
+        label: 'Gestion des centres',
+        path: '/admin/centres'
+      },
+      {
+        icon: <BookOpen className="h-5 w-5" />,
+        label: 'Gestion des formations',
+        path: '/admin/formations'
+      },
+      {
+        icon: <FileText className="h-5 w-5" />,
+        label: 'Rapports',
+        path: '/admin/reports'
+      },
+      {
+        icon: <Settings className="h-5 w-5" />,
+        label: 'Paramètres',
+        path: '/admin/settings'
+      }
+    ];
+
+    return (
+      <div className="space-y-1">
+        <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          Administration
+        </div>
+        {adminItems.map(renderMenuItem)}
+      </div>
+    );
+  };
+
+  const renderCentreManagerMenu = () => {
+    const centreItems: MenuItem[] = [
+      {
+        icon: <Home className="h-5 w-5" />,
+        label: 'Tableau de bord',
+        path: '/centre/dashboard'
+      },
+      {
+        icon: <Users className="h-5 w-5" />,
+        label: 'Gestion des formateurs',
+        path: '/centre/formateurs',
+        subItems: [
+          {
+            icon: <UserPlus className="h-4 w-4" />,
+            label: 'Ajouter un formateur',
+            path: '/centre/formateurs/add'
+          },
+          {
+            icon: <UserCog className="h-4 w-4" />,
+            label: 'Gérer les disponibilités',
+            path: '/centre/formateurs/disponibilites'
+          }
+        ]
+      },
+      {
+        icon: <BookOpen className="h-5 w-5" />,
+        label: 'Gestion des formations',
+        path: '/centre/formations',
+        subItems: [
+          {
+            icon: <FileText className="h-4 w-4" />,
+            label: 'Créer une formation',
+            path: '/centre/formations/create'
+          },
+          {
+            icon: <Calendar className="h-4 w-4" />,
+            label: 'Planifier une session',
+            path: '/centre/formations/sessions'
+          }
+        ]
+      },
+      {
+        icon: <Calendar className="h-5 w-5" />,
+        label: 'Planning',
+        path: '/centre/planning',
+        subItems: [
+          {
+            icon: <Calendar className="h-4 w-4" />,
+            label: 'Vue mensuelle',
+            path: '/centre/planning/month'
+          },
+          {
+            icon: <Calendar className="h-4 w-4" />,
+            label: 'Vue hebdomadaire',
+            path: '/centre/planning/week'
+          }
+        ]
+      },
+      {
+        icon: <GraduationCap className="h-5 w-5" />,
+        label: 'Gestion des étudiants',
+        path: '/centre/etudiants',
+        subItems: [
+          {
+            icon: <UserPlus className="h-4 w-4" />,
+            label: 'Inscrire un étudiant',
+            path: '/centre/etudiants/inscription'
+          },
+          {
+            icon: <ClipboardList className="h-4 w-4" />,
+            label: 'Suivi des progrès',
+            path: '/centre/etudiants/progres'
+          }
+        ]
+      },
+      {
+        icon: <FileText className="h-5 w-5" />,
+        label: 'Rapports',
+        path: '/centre/reports',
+        subItems: [
+          {
+            icon: <BarChart className="h-4 w-4" />,
+            label: 'Statistiques',
+            path: '/centre/reports/stats'
+          },
+          {
+            icon: <FileText className="h-4 w-4" />,
+            label: 'Rapports détaillés',
+            path: '/centre/reports/detailed'
+          }
+        ]
+      }
+    ];
+
+    return (
+      <div className="space-y-1">
+        <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          Gestion du centre
+        </div>
+        {centreItems.map(renderMenuItem)}
+      </div>
+    );
+  };
+
+  const renderFormateurMenu = () => {
+    const formateurItems: MenuItem[] = [
+      {
+        icon: <Home className="h-5 w-5" />,
+        label: 'Tableau de bord',
+        path: '/formateur/dashboard'
+      },
+      {
+        icon: <BookOpen className="h-5 w-5" />,
+        label: 'Mes cours',
+        path: '/formateur/cours',
+        subItems: [
+          {
+            icon: <FileText className="h-4 w-4" />,
+            label: 'Créer un cours',
+            path: '/formateur/cours/create'
+          },
+          {
+            icon: <BookOpen className="h-4 w-4" />,
+            label: 'Mes supports',
+            path: '/formateur/cours/supports'
+          }
+        ]
+      },
+      {
+        icon: <Users className="h-5 w-5" />,
+        label: 'Mes étudiants',
+        path: '/formateur/etudiants',
+        subItems: [
+          {
+            icon: <ClipboardList className="h-4 w-4" />,
+            label: 'Liste des étudiants',
+            path: '/formateur/etudiants/liste'
+          },
+          {
+            icon: <BarChart className="h-4 w-4" />,
+            label: 'Suivi des progrès',
+            path: '/formateur/etudiants/progres'
+          }
+        ]
+      },
+      {
+        icon: <ClipboardList className="h-5 w-5" />,
+        label: 'Évaluations',
+        path: '/formateur/evaluations',
+        subItems: [
+          {
+            icon: <FileText className="h-4 w-4" />,
+            label: 'Créer une évaluation',
+            path: '/formateur/evaluations/create'
+          },
+          {
+            icon: <ClipboardList className="h-4 w-4" />,
+            label: 'Résultats',
+            path: '/formateur/evaluations/resultats'
+          }
+        ]
+      },
+      {
+        icon: <Calendar className="h-5 w-5" />,
+        label: 'Mon planning',
+        path: '/formateur/planning',
+        subItems: [
+          {
+            icon: <Calendar className="h-4 w-4" />,
+            label: 'Vue mensuelle',
+            path: '/formateur/planning/month'
+          },
+          {
+            icon: <Calendar className="h-4 w-4" />,
+            label: 'Vue hebdomadaire',
+            path: '/formateur/planning/week'
+          }
+        ]
+      }
+    ];
+
+    return (
+      <div className="space-y-1">
+        <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          Espace formateur
+        </div>
+        {formateurItems.map(renderMenuItem)}
+      </div>
+    );
+  };
+
+  const renderEtudiantMenu = () => {
+    const etudiantItems: MenuItem[] = [
+      {
+        icon: <Home className="h-5 w-5" />,
+        label: 'Tableau de bord',
+        path: '/etudiant/dashboard'
+      },
+      {
+        icon: <BookOpen className="h-5 w-5" />,
+        label: 'Mes cours',
+        path: '/etudiant/cours',
+        subItems: [
+          {
+            icon: <BookOpen className="h-4 w-4" />,
+            label: 'Cours en cours',
+            path: '/etudiant/cours/current'
+          },
+          {
+            icon: <FileText className="h-4 w-4" />,
+            label: 'Supports de cours',
+            path: '/etudiant/cours/supports'
+          }
+        ]
+      },
+      {
+        icon: <ClipboardList className="h-5 w-5" />,
+        label: 'Évaluations',
+        path: '/etudiant/evaluations',
+        subItems: [
+          {
+            icon: <ClipboardList className="h-4 w-4" />,
+            label: 'Mes évaluations',
+            path: '/etudiant/evaluations/liste'
+          },
+          {
+            icon: <BarChart className="h-4 w-4" />,
+            label: 'Mes résultats',
+            path: '/etudiant/evaluations/resultats'
+          }
+        ]
+      },
+      {
+        icon: <Calendar className="h-5 w-5" />,
+        label: 'Mon planning',
+        path: '/etudiant/planning',
+        subItems: [
+          {
+            icon: <Calendar className="h-4 w-4" />,
+            label: 'Vue mensuelle',
+            path: '/etudiant/planning/month'
+          },
+          {
+            icon: <Calendar className="h-4 w-4" />,
+            label: 'Vue hebdomadaire',
+            path: '/etudiant/planning/week'
+          }
+        ]
+      },
+      {
+        icon: <Award className="h-5 w-5" />,
+        label: 'Mes certifications',
+        path: '/etudiant/certifications'
+      }
+    ];
+
+    return (
+      <div className="space-y-1">
+        <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          Espace étudiant
+        </div>
+        {etudiantItems.map(renderMenuItem)}
+      </div>
+    );
+  };
 
   const renderDemandeurMenu = () => (
     <>
@@ -344,33 +586,59 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   if (!user) return null;
 
   return (
-    <div className={`h-full bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ${isOpen ? 'w-64' : 'w-16'}`}>
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center">
-          <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
-            {user.firstName?.charAt(0) || 'U'}
+    <div
+      className={`fixed top-16 left-0 h-[calc(100vh-4rem)] bg-white shadow-lg transition-all duration-300 ease-in-out z-40 ${
+        isOpen ? 'w-64' : 'w-16'
+      }`}
+    >
+      <div className="flex flex-col h-full">
+        {/* En-tête de la sidebar */}
+        <div className="p-4 border-b">
+          <div className="flex items-center justify-between">
+            {isOpen ? (
+              <>
+                <span className="text-lg font-semibold text-gray-800">{getAccountName()}</span>
+                <button
+                  onClick={onToggle}
+                  className="p-2 rounded-md hover:bg-gray-100 transition-colors"
+                >
+                  <Menu className="w-5 h-5 text-gray-600" />
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={onToggle}
+                className="p-2 rounded-md hover:bg-gray-100 transition-colors w-full flex justify-center"
+              >
+                <Menu className="w-5 h-5 text-gray-600" />
+              </button>
+            )}
           </div>
           {isOpen && (
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-900">{user.firstName} {user.lastName}</p>
-              <p className="text-xs text-gray-500 capitalize">{user.userType?.replace('_', ' ')}</p>
+            <div className="mt-2 text-sm text-gray-600">
+              {getAccountType()}
             </div>
           )}
         </div>
-      </div>
-      
-      <div className="flex-1 overflow-y-auto py-4">
-        {renderMenu()}
-      </div>
-      
-      <div className="p-4 border-t border-gray-200">
-        <button 
-          onClick={handleLogout}
-          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
-        >
-          <LogOut className="mr-3 h-5 w-5" />
-          {isOpen && <span>Déconnexion</span>}
-        </button>
+
+        {/* Contenu de la sidebar */}
+        <div className="flex-1 overflow-y-auto py-4">
+          {renderMenu()}
+        </div>
+        
+        <div className="border-t border-gray-200 p-4 sticky bottom-0 bg-white">
+          <button
+            onClick={handleLogout}
+            className={`
+              flex items-center w-full px-4 py-2 text-sm text-gray-700
+              hover:bg-gray-100 rounded-md transition-colors duration-200
+            `}
+            title={!isOpen ? 'Déconnexion' : undefined}
+          >
+            <LogOut className="h-5 w-5" />
+            {isOpen && <span className="ml-3">Déconnexion</span>}
+          </button>
+        </div>
       </div>
     </div>
   );
