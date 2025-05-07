@@ -8,11 +8,17 @@ interface Event {
   description: string;
   start: {
     dateTime: string;
+    timeZone: string;
   };
   end: {
     dateTime: string;
+    timeZone: string;
   };
   location: string;
+  formateur: string;
+  participants: number;
+  type: 'formation' | 'session';
+  status: string;
 }
 
 const PlanningWeek: React.FC = () => {

@@ -1,50 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, List, Search, Filter, Plus, Clock, Users, MapPin, MoreVertical } from 'lucide-react';
-import { useGoogleCalendar } from '../../hooks/useGoogleCalendar';
 import PlanningMonth from './PlanningMonth';
 import PlanningWeek from './PlanningWeek';
+import PlanningDay from './PlanningDay';
+
+interface Formateur {
+  id: string;
+  name: string;
+}
+
+interface FormationType {
+  id: string;
+  name: string;
+}
 
 const PlanningManagement: React.FC = () => {
-  const [view, setView] = useState<'month' | 'week'>('month');
+  const [view, setView] = useState<'month' | 'week' | 'day'>('month');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  const { connectGoogleCalendar, isConnecting, error } = useGoogleCalendar();
+  const [selectedFormateur, setSelectedFormateur] = useState<string>('all');
+  const [selectedFormationType, setSelectedFormationType] = useState<string>('all');
 
   // Données fictives pour l'exemple
-  const seances = [
-    {
-      id: 1,
-      formation: 'Développement Web Frontend',
-      formateur: 'John Doe',
-      date: '2024-03-01',
-      heureDebut: '09:00',
-      heureFin: '12:00',
-      salle: 'Salle 101',
-      apprenants: 15,
-      status: 'planifie'
-    },
-    {
-      id: 2,
-      formation: 'Design UI/UX Avancé',
-      formateur: 'Jane Smith',
-      date: '2024-03-02',
-      heureDebut: '13:00',
-      heureFin: '16:00',
-      salle: 'Salle 102',
-      apprenants: 12,
-      status: 'planifie'
-    },
-    {
-      id: 3,
-      formation: 'Marketing Digital',
-      formateur: 'Bob Johnson',
-      date: '2024-03-03',
-      heureDebut: '09:00',
-      heureFin: '12:00',
-      salle: 'Salle 103',
-      apprenants: 18,
-      status: 'termine'
-    }
+  const formateurs: Formateur[] = [
+    { id: '1', name: 'John Doe' },
+    { id: '2', name: 'Jane Smith' },
+    { id: '3', name: 'Bob Johnson' }
+  ];
+
+  const formationTypes: FormationType[] = [
+    { id: '1', name: 'Développement Web' },
+    { id: '2', name: 'Design UI/UX' },
+    { id: '3', name: 'Marketing Digital' }
   ];
 
   const getStatusColor = (status: string) => {
@@ -105,38 +92,75 @@ const PlanningManagement: React.FC = () => {
             Vue hebdomadaire
           </button>
           <button
-            onClick={connectGoogleCalendar}
-            disabled={isConnecting}
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            onClick={() => setView('day')}
+            className={`flex items-center px-4 py-2 rounded-lg ${
+              view === 'day'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
           >
-            {isConnecting ? (
-              <>
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                Connexion en cours...
-              </>
-            ) : (
-              <>
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-                </svg>
-                Connecter avec Google Calendar
-              </>
-            )}
+            <Clock className="w-5 h-5 mr-2" />
+            Vue journalière
           </button>
         </div>
       </div>
 
-      {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
-          {error}
+      <div className="mb-6 flex flex-wrap gap-4">
+        <div className="flex-1 min-w-[200px]">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Rechercher..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+          </div>
         </div>
-      )}
+        <div className="flex gap-4">
+          <select
+            value={selectedFormateur}
+            onChange={(e) => setSelectedFormateur(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="all">Tous les formateurs</option>
+            {formateurs.map(formateur => (
+              <option key={formateur.id} value={formateur.id}>
+                {formateur.name}
+              </option>
+            ))}
+          </select>
+          <select
+            value={selectedFormationType}
+            onChange={(e) => setSelectedFormationType(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="all">Tous les types</option>
+            {formationTypes.map(type => (
+              <option key={type.id} value={type.id}>
+                {type.name}
+              </option>
+            ))}
+          </select>
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="all">Tous les statuts</option>
+            <option value="planifie">Planifié</option>
+            <option value="en_cours">En cours</option>
+            <option value="termine">Terminé</option>
+            <option value="annule">Annulé</option>
+          </select>
+        </div>
+      </div>
 
       <div className="bg-white rounded-lg shadow-md p-6">
-        {view === 'month' ? <PlanningMonth /> : <PlanningWeek />}
+        {view === 'month' && <PlanningMonth />}
+        {view === 'week' && <PlanningWeek />}
+        {view === 'day' && <PlanningDay />}
       </div>
     </div>
   );
