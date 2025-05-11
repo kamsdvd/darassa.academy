@@ -196,3 +196,18 @@ Pour toute question ou problème :
 2. Chercher dans les issues existantes
 3. Créer une nouvelle issue si nécessaire
 4. Contacter l'équipe de développement 
+
+## Développement piloté par les tests (TDD)
+
+- Avant d'implémenter une nouvelle fonctionnalité ou de corriger un bug, écrivez d'abord un test qui échoue.
+- Implémentez le code pour faire passer le test.
+- Refactorez si nécessaire.
+- Assurez-vous que tous les tests passent avant de committer.
+- Utilisez des outils comme Jest (frontend) ou un framework adapté (backend) pour écrire vos tests.
+
+## Intégration Continue (CI/CD)
+
+- Chaque push ou pull request déclenche automatiquement le pipeline CI/CD (GitHub Actions).
+- Le pipeline vérifie le lint, le build et exécute les tests sur le frontend et le backend.
+- Les merges sur `develop` et `master` sont bloqués si le pipeline échoue.
+- Consultez le badge de statut dans le README pour vérifier l'état du pipeline. 

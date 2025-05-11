@@ -1,6 +1,16 @@
 # Darassa Academy
 
+![CI](https://github.com/kamsdvd/darassa.academy/actions/workflows/ci.yml/badge.svg)
+
 Une plateforme d'apprentissage moderne construite avec React et Node.js.
+
+## ⚙️ Méthodologie de développement
+
+- Approche modulaire (modules indépendants et cohérents)
+- Développement piloté par les tests (TDD)
+- Revue de code systématique
+- Intégration continue (CI/CD) avec GitHub Actions
+- Documentation technique à jour
 
 ## 🚀 Technologies
 
