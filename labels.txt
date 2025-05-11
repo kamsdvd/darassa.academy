@@ -1,0 +1,7 @@
+module: auth|Module d'authentification|d4c5f9
+module: user|Module utilisateur|d4c5f9
+module: training|Module formation|d4c5f9
+module: center|Module centre|d4c5f9
+module: enterprise|Module entreprise|d4c5f9
+module: jobs|Module emploi|d4c5f9
+module: blog|Module blog|d4c5f9 

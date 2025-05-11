@@ -1,0 +1,14 @@
+## Objectif
+Ajouter des tests unitaires pour les composants et utilitaires du module common.
+
+## Tâches
+- [ ] Configurer l'environnement de test (Jest, etc.)
+- [ ] Créer des tests pour les helpers et utilitaires
+- [ ] Créer des tests pour les middlewares
+- [ ] Créer des tests pour les services
+- [ ] Mettre en place la couverture de code
+
+## Critères de succès
+- [ ] Les tests sont implémentés et passent
+- [ ] La couverture de code est satisfaisante (>80%)
+- [ ] La documentation des tests est à jour 

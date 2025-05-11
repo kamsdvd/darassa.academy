@@ -1,0 +1,14 @@
+## Objectif
+Mettre en place un système de logging centralisé pour l'application.
+
+## Tâches
+- [ ] Choisir et installer une bibliothèque de logging (ex: Winston, Pino)
+- [ ] Créer le service de logging dans `src/common/services/logger.service.ts`
+- [ ] Configurer les différents niveaux de log (error, warn, info, debug)
+- [ ] Configurer la sortie des logs (console, fichier, etc.)
+- [ ] Documenter l'utilisation du logger
+
+## Critères de succès
+- [ ] Le logger est implémenté et configuré
+- [ ] La documentation est à jour
+- [ ] Les logs sont cohérents dans toute l'application 

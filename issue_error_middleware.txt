@@ -1,0 +1,14 @@
+## Objectif
+Créer un middleware d'erreur global pour gérer de manière centralisée les erreurs dans l'application.
+
+## Tâches
+- [ ] Créer le middleware d'erreur dans `src/common/middleware/error.middleware.ts`
+- [ ] Implémenter la gestion des erreurs HTTP courantes
+- [ ] Ajouter la gestion des erreurs de validation
+- [ ] Ajouter la gestion des erreurs de base de données
+- [ ] Documenter les différents types d'erreurs gérés
+
+## Critères de succès
+- [ ] Le middleware est implémenté et testé
+- [ ] La documentation est à jour
+- [ ] Les erreurs sont gérées de manière cohérente dans toute l'application 

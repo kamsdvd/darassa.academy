@@ -1,0 +1,38 @@
+## Objectif
+Développer un système de gestion des offres d'emploi et des candidatures.
+
+## Tâches
+### Structure de base
+- [ ] Créer les modèles (Job, Application, etc.)
+- [ ] Implémenter les interfaces et types TypeScript
+- [ ] Mettre en place les migrations de base de données
+
+### Gestion des offres
+- [ ] Implémenter le CRUD des offres d'emploi
+- [ ] Gérer les catégories d'emploi
+- [ ] Implémenter la gestion des compétences requises
+- [ ] Mettre en place le système de validation des offres
+
+### Gestion des candidatures
+- [ ] Implémenter le processus de candidature
+- [ ] Gérer les étapes de recrutement
+- [ ] Implémenter le système de suivi des candidatures
+- [ ] Mettre en place les notifications
+
+### Fonctionnalités avancées
+- [ ] Implémenter la recherche d'offres
+- [ ] Ajouter le système de filtrage et tri
+- [ ] Mettre en place la pagination
+- [ ] Implémenter le système de recommandation
+
+### Tests et Documentation
+- [ ] Écrire les tests unitaires
+- [ ] Écrire les tests d'intégration
+- [ ] Documenter l'API des offres d'emploi
+- [ ] Créer des exemples d'utilisation
+
+## Critères de succès
+- [ ] Le système de gestion des offres d'emploi est fonctionnel
+- [ ] Les tests passent avec une couverture > 80%
+- [ ] La documentation est complète et à jour
+- [ ] Les exemples sont clairs et fonctionnels 

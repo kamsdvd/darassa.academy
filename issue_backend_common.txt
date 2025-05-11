@@ -1,0 +1,13 @@
+## Objectif
+Créer un dossier `src/common/` dans le backend pour centraliser les utilitaires partagés.
+
+## Tâches
+- [ ] Créer le dossier `src/common/`
+- [ ] Identifier les utilitaires existants à déplacer
+- [ ] Déplacer les helpers, middlewares génériques et gestion d'erreur
+- [ ] Mettre à jour les imports dans les fichiers existants
+
+## Critères de succès
+- [ ] Le dossier `src/common/` existe
+- [ ] Les utilitaires sont centralisés et documentés
+- [ ] Les imports sont à jour dans tout le projet 

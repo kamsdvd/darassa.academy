@@ -1,0 +1,38 @@
+## Objectif
+Développer un système complet de gestion des formations et des cours.
+
+## Tâches
+### Structure de base
+- [ ] Créer les modèles de données (Formation, Cours, Module, etc.)
+- [ ] Implémenter les interfaces et types TypeScript
+- [ ] Mettre en place les migrations de base de données
+
+### Gestion des formations
+- [ ] Implémenter le CRUD des formations
+- [ ] Gérer les catégories de formations
+- [ ] Implémenter la gestion des prérequis
+- [ ] Mettre en place le système de validation des formations
+
+### Gestion des cours
+- [ ] Implémenter le CRUD des cours
+- [ ] Gérer les modules et chapitres
+- [ ] Implémenter la gestion des ressources (vidéos, documents, etc.)
+- [ ] Mettre en place le système de progression
+
+### Fonctionnalités avancées
+- [ ] Implémenter la recherche de formations
+- [ ] Ajouter le système de filtrage et tri
+- [ ] Mettre en place la pagination
+- [ ] Implémenter le système de notation et évaluation
+
+### Tests et Documentation
+- [ ] Écrire les tests unitaires
+- [ ] Écrire les tests d'intégration
+- [ ] Documenter l'API des formations
+- [ ] Créer des exemples d'utilisation
+
+## Critères de succès
+- [ ] Le système de gestion des formations est fonctionnel
+- [ ] Les tests passent avec une couverture > 80%
+- [ ] La documentation est complète et à jour
+- [ ] Les exemples sont clairs et fonctionnels 

@@ -1,0 +1,14 @@
+## Objectif
+Documenter le module common et son utilisation dans l'application.
+
+## Tâches
+- [ ] Créer un README.md pour le module common
+- [ ] Documenter la structure du module
+- [ ] Documenter l'utilisation des composants et utilitaires
+- [ ] Ajouter des exemples d'utilisation
+- [ ] Mettre à jour la documentation globale du projet
+
+## Critères de succès
+- [ ] La documentation est complète et à jour
+- [ ] Les exemples sont clairs et fonctionnels
+- [ ] La documentation est accessible et facile à comprendre 

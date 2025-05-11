@@ -1,0 +1,38 @@
+## Objectif
+Développer un système de gestion des centres de formation.
+
+## Tâches
+### Structure de base
+- [ ] Créer le modèle Center avec les champs nécessaires
+- [ ] Implémenter les interfaces et types TypeScript
+- [ ] Mettre en place les migrations de base de données
+
+### Gestion des centres
+- [ ] Implémenter le CRUD des centres de formation
+- [ ] Gérer les informations de contact et localisation
+- [ ] Implémenter la gestion des équipements
+- [ ] Mettre en place le système de validation des centres
+
+### Gestion des formateurs
+- [ ] Implémenter l'association formateurs-centres
+- [ ] Gérer les disponibilités des formateurs
+- [ ] Implémenter le système d'évaluation des formateurs
+- [ ] Mettre en place la gestion des spécialités
+
+### Fonctionnalités avancées
+- [ ] Implémenter la recherche de centres
+- [ ] Ajouter le système de filtrage et tri
+- [ ] Mettre en place la pagination
+- [ ] Implémenter le système de géolocalisation
+
+### Tests et Documentation
+- [ ] Écrire les tests unitaires
+- [ ] Écrire les tests d'intégration
+- [ ] Documenter l'API des centres
+- [ ] Créer des exemples d'utilisation
+
+## Critères de succès
+- [ ] Le système de gestion des centres est fonctionnel
+- [ ] Les tests passent avec une couverture > 80%
+- [ ] La documentation est complète et à jour
+- [ ] Les exemples sont clairs et fonctionnels 

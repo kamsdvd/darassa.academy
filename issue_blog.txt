@@ -1,0 +1,38 @@
+## Objectif
+Développer un système de blog pour partager des articles et actualités.
+
+## Tâches
+### Structure de base
+- [ ] Créer les modèles (Post, Category, Comment, etc.)
+- [ ] Implémenter les interfaces et types TypeScript
+- [ ] Mettre en place les migrations de base de données
+
+### Gestion des articles
+- [ ] Implémenter le CRUD des articles
+- [ ] Gérer les catégories et tags
+- [ ] Implémenter la gestion des médias
+- [ ] Mettre en place le système de validation des articles
+
+### Gestion des commentaires
+- [ ] Implémenter le système de commentaires
+- [ ] Gérer la modération des commentaires
+- [ ] Implémenter les réponses aux commentaires
+- [ ] Mettre en place le système de notification
+
+### Fonctionnalités avancées
+- [ ] Implémenter la recherche d'articles
+- [ ] Ajouter le système de filtrage et tri
+- [ ] Mettre en place la pagination
+- [ ] Implémenter le système de partage social
+
+### Tests et Documentation
+- [ ] Écrire les tests unitaires
+- [ ] Écrire les tests d'intégration
+- [ ] Documenter l'API du blog
+- [ ] Créer des exemples d'utilisation
+
+## Critères de succès
+- [ ] Le système de blog est fonctionnel
+- [ ] Les tests passent avec une couverture > 80%
+- [ ] La documentation est complète et à jour
+- [ ] Les exemples sont clairs et fonctionnels 
