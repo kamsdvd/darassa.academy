@@ -1,132 +1,198 @@
-# Guide de Contribution
+# Guide du Contributeur
 
-Merci de votre intérêt pour contribuer à Darassa Academy ! Ce document fournit les lignes directrices pour contribuer au projet.
+## Prérequis
 
-## 🌟 Comment Contribuer
+### 1. Outils de développement
+- Node.js (v18 ou supérieur)
+- npm (v9 ou supérieur)
+- Git
+- Docker et Docker Compose
+- PostgreSQL (v15 ou supérieur)
+- Redis (v7 ou supérieur)
 
-1. **Fork** le projet
-2. Créez votre branche de fonctionnalité (`git checkout -b feature/AmazingFeature`)
-3. Committez vos changements (`git commit -m 'feat: Add some AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrez une Pull Request
+### 2. Éditeur de code recommandé
+- VS Code avec les extensions suivantes :
+  - ESLint
+  - Prettier
+  - GitLens
+  - Docker
+  - PostgreSQL
 
-## 📝 Convention de Commits
+## Installation
 
-Nous suivons la [convention de commits conventionnels](https://www.conventionalcommits.org/). Chaque message de commit doit être structuré comme suit :
-
-```
-<type>(<scope>): <description>
-
-[corps optionnel]
-
-[pied de page optionnel]
-```
-
-### Types de Commits
-
-- `feat`: Nouvelle fonctionnalité
-- `fix`: Correction de bug
-- `docs`: Modification de la documentation
-- `style`: Formatage, point-virgules manquants, etc.
-- `refactor`: Refactorisation du code
-- `test`: Ajout ou modification de tests
-- `chore`: Tâches de maintenance
-
-### Exemples
-
-```
-feat(auth): Add OAuth2 authentication
-fix(api): Handle null response in user service
-docs(readme): Update installation instructions
-```
-
-## 🧪 Tests
-
-- Assurez-vous que tous les tests passent avant de soumettre une PR
-- Ajoutez des tests pour les nouvelles fonctionnalités
-- Maintenez une couverture de test élevée
-
-## 📚 Documentation
-
-- Mettez à jour la documentation pour refléter vos changements
-- Commentez le code complexe
-- Utilisez des noms de variables et de fonctions descriptifs
-
-## 🎨 Style de Code
-
-### Frontend
-
-- Utilisez TypeScript
-- Suivez les règles ESLint
-- Utilisez des composants fonctionnels React
-- Appliquez les principes de design atomique
-
-### Backend
-
-- Utilisez TypeScript
-- Suivez les principes SOLID
-- Documentez les endpoints API
-- Gérez correctement les erreurs
-
-## 🚀 Process de Review
-
-1. Les PR doivent être liées à une issue
-2. Les PR doivent passer tous les checks CI
-3. Les PR nécessitent au moins une review approuvée
-4. Le code doit suivre les standards du projet
-
-## ⚠️ À Éviter
-
-- Breaking changes sans discussion préalable
-- Code non testé
-- Commits directs sur master
-- Large PR (préférez des PR plus petites et focalisées)
-
-## 🤝 Code de Conduite
-
-- Soyez respectueux et inclusif
-- Acceptez les critiques constructives
-- Concentrez-vous sur ce qui est le mieux pour la communauté
-- Montrez de l'empathie envers les autres membres
-
-## 🔄 Workflow Git
-
-1. Synchronisez votre fork
+### 1. Cloner le projet
 ```bash
-git remote add upstream https://github.com/original/repository.git
-git fetch upstream
-git checkout master
-git merge upstream/master
+git clone https://github.com/kamsdvd/darassa.academy.git
+cd darassa.academy
 ```
 
-2. Créez une branche pour votre travail
+### 2. Installer les dépendances
 ```bash
-git checkout -b type/description
+# Backend
+cd backend
+npm install
+
+# Frontend
+cd ../frontend
+npm install
 ```
 
-3. Faites vos modifications et committez
+### 3. Configuration de l'environnement
+```bash
+# Backend
+cp .env.example .env
+# Modifier les variables d'environnement selon vos besoins
+
+# Frontend
+cp .env.example .env.local
+# Modifier les variables d'environnement selon vos besoins
+```
+
+### 4. Base de données
+```bash
+# Démarrer PostgreSQL et Redis avec Docker
+docker-compose up -d
+
+# Appliquer les migrations
+cd backend
+npm run migration:run
+```
+
+### 5. Lancer le projet
+```bash
+# Backend (dans le dossier backend)
+npm run start:dev
+
+# Frontend (dans le dossier frontend)
+npm run dev
+```
+
+## Workflow de développement
+
+### 1. Créer une branche
+```bash
+git checkout -b feature/nom-de-la-fonctionnalite
+```
+
+### 2. Développer
+- Suivre les conventions de code
+- Écrire des tests
+- Documenter le code
+
+### 3. Commiter
 ```bash
 git add .
 git commit -m "type(scope): description"
 ```
 
-4. Poussez et créez une PR
+### 4. Pousser les changements
 ```bash
-git push origin type/description
+git push origin feature/nom-de-la-fonctionnalite
 ```
 
-## 📝 Checklist PR
+### 5. Créer une Pull Request
+- Utiliser le template de PR
+- Ajouter les reviewers
+- Attendre les reviews
 
-- [ ] Tests ajoutés/mis à jour
-- [ ] Documentation mise à jour
-- [ ] Code formaté et lint passé
-- [ ] Commits suivant la convention
-- [ ] Branch à jour avec master
+## Conventions de code
 
-## 🆘 Besoin d'Aide ?
+### 1. Style de code
+- Utiliser ESLint et Prettier
+- Suivre les conventions TypeScript
+- Documenter les fonctions et classes
 
-- Consultez les issues existantes
-- Rejoignez notre canal de discussion
-- Contactez l'équipe à support@darassa.academy
+### 2. Tests
+- Écrire des tests unitaires
+- Écrire des tests d'intégration
+- Maintenir la couverture de tests
 
-Merci de contribuer à Darassa Academy ! 🎉 
+### 3. Documentation
+- Documenter les APIs
+- Mettre à jour le README
+- Commenter le code complexe
+
+## Structure du projet
+
+### 1. Backend
+```
+src/
+├── modules/          # Modules de l'application
+├── common/           # Code partagé
+├── config/           # Configuration
+└── main.ts          # Point d'entrée
+```
+
+### 2. Frontend
+```
+src/
+├── components/       # Composants React
+├── pages/           # Pages Next.js
+├── styles/          # Styles CSS
+└── utils/           # Utilitaires
+```
+
+## Scripts utiles
+
+### Backend
+```bash
+# Lancer les tests
+npm run test
+
+# Lancer les tests avec couverture
+npm run test:cov
+
+# Lancer le linter
+npm run lint
+
+# Appliquer les migrations
+npm run migration:run
+
+# Générer les migrations
+npm run migration:generate
+```
+
+### Frontend
+```bash
+# Lancer les tests
+npm run test
+
+# Lancer le linter
+npm run lint
+
+# Build pour la production
+npm run build
+```
+
+## Débogage
+
+### 1. Backend
+- Utiliser les logs
+- Utiliser le debugger de VS Code
+- Vérifier les logs de la base de données
+
+### 2. Frontend
+- Utiliser les DevTools
+- Utiliser React Developer Tools
+- Vérifier les logs du navigateur
+
+## Ressources
+
+### 1. Documentation
+- [NestJS](https://docs.nestjs.com/)
+- [Next.js](https://nextjs.org/docs)
+- [TypeScript](https://www.typescriptlang.org/docs/)
+- [PostgreSQL](https://www.postgresql.org/docs/)
+
+### 2. Outils
+- [Git](https://git-scm.com/doc)
+- [Docker](https://docs.docker.com/)
+- [VS Code](https://code.visualstudio.com/docs)
+
+## Support
+
+Pour toute question ou problème :
+1. Consulter la documentation
+2. Chercher dans les issues existantes
+3. Créer une nouvelle issue si nécessaire
+4. Contacter l'équipe de développement 
