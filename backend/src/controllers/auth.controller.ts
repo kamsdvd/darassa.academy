@@ -5,6 +5,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { emailService } from '../services/email.service';
+import { generateJWT, generateRandomToken } from '../common/helpers/token.helper';
+import { getResetPasswordUrl, getVerificationUrl } from '../common/helpers/format.helper';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const JWT_EXPIRES_IN = '24h'; // Token expire après 24 heures
@@ -35,11 +37,7 @@ export const register = async (req: Request, res: Response) => {
     console.log('✅ Utilisateur créé avec succès:', user._id);
 
     // Générer le token JWT
-    const token = jwt.sign(
-      { id: user._id },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
+    const token = generateJWT({ id: user._id });
 
     res.status(201).json({
       token,
@@ -90,11 +88,7 @@ export const login = async (req: Request, res: Response) => {
     await user.save();
 
     // Générer le token JWT
-    const token = jwt.sign(
-      { id: user._id },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
+    const token = generateJWT({ id: user._id });
 
     res.status(200).json({
       token,
@@ -135,7 +129,7 @@ export const requestPasswordReset = async (req: Request, res: Response) => {
     }
 
     // Générer un token unique
-    const token = crypto.randomBytes(32).toString('hex');
+    const token = generateRandomToken();
     const expiresAt = new Date(Date.now() + 3600000); // 1 heure
 
     // Sauvegarder le token

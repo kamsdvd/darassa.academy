@@ -9,7 +9,7 @@ import {
   updateParticipantPresence
 } from '../controllers/session.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
-import { roleMiddleware } from '../middleware/role.middleware';
+import { roleMiddleware } from '../common/middlewares/role.middleware';
 
 const router = express.Router();
 

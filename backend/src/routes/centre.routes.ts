@@ -1,7 +1,7 @@
 import express from 'express';
 import { getDashboardStats } from '../controllers/centre.controller';
 import { authenticateToken } from '../middleware/auth';
-import { checkRole } from '../middleware/roles';
+import { roleMiddleware } from '../common/middlewares/role.middleware';
 
 const router = express.Router();
 
@@ -9,7 +9,7 @@ const router = express.Router();
 router.get(
   '/dashboard/:centreId',
   authenticateToken,
-  checkRole(['centre_manager']),
+  roleMiddleware(['centre_manager']),
   getDashboardStats
 );
 

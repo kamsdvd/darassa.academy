@@ -8,6 +8,9 @@ import seedDatabase from './config/seed';
 import { setupSwagger } from './config/swagger.config';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import createError from 'http-errors';
+import { authMiddleware } from './common/middlewares/auth.middleware';
+import errorMiddleware from './common/middlewares/error.middleware';
 
 // Load environment variables
 dotenv.config();
@@ -46,6 +49,14 @@ setupSwagger(app);
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
+
+// Middleware 404 pour les routes non trouvées
+app.use((req, res, next) => {
+  next(createError(404, `Route non trouvée: ${req.originalUrl}`));
+});
+
+// Middleware d'erreur global Express
+app.use(errorMiddleware);
 
 const initializeDatabase = async () => {
   try {

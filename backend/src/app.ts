@@ -8,6 +8,7 @@ import centreRoutes from './routes/centre.routes';
 import calendarRoutes from './routes/calendar.routes';
 import googleAuthRoutes from './routes/google-auth.routes';
 import eventRoutes from './routes/event.routes';
+import usersRoutes from './routes/users.routes';
 // ... autres imports
 
 dotenv.config();
@@ -36,6 +37,7 @@ app.use('/api/centre', centreRoutes);
 app.use('/api/calendar', calendarRoutes);
 app.use('/api/google', googleAuthRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/users', usersRoutes);
 // ... autres routes
 
 // ... reste du code

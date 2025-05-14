@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { config } from '../config/config';
+import { getResetPasswordUrl, getVerificationUrl } from '../common/helpers/format.helper';
 
 class EmailService {
   private transporter: nodemailer.Transporter;
@@ -17,7 +18,7 @@ class EmailService {
   }
 
   async sendPasswordResetEmail(email: string, resetToken: string): Promise<void> {
-    const resetUrl = `${config.frontendUrl}/reset-password?token=${resetToken}`;
+    const resetUrl = getResetPasswordUrl(resetToken);
     
     const mailOptions = {
       from: config.email.from,
@@ -43,7 +44,7 @@ class EmailService {
   }
 
   async sendVerificationEmail(email: string, verificationToken: string): Promise<void> {
-    const verificationUrl = `${config.frontendUrl}/verify-email?token=${verificationToken}`;
+    const verificationUrl = getVerificationUrl(verificationToken);
     
     const mailOptions = {
       from: config.email.from,

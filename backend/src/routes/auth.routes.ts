@@ -1,11 +1,82 @@
 import express from 'express';
 import passport from 'passport';
 import { register, login, getProfile, requestPasswordReset, resetPassword, verifyEmail } from '../controllers/auth.controller';
-import { authMiddleware } from '../middleware/auth.middleware';
+import { authMiddleware } from '../common/middlewares/auth.middleware';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import jwt from 'jsonwebtoken';
+import { body, validationResult } from 'express-validator';
 
 const router = express.Router();
+
+// Middleware de validation pour l'inscription
+const validateRegister = [
+  body('email').isEmail().withMessage('Email invalide'),
+  body('password').isLength({ min: 6 }).withMessage('Le mot de passe doit contenir au moins 6 caractères'),
+  body('firstName').notEmpty().withMessage('Le prénom est requis'),
+  body('lastName').notEmpty().withMessage('Le nom est requis'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      // Formatage des erreurs de validation
+      return next({
+        status: 400,
+        message: 'Erreur de validation',
+        errors: errors.array().map(e => ({ field: e.param, message: e.msg }))
+      });
+    }
+    next();
+  }
+];
+
+// Middleware de validation pour la connexion
+const validateLogin = [
+  body('email').isEmail().withMessage('Email invalide'),
+  body('password').notEmpty().withMessage('Le mot de passe est requis'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return next({
+        status: 400,
+        message: 'Erreur de validation',
+        errors: errors.array().map(e => ({ field: e.param, message: e.msg }))
+      });
+    }
+    next();
+  }
+];
+
+// Middleware de validation pour la demande de reset
+const validateRequestReset = [
+  body('email').isEmail().withMessage('Email invalide'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return next({
+        status: 400,
+        message: 'Erreur de validation',
+        errors: errors.array().map(e => ({ field: e.param, message: e.msg }))
+      });
+    }
+    next();
+  }
+];
+
+// Middleware de validation pour le reset du mot de passe
+const validateResetPassword = [
+  body('token').notEmpty().withMessage('Token requis'),
+  body('password').isLength({ min: 6 }).withMessage('Le mot de passe doit contenir au moins 6 caractères'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return next({
+        status: 400,
+        message: 'Erreur de validation',
+        errors: errors.array().map(e => ({ field: e.param, message: e.msg }))
+      });
+    }
+    next();
+  }
+];
 
 /**
  * @swagger
@@ -41,7 +112,7 @@ const router = express.Router();
  *       409:
  *         description: Email already exists
  */
-router.post('/register', register);
+router.post('/register', validateRegister, register);
 
 /**
  * @swagger
@@ -81,7 +152,7 @@ router.post('/register', register);
  *       401:
  *         description: Invalid credentials
  */
-router.post('/login', login);
+router.post('/login', validateLogin, login);
 
 // Routes protégées
 router.get('/profile', authMiddleware, getProfile);
@@ -111,7 +182,7 @@ router.get('/profile', authMiddleware, getProfile);
  *       404:
  *         description: User not found
  */
-router.post('/request-reset', requestPasswordReset);
+router.post('/request-reset', validateRequestReset, requestPasswordReset);
 
 /**
  * @swagger
@@ -141,7 +212,7 @@ router.post('/request-reset', requestPasswordReset);
  *       400:
  *         description: Invalid or expired token
  */
-router.post('/reset-password', resetPassword);
+router.post('/reset-password', validateResetPassword, resetPassword);
 
 /**
  * @swagger
