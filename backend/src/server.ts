@@ -3,7 +3,11 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes';
+import courseRoutes from './routes/course.routes';
 import seedDatabase from './config/seed';
+import { setupSwagger } from './config/swagger.config';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 // Load environment variables
 dotenv.config();
@@ -17,9 +21,26 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use(helmet());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/courses', courseRoutes);
+
+// Limiteur de requêtes pour les routes d'authentification
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limite à 10 requêtes par IP
+  message: 'Trop de tentatives, veuillez réessayer plus tard.'
+});
+
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
+app.use('/api/auth/request-reset', authLimiter);
+app.use('/api/auth/reset-password', authLimiter);
+
+// Setup Swagger
+setupSwagger(app);
 
 // Health check route
 app.get('/api/health', (_req, res) => {
@@ -60,6 +81,7 @@ const initializeDatabase = async () => {
       console.log(`✅ Serveur démarré sur le port ${port}`);
       console.log(`Mode: ${process.env.NODE_ENV || 'production'}`);
       console.log(`URL: http://localhost:${port}`);
+      console.log(`Documentation API: http://localhost:${port}/api/docs`);
     });
   } catch (error) {
     console.error('❌ Erreur de connexion à MongoDB:', error);

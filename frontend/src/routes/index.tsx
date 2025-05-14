@@ -1,84 +1,77 @@
-import React from 'react';
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { ProtectedRoute } from '../components/shared/ProtectedRoute';
+import { MainLayout } from '../components/layout/MainLayout';
+import { LoadingSpinner } from '../components/common/LoadingSpinner';
+import { useAuth } from '../hooks/useAuth';
 
-// Pages publiques
-import Home from '../pages/Home';
-import Connexion from '../pages/auth/Connexion';
-import Inscription from '../pages/auth/Inscription';
+// Lazy loading des pages
+const Home = lazy(() => import('../pages/Home'));
+const Register = lazy(() => import('../features/auth/containers/RegisterContainer'));
+const Dashboard = lazy(() => import('../pages/Dashboard'));
+const Courses = lazy(() => import('../features/courses/containers/CoursesContainer'));
+const CourseDetail = lazy(() => import('../features/courses/containers/CourseDetailContainer'));
+const Profile = lazy(() => import('../features/profile/containers/ProfileContainer'));
+const NotFound = lazy(() => import('../pages/NotFound'));
+const Connexion = lazy(() => import('../features/auth/containers/ConnexionContainer'));
 
-// Pages du tableau de bord administrateur
-import AdminDashboard from '../pages/admin/Dashboard';
-import UsersManagement from '../pages/admin/UsersManagement';
-import CentresManagement from '../pages/admin/CentresManagement';
-import AdminStats from '../pages/admin/Stats';
+// Composant de chargement
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <LoadingSpinner size="lg" />
+  </div>
+);
 
-// Pages du tableau de bord centre de formation
-import CentreDashboard from '../pages/centre/Dashboard';
-import FormateursManagement from '../pages/centre/FormateursManagement';
-import FormationsManagement from '../pages/centre/FormationsManagement';
-import PlanningManagement from '../pages/centre/PlanningManagement';
+// Route protégée
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, loading } = useAuth();
 
-// Pages du tableau de bord formateur
-import FormateurDashboard from '../pages/formateur/Dashboard';
-import FormateurCours from '../pages/formateur/Cours';
-import FormateurRessources from '../pages/formateur/Ressources';
-import FormateurEvaluations from '../pages/formateur/Evaluations';
+  if (loading) {
+    return <LoadingFallback />;
+  }
 
-// Pages du tableau de bord entreprise
-import EntrepriseDashboard from '../pages/entreprise/Dashboard';
-import EmployesManagement from '../pages/entreprise/EmployesManagement';
-import EntrepriseFormations from '../pages/entreprise/Formations';
-import EntrepriseRapports from '../pages/entreprise/Rapports';
+  if (!isAuthenticated) {
+    return <Navigate to="/connexion" replace />;
+  }
 
-// Pages du tableau de bord utilisateur
-import UserDashboard from '../pages/dashboard/Dashboard';
-import UserFormations from '../pages/user/Formations';
-import Certificats from '../pages/user/Certificats';
-import UserOpportunites from '../pages/user/Opportunites';
-
-const AppRoutes: React.FC = () => {
-  return (
-    <Routes>
-      {/* Routes publiques */}
-      <Route path="/" element={<Home />} />
-      <Route path="/connexion" element={<Connexion />} />
-      <Route path="/inscription" element={<Inscription />} />
-
-      {/* Routes administrateur */}
-      <Route path="/admin" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />
-      <Route path="/admin/users" element={<ProtectedRoute roles={['admin']}><UsersManagement /></ProtectedRoute>} />
-      <Route path="/admin/centres" element={<ProtectedRoute roles={['admin']}><CentresManagement /></ProtectedRoute>} />
-      <Route path="/admin/stats" element={<ProtectedRoute roles={['admin']}><AdminStats /></ProtectedRoute>} />
-
-      {/* Routes centre de formation */}
-      <Route path="/centre" element={<ProtectedRoute roles={['centre_manager']}><CentreDashboard /></ProtectedRoute>} />
-      <Route path="/centre/formateurs" element={<ProtectedRoute roles={['centre_manager']}><FormateursManagement /></ProtectedRoute>} />
-      <Route path="/centre/formations" element={<ProtectedRoute roles={['centre_manager']}><FormationsManagement /></ProtectedRoute>} />
-      <Route path="/centre/planning" element={<ProtectedRoute roles={['centre_manager']}><PlanningManagement /></ProtectedRoute>} />
-
-      {/* Routes formateur */}
-      <Route path="/formateur" element={<ProtectedRoute roles={['formateur']}><FormateurDashboard /></ProtectedRoute>} />
-      <Route path="/formateur/cours" element={<ProtectedRoute roles={['formateur']}><FormateurCours /></ProtectedRoute>} />
-      <Route path="/formateur/ressources" element={<ProtectedRoute roles={['formateur']}><FormateurRessources /></ProtectedRoute>} />
-      <Route path="/formateur/evaluations" element={<ProtectedRoute roles={['formateur']}><FormateurEvaluations /></ProtectedRoute>} />
-
-      {/* Routes entreprise */}
-      <Route path="/entreprise" element={<ProtectedRoute roles={['entreprise']}><EntrepriseDashboard /></ProtectedRoute>} />
-      <Route path="/entreprise/employes" element={<ProtectedRoute roles={['entreprise']}><EmployesManagement /></ProtectedRoute>} />
-      <Route path="/entreprise/formations" element={<ProtectedRoute roles={['entreprise']}><EntrepriseFormations /></ProtectedRoute>} />
-      <Route path="/entreprise/rapports" element={<ProtectedRoute roles={['entreprise']}><EntrepriseRapports /></ProtectedRoute>} />
-
-      {/* Routes utilisateur standard */}
-      <Route path="/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
-      <Route path="/formations" element={<ProtectedRoute><UserFormations /></ProtectedRoute>} />
-      <Route path="/certificats" element={<ProtectedRoute><Certificats /></ProtectedRoute>} />
-      <Route path="/opportunites" element={<ProtectedRoute><UserOpportunites /></ProtectedRoute>} />
-
-      {/* Route par défaut */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  );
+  return <>{children}</>;
 };
 
-export default AppRoutes; 
+export const AppRoutes = () => {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <Routes>
+        {/* Routes publiques */}
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/connexion" element={<Connexion />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/courses/:id" element={<CourseDetail />} />
+        </Route>
+
+        {/* Routes protégées */}
+        <Route element={<MainLayout />}>
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
+
+        {/* Route 404 */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
+  );
+}; 

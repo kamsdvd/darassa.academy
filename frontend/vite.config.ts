@@ -11,7 +11,18 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', 'framer-motion', 'lucide-react']
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'framer-motion',
+      'lucide-react',
+      '@mui/material',
+      '@mui/icons-material',
+      'react-window',
+      'react-virtualized-auto-sizer'
+    ],
+    exclude: ['@darassa/ui']
   },
   plugins: [
     react(),
@@ -44,25 +55,34 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('react')) {
-              return 'react-vendor';
-            }
-            if (id.includes('framer-motion') || id.includes('lucide-react')) {
-              return 'ui-vendor';
-            }
-            if (id.includes('axios') || id.includes('web-vitals')) {
-              return 'utils-vendor';
-            }
-            return 'vendor';
-          }
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['@mui/material', '@mui/icons-material', 'framer-motion', 'lucide-react'],
+          'utils-vendor': ['axios', 'web-vitals', 'react-window', 'react-virtualized-auto-sizer'],
+          'pages': [
+            './src/pages/courses/index.tsx',
+            './src/pages/auth/Login.tsx',
+            './src/pages/auth/Register.tsx'
+          ],
+          'components': [
+            './src/components/ui/Button.tsx',
+            './src/components/ui/Input.tsx',
+            './src/components/ui/Card.tsx',
+            './src/components/common/LoadingSpinner.tsx'
+          ]
         }
       }
     },
     chunkSizeWarningLimit: 1000,
     sourcemap: true,
-    target: 'esnext'
+    target: 'esnext',
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    }
   },
   server: {
     port: 5173,

@@ -4,6 +4,7 @@ import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import PageTransition from '../../components/shared/PageTransition';
 import { AuthService } from '../../services/authService';
 import { useStore } from '../../store/useStore';
+import { SocialLoginButtons } from '../../components/auth/SocialLoginButtons';
 
 const Connexion: React.FC = () => {
   const navigate = useNavigate();
@@ -86,6 +87,17 @@ const Connexion: React.FC = () => {
         setIsLoading(false);
       }
     }
+  };
+
+  // Handlers pour la connexion sociale
+  const handleGoogleLogin = () => {
+    window.location.href = '/api/auth/google';
+  };
+  const handleFacebookLogin = () => {
+    window.location.href = '/api/auth/facebook';
+  };
+  const handleLinkedInLogin = () => {
+    window.location.href = '/api/auth/linkedin';
   };
 
   // Si déjà authentifié, rediriger
@@ -221,24 +233,29 @@ const Connexion: React.FC = () => {
             </div>
           </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Ou</span>
-              </div>
-            </div>
+          {/* Boutons de connexion sociale */}
+          <SocialLoginButtons
+            onGoogleLogin={handleGoogleLogin}
+            onFacebookLogin={handleFacebookLogin}
+            onLinkedInLogin={handleLinkedInLogin}
+          />
 
-            <div className="mt-6">
-              <Link
-                to="/inscription"
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
-                <span>Créer un compte</span>
-              </Link>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300" />
             </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Ou</span>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <Link
+              to="/inscription"
+              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+            >
+              <span>Créer un compte</span>
+            </Link>
           </div>
         </div>
       </div>

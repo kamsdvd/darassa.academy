@@ -11,6 +11,7 @@ export interface IUser extends Document {
   profilePicture?: string;
   userType: 'admin' | 'centre_manager' | 'formateur' | 'etudiant' | 'demandeur' | 'entreprise';
   isActive: boolean;
+  isEmailVerified: boolean;
   lastLogin?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -56,6 +57,10 @@ const userSchema = new Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  isEmailVerified: {
+    type: Boolean,
+    default: false
   },
   lastLogin: {
     type: Date

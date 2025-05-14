@@ -1,130 +1,146 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useStore } from '../store/useStore';
-import { API_CONFIG } from '../config/api.config';
-import axios from 'axios';
+import { authService, User, AuthError } from '../services/auth.service';
 
 // Types
-interface User {
-  _id: string;
-  name: string;
-  email: string;
-  role: string;
-}
-
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (email: string, password: string) => Promise<any>;
-  register: (name: string, email: string, password: string) => Promise<any>;
-  logout: () => Promise<void>;
+  error: AuthError | null;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
+  logout: () => void;
+  clearError: () => void;
 }
 
 // Créer le contexte
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Provider component
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface AuthProviderProps {
+  children: React.ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<AuthError | null>(null);
+  const navigate = useNavigate();
 
   // Vérifier si l'utilisateur est déjà connecté au chargement
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Vérifier le token et charger l'utilisateur
-      const checkAuth = async () => {
-        try {
-          const response = await axios.get(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.ME}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          setUser(response.data.data);
+    const checkAuth = async () => {
+      try {
+        if (authService.isAuthenticated()) {
+          // Vérifier la validité du token et récupérer les informations utilisateur
+          const response = await authService.getCurrentUser();
+          setUser(response.user);
           setIsAuthenticated(true);
-        } catch (error) {
-          localStorage.removeItem('token');
-        } finally {
-          setLoading(false);
         }
-      };
-      checkAuth();
-    } else {
-      setLoading(false);
-    }
+      } catch (err) {
+        authService.logout();
+        setError(err as AuthError);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
   }, []);
+
+  const validatePassword = (password: string): boolean => {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+    return password.length >= minLength && 
+           hasUpperCase && 
+           hasLowerCase && 
+           hasNumbers && 
+           hasSpecialChar;
+  };
+
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   // Fonction de connexion
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.LOGIN}`, { email, password });
-      const { token, ...userData } = response.data;
-      
-      localStorage.setItem('token', token);
-      setUser(userData);
-      setIsAuthenticated(true);
-      
-      return response.data;
-    } catch (error: any) {
-      if (error.response) {
-        throw new Error(error.response.data.message || 'Erreur lors de la connexion');
-      } else if (error.request) {
-        throw new Error('Impossible de contacter le serveur');
-      } else {
-        throw new Error('Une erreur est survenue');
+      setLoading(true);
+      setError(null);
+
+      if (!validateEmail(email)) {
+        throw { code: 'INVALID_EMAIL', message: 'Format d\'email invalide' };
       }
+
+      const response = await authService.login(email, password);
+      setUser(response.user);
+      setIsAuthenticated(true);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err as AuthError);
+      throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
   // Fonction d'inscription
   const register = async (name: string, email: string, password: string) => {
     try {
-      const response = await axios.post(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.REGISTER}`, {
-        name,
-        email,
-        password
-      });
-      const { token, ...userData } = response.data;
-      
-      localStorage.setItem('token', token);
-      setUser(userData);
-      setIsAuthenticated(true);
-      
-      return response.data;
-    } catch (error: any) {
-      if (error.response) {
-        throw new Error(error.response.data.message || 'Erreur lors de l\'inscription');
-      } else if (error.request) {
-        throw new Error('Impossible de contacter le serveur');
-      } else {
-        throw new Error('Une erreur est survenue');
+      setLoading(true);
+      setError(null);
+
+      if (!validateEmail(email)) {
+        throw { code: 'INVALID_EMAIL', message: 'Format d\'email invalide' };
       }
+
+      if (!validatePassword(password)) {
+        throw {
+          code: 'INVALID_PASSWORD',
+          message: 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial'
+        };
+      }
+
+      const response = await authService.register({ name, email, password });
+      setUser(response.user);
+      setIsAuthenticated(true);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err as AuthError);
+      throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
   // Fonction de déconnexion
-  const logout = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (token) {
-        await axios.post(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.LOGOUT}`, {}, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      }
-    } finally {
-      localStorage.removeItem('token');
-      setUser(null);
-      setIsAuthenticated(false);
-    }
+  const logout = () => {
+    authService.logout();
+    setUser(null);
+    setIsAuthenticated(false);
+    navigate('/login');
+  };
+
+  const clearError = () => {
+    setError(null);
   };
 
   const value = {
     user,
     isAuthenticated,
     loading,
+    error,
     login,
     register,
-    logout
+    logout,
+    clearError
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -133,7 +149,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 // Hook personnalisé
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
