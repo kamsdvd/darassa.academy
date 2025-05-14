@@ -1,19 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { User } from '../models/user.model';
+import { User } from '../../models/user.model';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 interface JwtPayload {
   id: string;
-}
-
-declare global {
-  namespace Express {
-    interface Request {
-      user?: any;
-    }
-  }
 }
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {

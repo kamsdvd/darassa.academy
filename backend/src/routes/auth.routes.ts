@@ -4,7 +4,8 @@ import { register, login, getProfile, requestPasswordReset, resetPassword, verif
 import { authMiddleware } from '../common/middlewares/auth.middleware';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import jwt from 'jsonwebtoken';
-import { body, validationResult } from 'express-validator';
+import { body, validationResult, ValidationError } from 'express-validator';
+import { Request, Response, NextFunction } from 'express';
 
 const router = express.Router();
 
@@ -14,14 +15,14 @@ const validateRegister = [
   body('password').isLength({ min: 6 }).withMessage('Le mot de passe doit contenir au moins 6 caractères'),
   body('firstName').notEmpty().withMessage('Le prénom est requis'),
   body('lastName').notEmpty().withMessage('Le nom est requis'),
-  (req, res, next) => {
+  (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       // Formatage des erreurs de validation
       return next({
         status: 400,
         message: 'Erreur de validation',
-        errors: errors.array().map(e => ({ field: e.param, message: e.msg }))
+        errors: errors.array().map(e => ({ field: (e as any).param || (e as any).path || '', message: e.msg }))
       });
     }
     next();
@@ -32,13 +33,13 @@ const validateRegister = [
 const validateLogin = [
   body('email').isEmail().withMessage('Email invalide'),
   body('password').notEmpty().withMessage('Le mot de passe est requis'),
-  (req, res, next) => {
+  (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return next({
         status: 400,
         message: 'Erreur de validation',
-        errors: errors.array().map(e => ({ field: e.param, message: e.msg }))
+        errors: errors.array().map(e => ({ field: (e as any).param || (e as any).path || '', message: e.msg }))
       });
     }
     next();
@@ -48,13 +49,13 @@ const validateLogin = [
 // Middleware de validation pour la demande de reset
 const validateRequestReset = [
   body('email').isEmail().withMessage('Email invalide'),
-  (req, res, next) => {
+  (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return next({
         status: 400,
         message: 'Erreur de validation',
-        errors: errors.array().map(e => ({ field: e.param, message: e.msg }))
+        errors: errors.array().map(e => ({ field: (e as any).param || (e as any).path || '', message: e.msg }))
       });
     }
     next();
@@ -65,13 +66,13 @@ const validateRequestReset = [
 const validateResetPassword = [
   body('token').notEmpty().withMessage('Token requis'),
   body('password').isLength({ min: 6 }).withMessage('Le mot de passe doit contenir au moins 6 caractères'),
-  (req, res, next) => {
+  (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return next({
         status: 400,
         message: 'Erreur de validation',
-        errors: errors.array().map(e => ({ field: e.param, message: e.msg }))
+        errors: errors.array().map(e => ({ field: (e as any).param || (e as any).path || '', message: e.msg }))
       });
     }
     next();
@@ -260,7 +261,7 @@ router.get('/google/callback',
   (req, res) => {
     // Générer le token JWT
     const token = jwt.sign(
-      { id: req.user._id },
+      { id: req.user && typeof req.user === 'object' && '_id' in req.user ? req.user._id : undefined },
       process.env.JWT_SECRET || 'your-secret-key',
       { expiresIn: '24h' }
     );
@@ -295,7 +296,7 @@ router.get('/facebook/callback',
   (req, res) => {
     // Générer le token JWT
     const token = jwt.sign(
-      { id: req.user._id },
+      { id: req.user && typeof req.user === 'object' && '_id' in req.user ? req.user._id : undefined },
       process.env.JWT_SECRET || 'your-secret-key',
       { expiresIn: '24h' }
     );
@@ -314,7 +315,7 @@ router.get('/facebook/callback',
  *     description: Redirect to LinkedIn OAuth login
  */
 router.get('/linkedin',
-  passport.authenticate('linkedin', { state: true })
+  passport.authenticate('linkedin', { state: 'darassa-linkedin' })
 );
 
 /**
@@ -330,7 +331,7 @@ router.get('/linkedin/callback',
   (req, res) => {
     // Générer le token JWT
     const token = jwt.sign(
-      { id: req.user._id },
+      { id: req.user && typeof req.user === 'object' && '_id' in req.user ? req.user._id : undefined },
       process.env.JWT_SECRET || 'your-secret-key',
       { expiresIn: '24h' }
     );

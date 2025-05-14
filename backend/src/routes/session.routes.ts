@@ -8,7 +8,7 @@ import {
   updateSessionStatus,
   updateParticipantPresence
 } from '../controllers/session.controller';
-import { authMiddleware } from '../middleware/auth.middleware';
+import { authMiddleware } from '../common/middlewares/auth.middleware';
 import { roleMiddleware } from '../common/middlewares/role.middleware';
 
 const router = express.Router();

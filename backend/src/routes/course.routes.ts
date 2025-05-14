@@ -1,5 +1,5 @@
 import express from 'express';
-import { authMiddleware } from '../middleware/auth.middleware';
+import { authMiddleware } from '../common/middlewares/auth.middleware';
 import { CourseDto } from '../models/Course';
 
 const router = express.Router();

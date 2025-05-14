@@ -108,7 +108,11 @@ export const login = async (req: Request, res: Response) => {
 
 export const getProfile = async (req: Request, res: Response) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const userId = req.user && typeof req.user === 'object' && ('_id' in req.user ? (req.user as any)._id : ('id' in req.user ? (req.user as any).id : undefined));
+    if (!userId) {
+      return res.status(401).json({ message: 'Utilisateur non authentifié' });
+    }
+    const user = await User.findById(userId).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'Utilisateur non trouvé' });
     }
