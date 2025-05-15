@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes';
 import courseRoutes from './routes/course.routes';
+import userRoutes from './routes/users.routes';
 import seedDatabase from './config/seed';
 import { setupSwagger } from './config/swagger.config';
 import helmet from 'helmet';
@@ -20,7 +21,7 @@ const port = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: process.env.CORS_ORIGIN || ['http://localhost:5173', 'http://localhost:5174'],
   credentials: true
 }));
 app.use(express.json());
@@ -29,6 +30,11 @@ app.use(helmet());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
+console.log('Enregistrement de la route /api/users', userRoutes);
+app.use('/api/users', userRoutes);
+
+// Route de test non protégée
+app.get('/api/test', (req, res) => res.json({ ok: true }));
 
 // Limiteur de requêtes pour les routes d'authentification
 const authLimiter = rateLimit({

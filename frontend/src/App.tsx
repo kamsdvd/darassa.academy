@@ -26,6 +26,8 @@ import EntrepriseRapports from './pages/entreprise/Rapports';
 import Certificats from './pages/user/Certificats';
 import UserOpportunites from './pages/user/Opportunites';
 import MultiRoleDashboard from './pages/dashboard/MultiRoleDashboard';
+import AddUser from './pages/admin/AddUser';
+import UsersList from './pages/admin/UsersList';
 
 // Lazy loading avec prefetch
 const lazyWithPrefetch = (factory: () => Promise<any>, preload = false) => {
@@ -192,7 +194,12 @@ function AnimatedRoutes() {
           } />
           <Route path="/admin/users" element={
             <ProtectedRoute roles={['admin']}>
-              <UsersManagement />
+              <UsersList />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/users/add" element={
+            <ProtectedRoute roles={['admin']}>
+              <AddUser />
             </ProtectedRoute>
           } />
           <Route path="/admin/centres" element={
