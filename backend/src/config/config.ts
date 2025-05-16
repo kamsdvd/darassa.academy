@@ -2,11 +2,21 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Vérification des variables d'environnement requises
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET must be defined in environment variables');
+}
+
 export const config = {
   port: process.env.PORT || 5000,
   mongoUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/darassa',
-  jwtSecret: process.env.JWT_SECRET || 'your-secret-key',
-  jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
+  auth: {
+    jwtSecret: process.env.JWT_SECRET,
+    jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
+    refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
+    passwordMinLength: 6,
+    passwordMaxLength: 50
+  },
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
   email: {
     host: process.env.EMAIL_HOST,
@@ -16,16 +26,18 @@ export const config = {
     password: process.env.EMAIL_PASSWORD,
     from: process.env.EMAIL_FROM || 'noreply@darassa.academy'
   },
-  google: {
-    clientId: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET
-  },
-  facebook: {
-    appId: process.env.FACEBOOK_APP_ID,
-    appSecret: process.env.FACEBOOK_APP_SECRET
-  },
-  linkedin: {
-    clientId: process.env.LINKEDIN_CLIENT_ID,
-    clientSecret: process.env.LINKEDIN_CLIENT_SECRET
+  oauth: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET
+    },
+    facebook: {
+      appId: process.env.FACEBOOK_APP_ID,
+      appSecret: process.env.FACEBOOK_APP_SECRET
+    },
+    linkedin: {
+      clientId: process.env.LINKEDIN_CLIENT_ID,
+      clientSecret: process.env.LINKEDIN_CLIENT_SECRET
+    }
   }
 }; 

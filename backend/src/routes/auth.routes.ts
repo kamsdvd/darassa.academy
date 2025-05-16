@@ -2,27 +2,33 @@ import express from 'express';
 import passport from 'passport';
 import { register, login, getProfile, requestPasswordReset, resetPassword, verifyEmail } from '../controllers/auth.controller';
 import { authMiddleware } from '../common/middlewares/auth.middleware';
+import { handleOAuthCallback } from '../common/middlewares/oauth.middleware';
+import { body, validationResult } from 'express-validator';
+import { Request, Response, NextFunction } from 'express';
+import { config } from '../config/config';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import jwt from 'jsonwebtoken';
-import { body, validationResult, ValidationError } from 'express-validator';
-import { Request, Response, NextFunction } from 'express';
 
 const router = express.Router();
 
 // Middleware de validation pour l'inscription
 const validateRegister = [
   body('email').isEmail().withMessage('Email invalide'),
-  body('password').isLength({ min: 6 }).withMessage('Le mot de passe doit contenir au moins 6 caractères'),
+  body('password')
+    .isLength({ min: config.auth.passwordMinLength })
+    .withMessage(`Le mot de passe doit contenir au moins ${config.auth.passwordMinLength} caractères`),
   body('firstName').notEmpty().withMessage('Le prénom est requis'),
   body('lastName').notEmpty().withMessage('Le nom est requis'),
+  body('userType')
+    .isIn(['admin', 'centre_manager', 'formateur', 'etudiant', 'demandeur', 'entreprise'])
+    .withMessage('Type d\'utilisateur invalide'),
   (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      // Formatage des erreurs de validation
-      return next({
-        status: 400,
+      return res.status(400).json({
+        success: false,
         message: 'Erreur de validation',
-        errors: errors.array().map(e => ({ field: (e as any).param || (e as any).path || '', message: e.msg }))
+        errors: errors.array().map(e => ({ field: e.param, message: e.msg }))
       });
     }
     next();
@@ -36,205 +42,51 @@ const validateLogin = [
   (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return next({
-        status: 400,
+      return res.status(400).json({
+        success: false,
         message: 'Erreur de validation',
-        errors: errors.array().map(e => ({ field: (e as any).param || (e as any).path || '', message: e.msg }))
+        errors: errors.array().map(e => ({ field: e.param, message: e.msg }))
       });
     }
     next();
   }
 ];
 
-// Middleware de validation pour la demande de reset
-const validateRequestReset = [
-  body('email').isEmail().withMessage('Email invalide'),
-  (req: Request, res: Response, next: NextFunction) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return next({
-        status: 400,
-        message: 'Erreur de validation',
-        errors: errors.array().map(e => ({ field: (e as any).param || (e as any).path || '', message: e.msg }))
-      });
-    }
-    next();
-  }
-];
-
-// Middleware de validation pour le reset du mot de passe
-const validateResetPassword = [
-  body('token').notEmpty().withMessage('Token requis'),
-  body('password').isLength({ min: 6 }).withMessage('Le mot de passe doit contenir au moins 6 caractères'),
-  (req: Request, res: Response, next: NextFunction) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return next({
-        status: 400,
-        message: 'Erreur de validation',
-        errors: errors.array().map(e => ({ field: (e as any).param || (e as any).path || '', message: e.msg }))
-      });
-    }
-    next();
-  }
-];
-
-/**
- * @swagger
- * /api/auth/register:
- *   post:
- *     tags: [auth]
- *     summary: Register a new user
- *     description: Create a new user account
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *               - name
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *               password:
- *                 type: string
- *                 format: password
- *               name:
- *                 type: string
- *     responses:
- *       201:
- *         description: User successfully registered
- *       400:
- *         description: Invalid input data
- *       409:
- *         description: Email already exists
- */
+// Routes d'authentification de base
 router.post('/register', validateRegister, register);
-
-/**
- * @swagger
- * /api/auth/login:
- *   post:
- *     tags: [auth]
- *     summary: Login user
- *     description: Authenticate user and return JWT token
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *               password:
- *                 type: string
- *                 format: password
- *     responses:
- *       200:
- *         description: Login successful
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                 user:
- *                   type: object
- *       401:
- *         description: Invalid credentials
- */
 router.post('/login', validateLogin, login);
-
-// Routes protégées
 router.get('/profile', authMiddleware, getProfile);
-
-/**
- * @swagger
- * /api/auth/request-reset:
- *   post:
- *     tags: [auth]
- *     summary: Request password reset
- *     description: Send a password reset email
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *     responses:
- *       200:
- *         description: Reset email sent
- *       404:
- *         description: User not found
- */
-router.post('/request-reset', validateRequestReset, requestPasswordReset);
-
-/**
- * @swagger
- * /api/auth/reset-password:
- *   post:
- *     tags: [auth]
- *     summary: Reset password
- *     description: Reset password using token
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - token
- *               - password
- *             properties:
- *               token:
- *                 type: string
- *               password:
- *                 type: string
- *                 format: password
- *     responses:
- *       200:
- *         description: Password reset successful
- *       400:
- *         description: Invalid or expired token
- */
-router.post('/reset-password', validateResetPassword, resetPassword);
-
-/**
- * @swagger
- * /api/auth/verify-email:
- *   get:
- *     tags: [auth]
- *     summary: Verify email
- *     description: Verify email using token
- *     parameters:
- *       - in: query
- *         name: token
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Email verified successfully
- *       400:
- *         description: Invalid or expired token
- */
+router.post('/request-reset', requestPasswordReset);
+router.post('/reset-password', resetPassword);
 router.get('/verify-email', verifyEmail);
+
+// Routes OAuth
+router.get('/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+router.get('/google/callback',
+  passport.authenticate('google', { session: false }),
+  handleOAuthCallback('google')
+);
+
+router.get('/facebook',
+  passport.authenticate('facebook', { scope: ['email'] })
+);
+
+router.get('/facebook/callback',
+  passport.authenticate('facebook', { session: false }),
+  handleOAuthCallback('facebook')
+);
+
+router.get('/linkedin',
+  passport.authenticate('linkedin', { state: 'darassa-linkedin' })
+);
+
+router.get('/linkedin/callback',
+  passport.authenticate('linkedin', { session: false }),
+  handleOAuthCallback('linkedin')
+);
 
 /**
  * @swagger

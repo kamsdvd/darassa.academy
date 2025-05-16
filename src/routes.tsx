@@ -4,7 +4,7 @@ import { MainLayout } from './components/layout/MainLayout';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
 
 // Lazy load pages
-const Home = lazy(() => import('./pages/Home'));
+const Home = lazy(() => import('./pages'));
 const Courses = lazy(() => import('./pages/courses'));
 const CourseDetail = lazy(() => import('./pages/courses/[id]'));
 const Connexion = lazy(() => import('./pages/auth/Connexion'));

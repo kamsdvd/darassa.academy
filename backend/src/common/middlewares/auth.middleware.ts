@@ -1,37 +1,48 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
 import { User } from '../../models/user.model';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-
-interface JwtPayload {
-  id: string;
-}
+import { verifyJWT } from '../helpers/token.helper';
+import { config } from '../../config/config';
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Token d\'authentification non fourni' });
+      return res.status(401).json({ 
+        success: false,
+        message: 'Token d\'authentification non fourni' 
+      });
     }
 
     const token = authHeader.split(' ')[1];
-
+    
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+      const decoded = verifyJWT(token);
       
       const user = await User.findById(decoded.id).select('-password');
       if (!user) {
-        return res.status(401).json({ message: 'Utilisateur non trouvé' });
+        return res.status(401).json({ 
+          success: false,
+          message: 'Utilisateur non trouvé' 
+        });
+      }
+
+      if (!user.isActive) {
+        return res.status(403).json({ 
+          success: false,
+          message: 'Compte désactivé' 
+        });
       }
 
       req.user = user;
       next();
     } catch (error) {
-      return res.status(401).json({ message: 'Token invalide ou expiré' });
+      return res.status(401).json({ 
+        success: false,
+        message: 'Token invalide ou expiré' 
+      });
     }
   } catch (error) {
     console.error('Erreur dans le middleware d\'authentification:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
+    next(error);
   }
 }; 

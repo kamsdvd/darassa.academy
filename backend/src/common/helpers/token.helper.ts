@@ -1,17 +1,33 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import { config } from '../../config/config';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
+export interface TokenPayload {
+  id: string;
+  userType?: string;
+  email?: string;
+}
 
-export const generateJWT = (payload: object, expiresIn: string = JWT_EXPIRES_IN) => {
-  return jwt.sign(payload, JWT_SECRET as string, { expiresIn } as jwt.SignOptions);
+export const generateJWT = (payload: TokenPayload): string => {
+  return jwt.sign(payload, config.auth.jwtSecret, { 
+    expiresIn: config.auth.jwtExpiresIn 
+  });
 };
 
-export const verifyJWT = (token: string) => {
-  return jwt.verify(token, JWT_SECRET);
+export const verifyJWT = (token: string): TokenPayload => {
+  try {
+    return jwt.verify(token, config.auth.jwtSecret) as TokenPayload;
+  } catch (error) {
+    throw new Error('Invalid or expired token');
+  }
 };
 
-export const generateRandomToken = (size = 32) => {
-  return crypto.randomBytes(size).toString('hex');
+export const generateRefreshToken = (payload: TokenPayload): string => {
+  return jwt.sign(payload, config.auth.jwtSecret, {
+    expiresIn: config.auth.refreshTokenExpiresIn
+  });
+};
+
+export const generateRandomToken = (length: number = 32): string => {
+  return crypto.randomBytes(length).toString('hex');
 }; 

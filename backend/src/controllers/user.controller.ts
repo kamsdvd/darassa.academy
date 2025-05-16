@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { User } from '../models/user.model';
+import { User, IUser } from '../models/user.model';
 import mongoose from 'mongoose';
 import { paginate } from '../common/helpers/pagination.helper';
 
@@ -178,9 +178,11 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID invalide' });
+    
     const { email, firstName, lastName, userType, phone, profilePicture } = req.body;
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    
     if (email) user.email = email;
     if (firstName) user.firstName = firstName;
     if (lastName) user.lastName = lastName;
@@ -217,9 +219,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
 export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID invalide' });
-    if (req.user._id.toString() === req.params.id) {
-      return res.status(403).json({ message: 'Un admin ne peut pas se supprimer lui-même.' });
-    }
+    
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
     res.status(200).json({ message: 'Utilisateur supprimé' });
@@ -251,14 +251,13 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
 export const disableUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID invalide' });
-    if (req.user._id.toString() === req.params.id) {
-      return res.status(403).json({ message: 'Un admin ne peut pas se désactiver lui-même.' });
-    }
+    
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
-    user.isActive = !user.isActive;
+    
+    user.isActive = false;
     await user.save();
-    res.status(200).json({ message: `Utilisateur ${user.isActive ? 'activé' : 'désactivé'}` });
+    res.status(200).json({ message: 'Utilisateur désactivé' });
   } catch (err) {
     next(err);
   }
@@ -298,16 +297,16 @@ export const disableUser = async (req: Request, res: Response, next: NextFunctio
 export const changeUserRole = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID invalide' });
-    if (req.user._id.toString() === req.params.id) {
-      return res.status(403).json({ message: 'Un admin ne peut pas changer son propre rôle.' });
-    }
-    const { userType } = req.body;
-    if (!userType) return res.status(400).json({ message: 'Nouveau rôle requis' });
+    
+    const { newRole } = req.body;
+    if (!newRole) return res.status(400).json({ message: 'Nouveau rôle requis' });
+    
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
-    user.userType = userType;
+    
+    user.userType = newRole;
     await user.save();
-    res.status(200).json({ message: 'Rôle modifié', user: { ...user.toObject(), password: undefined } });
+    res.status(200).json({ message: 'Rôle modifié avec succès' });
   } catch (err) {
     next(err);
   }
