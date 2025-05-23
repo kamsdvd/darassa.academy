@@ -5,6 +5,7 @@ import { emailService } from '../services/email.service';
 import { generateJWT, generateRefreshToken, generateRandomToken } from '../common/helpers/token.helper';
 import { getResetPasswordUrl, getVerificationUrl } from '../common/helpers/format.helper';
 import { config } from '../config/config';
+import { Types } from 'mongoose';
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -32,12 +33,12 @@ export const register = async (req: Request, res: Response) => {
 
     // Générer les tokens
     const accessToken = generateJWT({ 
-      id: user._id.toString(),
+      id: (user._id as Types.ObjectId).toString(),
       userType: user.userType,
       email: user.email
     });
     const refreshToken = generateRefreshToken({ 
-      id: user._id.toString(),
+      id: (user._id as Types.ObjectId).toString(),
       userType: user.userType,
       email: user.email
     });
@@ -103,12 +104,12 @@ export const login = async (req: Request, res: Response) => {
 
     // Générer les tokens
     const accessToken = generateJWT({ 
-      id: user._id.toString(),
+      id: (user._id as Types.ObjectId).toString(),
       userType: user.userType,
       email: user.email
     });
     const refreshToken = generateRefreshToken({ 
-      id: user._id.toString(),
+      id: (user._id as Types.ObjectId).toString(),
       userType: user.userType,
       email: user.email
     });
@@ -140,7 +141,11 @@ export const login = async (req: Request, res: Response) => {
 
 export const getProfile = async (req: Request, res: Response) => {
   try {
-    const user = await User.findById(req.user?._id).select('-password');
+    // Correction du typage pour accéder à _id
+    const userId = (req.user && typeof req.user === 'object' && '_id' in req.user)
+      ? (req.user as any)._id
+      : undefined;
+    const user = await User.findById(userId).select('-password');
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -278,7 +283,6 @@ export const verifyEmail = async (req: Request, res: Response) => {
 
     // Marquer l'email comme vérifié
     user.isEmailVerified = true;
-    user.emailVerificationToken = undefined;
     await user.save();
 
     res.status(200).json({
@@ -292,4 +296,4 @@ export const verifyEmail = async (req: Request, res: Response) => {
       message: 'Erreur lors de la vérification de l\'email'
     });
   }
-}; 
+};

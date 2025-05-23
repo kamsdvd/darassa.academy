@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { API_CONFIG } from '../config/api.config';
 
 interface LoginResponse {
@@ -37,7 +37,7 @@ export class AuthService {
     // Configurer un intercepteur pour gérer les erreurs 401/403
     axios.interceptors.response.use(
       (response) => response,
-      async (error) => {
+      async (error: AxiosError) => {
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {
           // Si l'erreur est due à un token expiré, déconnecter l'utilisateur
           if (this.isAuthenticated()) {
@@ -66,19 +66,27 @@ export class AuthService {
         password,
       });
       
-      const { token, user } = response.data;
-      this.token = token;
-      localStorage.setItem('token', token);
+      if (response.data.data) {
+        const { user, tokens } = response.data.data;
+        this.token = tokens.accessToken;
+        localStorage.setItem('token', tokens.accessToken);
 
-      // Mapper userType en role pour la compatibilité frontend
-      return {
-        token,
-        user: {
-          ...user,
-          role: user.userType
-        }
-      };
-    } catch (error: any) {
+        // Mapper userType en role pour la compatibilité frontend
+        const mappedUser = {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.userType // Mapper userType vers role
+        };
+
+        return {
+          token: tokens.accessToken,
+          user: mappedUser
+        };
+      }
+      throw new Error('Format de réponse invalide');
+    } catch (error) {
       console.error('Erreur de connexion:', error);
       throw this.handleError(error);
     }
@@ -93,19 +101,27 @@ export class AuthService {
     try {
       const response = await axios.post(`${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.REGISTER}`, userData);
       
-      const { token, user } = response.data;
-      this.token = token;
-      localStorage.setItem('token', token);
+      if (response.data.data) {
+        const { user, tokens } = response.data.data;
+        this.token = tokens.accessToken;
+        localStorage.setItem('token', tokens.accessToken);
 
-      // Mapper userType en role pour la compatibilité frontend
-      return {
-        token,
-        user: {
-          ...user,
+        // Mapper userType en role pour la compatibilité frontend
+        const mappedUser = {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
           role: user.userType
-        }
-      };
-    } catch (error: any) {
+        };
+
+        return {
+          token: tokens.accessToken,
+          user: mappedUser
+        };
+      }
+      throw new Error('Format de réponse invalide');
+    } catch (error) {
       console.error('Erreur d\'inscription:', error);
       throw this.handleError(error);
     }
@@ -133,12 +149,19 @@ export class AuthService {
         }
       });
 
-      return response.data;
+      if (response.data.data && response.data.data.user) {
+        const user = response.data.data.user;
+        return {
+          ...user,
+          role: user.userType
+        };
+      }
+      return null;
     } catch (error) {
       console.error('Erreur lors de la récupération du profil:', error);
       
       // Si l'erreur est 401 ou 403, déconnecter l'utilisateur
-      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      if (error instanceof AxiosError && (error.response?.status === 401 || error.response?.status === 403)) {
         await this.logout();
       }
       
@@ -154,39 +177,35 @@ export class AuthService {
     return !!this.getToken();
   }
 
-  private handleError(error: any) {
-    if (error.response) {
-      // Le serveur a répondu avec un code d'erreur
-      console.error('Erreur serveur:', error.response.status, error.response.data);
-      
-      // Si c'est une erreur 404, vérifier si c'est un problème de route
-      if (error.response.status === 404) {
-        console.error('Route non trouvée. Vérifiez la configuration de l\'API.');
+  private handleError(error: unknown): Error {
+    if (error instanceof AxiosError) {
+      if (error.response) {
+        // Le serveur a répondu avec un code d'erreur
+        console.error('Erreur serveur:', error.response.status, error.response.data);
+        
+        // Si c'est une erreur 404, vérifier si c'est un problème de route
+        if (error.response.status === 404) {
+          console.error('Route non trouvée. Vérifiez la configuration de l\'API.');
+        }
+        
+        return new Error(error.response.data.message || 'Erreur serveur');
+      } else if (error.request) {
+        // La requête a été faite mais pas de réponse
+        console.error('Pas de réponse du serveur:', error.request);
+        
+        // Si nous n'avons pas dépassé le nombre maximum de tentatives, réessayer
+        if (this.retryCount < this.maxRetries) {
+          this.retryCount++;
+          console.log(`Tentative de reconnexion (${this.retryCount}/${this.maxRetries})...`);
+          return new Error('Tentative de reconnexion...');
+        }
+        
+        return new Error('Impossible de contacter le serveur. Veuillez vérifier votre connexion internet.');
       }
-      
-      return new Error(error.response.data.message || 'Erreur serveur');
-    } else if (error.request) {
-      // La requête a été faite mais pas de réponse
-      console.error('Pas de réponse du serveur:', error.request);
-      
-      // Si nous n'avons pas dépassé le nombre maximum de tentatives, réessayer
-      if (this.retryCount < this.maxRetries) {
-        this.retryCount++;
-        console.log(`Tentative de reconnexion (${this.retryCount}/${this.maxRetries})...`);
-        // Attendre un peu avant de réessayer
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(this.login(error.config.data.email, error.config.data.password));
-          }, 1000 * this.retryCount);
-        });
-      }
-      
-      return new Error('Impossible de contacter le serveur. Veuillez vérifier votre connexion internet.');
-    } else {
-      // Une erreur s'est produite lors de la configuration de la requête
-      console.error('Erreur de configuration:', error.message);
-      return new Error('Erreur lors de la configuration de la requête');
     }
+    
+    console.error('Erreur inattendue:', error);
+    return new Error('Une erreur inattendue est survenue');
   }
 }
 

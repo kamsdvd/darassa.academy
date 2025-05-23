@@ -1,4 +1,7 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, PopulatedDoc } from 'mongoose';
+import { IUser } from './user.model';
+import { IFormation } from './formation.model';
+import { ISession } from './session.model';
 
 export interface IEvent extends Document {
   titre: string;
@@ -6,15 +9,15 @@ export interface IEvent extends Document {
   dateDebut: Date;
   dateFin: Date;
   type: 'formation' | 'session';
-  formateur: mongoose.Types.ObjectId;
+  formateur: PopulatedDoc<Document<mongoose.Types.ObjectId> & IUser>;
   salle?: {
     nom: string;
     capacite: number;
   };
   participants: number;
   statut: 'planifie' | 'en_cours' | 'termine' | 'annule';
-  formation?: mongoose.Types.ObjectId;
-  session?: mongoose.Types.ObjectId;
+  formation?: PopulatedDoc<Document<mongoose.Types.ObjectId> & IFormation>;
+  session?: PopulatedDoc<Document<mongoose.Types.ObjectId> & ISession>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -78,4 +81,4 @@ EventSchema.index({ formateur: 1 });
 EventSchema.index({ type: 1 });
 EventSchema.index({ statut: 1 });
 
-export const Event = mongoose.model<IEvent>('Event', EventSchema); 
+export const Event = mongoose.model<IEvent>('Event', EventSchema);

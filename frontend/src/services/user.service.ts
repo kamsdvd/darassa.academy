@@ -1,5 +1,7 @@
 import axios from 'axios';
-import { API_CONFIG } from '../config/api.config';
+import { User } from '../types/user';
+
+const API_URL = 'http://localhost:5000/api';
 
 // Intercepteur global pour ajouter le token à chaque requête
 axios.interceptors.request.use(
@@ -47,11 +49,16 @@ export interface UpdateUserData {
 }
 
 class UserService {
-  private readonly baseUrl = `${API_CONFIG.BASE_URL}/users`;
+  private readonly baseUrl = `${API_URL}/users`;
 
   async getAllUsers(params?: { page?: number; limit?: number; userType?: string; isActive?: boolean }) {
-    const response = await axios.get(this.baseUrl, { params });
-    return response.data;
+    try {
+      const response = await axios.get(this.baseUrl, { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      throw error;
+    }
   }
 
   async getUserById(id: string) {

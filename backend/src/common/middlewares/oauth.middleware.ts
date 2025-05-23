@@ -8,10 +8,11 @@ export const handleOAuthCallback = (provider: string) => async (req: Request, re
       throw new Error('No user found in request');
     }
 
+    const user = req.user as any;
     const token = generateJWT({ 
-      id: req.user._id.toString(),
-      userType: req.user.userType,
-      email: req.user.email
+      id: user._id.toString(),
+      userType: user.userType,
+      email: user.email
     });
 
     // Rediriger vers le frontend avec le token
@@ -20,4 +21,4 @@ export const handleOAuthCallback = (provider: string) => async (req: Request, re
     console.error(`Error in ${provider} OAuth callback:`, error);
     res.redirect(`${config.frontendUrl}/auth/error?message=${encodeURIComponent('Authentication failed')}`);
   }
-}; 
+};

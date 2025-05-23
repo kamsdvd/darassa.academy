@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 import { 
   Users, 
@@ -38,6 +38,7 @@ interface MenuItem {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
   const { user, logout } = useStore();
   const location = useLocation();
+  const navigate = useNavigate();
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
   const isActive = (path: string) => {
@@ -104,6 +105,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
             if (hasSubItems) {
               e.preventDefault();
               toggleSection(item.path);
+              if (!isItemActive) {
+                navigate(item.path);
+              }
             }
           }}
           title={!isOpen ? item.label : undefined}
@@ -184,7 +188,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
       {
         icon: <FileText className="h-5 w-5" />,
         label: 'Rapports',
-        path: '/admin/reports'
+        path: '/admin/stats'
       },
       {
         icon: <Settings className="h-5 w-5" />,
@@ -575,22 +579,20 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
   const renderMenu = () => {
     if (!user) return null;
 
-    switch (user.userType) {
-      case 'admin':
-        return renderAdminMenu();
-      case 'centre_manager':
-        return renderCentreManagerMenu();
-      case 'formateur':
-        return renderFormateurMenu();
-      case 'etudiant':
-        return renderEtudiantMenu();
-      case 'demandeur':
-        return renderDemandeurMenu();
-      case 'entreprise':
-        return renderEntrepriseMenu();
-      default:
-        return null;
+    if (user.roles.includes('admin')) {
+      return renderAdminMenu();
+    } else if (user.roles.includes('centre_manager')) {
+      return renderCentreManagerMenu();
+    } else if (user.roles.includes('formateur')) {
+      return renderFormateurMenu();
+    } else if (user.roles.includes('etudiant')) {
+      return renderEtudiantMenu();
+    } else if (user.roles.includes('demandeur')) {
+      return renderDemandeurMenu();
+    } else if (user.roles.includes('entreprise')) {
+      return renderEntrepriseMenu();
     }
+    return null;
   };
 
   if (!user) return null;

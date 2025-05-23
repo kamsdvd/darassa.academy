@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import crypto from 'crypto';
 import { config } from '../../config/config';
 
@@ -9,9 +9,7 @@ export interface TokenPayload {
 }
 
 export const generateJWT = (payload: TokenPayload): string => {
-  return jwt.sign(payload, config.auth.jwtSecret, { 
-    expiresIn: config.auth.jwtExpiresIn 
-  });
+  return jwt.sign(payload, config.auth.jwtSecret as string, { expiresIn: config.auth.jwtExpiresIn as any });
 };
 
 export const verifyJWT = (token: string): TokenPayload => {
@@ -23,11 +21,9 @@ export const verifyJWT = (token: string): TokenPayload => {
 };
 
 export const generateRefreshToken = (payload: TokenPayload): string => {
-  return jwt.sign(payload, config.auth.jwtSecret, {
-    expiresIn: config.auth.refreshTokenExpiresIn
-  });
+  return jwt.sign(payload, config.auth.jwtSecret as string, { expiresIn: config.auth.refreshTokenExpiresIn as any });
 };
 
 export const generateRandomToken = (length: number = 32): string => {
   return crypto.randomBytes(length).toString('hex');
-}; 
+};

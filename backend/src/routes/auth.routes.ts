@@ -28,7 +28,10 @@ const validateRegister = [
       return res.status(400).json({
         success: false,
         message: 'Erreur de validation',
-        errors: errors.array().map(e => ({ field: e.param, message: e.msg }))
+        errors: errors.array().map(e => {
+          const err = e as any;
+          return { field: err.path || err.param, message: err.msg };
+        })
       });
     }
     next();
@@ -45,7 +48,10 @@ const validateLogin = [
       return res.status(400).json({
         success: false,
         message: 'Erreur de validation',
-        errors: errors.array().map(e => ({ field: e.param, message: e.msg }))
+        errors: errors.array().map(e => {
+          const err = e as any;
+          return { field: err.path || err.param, message: err.msg };
+        })
       });
     }
     next();
@@ -193,4 +199,4 @@ router.get('/linkedin/callback',
   }
 );
 
-export default router; 
+export default router;

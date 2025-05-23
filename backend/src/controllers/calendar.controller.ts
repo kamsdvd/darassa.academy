@@ -1,9 +1,38 @@
 import { Request, Response } from 'express';
 import { Formation } from '../models/formation.model';
 import { Session } from '../models/session.model';
-import { Event } from '../models/event.model';
+import { Event, IEvent } from '../models/event.model';
+import mongoose from 'mongoose';
 
-export const getEvents = async (req: Request, res: Response) => {
+interface CalendarQueryParams {
+  startDate?: string;
+  endDate?: string;
+  formateurId?: string;
+  formationTypeId?: string;
+  status?: string;
+  searchTerm?: string;
+}
+
+interface CalendarEventResponse {
+  id: string;
+  summary: string;
+  description: string;
+  start: {
+    dateTime: string;
+    timeZone: string;
+  };
+  end: {
+    dateTime: string;
+    timeZone: string;
+  };
+  location?: string;
+  formateur?: string;
+  participants: number;
+  type: string;
+  status: string;
+}
+
+export const getEvents = async (req: Request<{}, {}, {}, CalendarQueryParams>, res: Response) => {
   try {
     const { 
       startDate, 
@@ -14,65 +43,53 @@ export const getEvents = async (req: Request, res: Response) => {
       searchTerm 
     } = req.query;
 
-    console.log('Query parameters:', {
-      startDate,
-      endDate,
-      formateurId,
-      formationTypeId,
-      status,
-      searchTerm
-    });
+    // Build the base query
+    const query: mongoose.FilterQuery<IEvent> = {};
+    const orConditions: mongoose.FilterQuery<IEvent>[] = [];
 
-    // Construire la requête de base
-    const query: any = {};
-
-    // Gestion des dates
+    // Handle dates
     if (startDate && endDate) {
-      query.dateDebut = { $gte: new Date(startDate as string) };
-      query.dateFin = { $lte: new Date(endDate as string) };
+      query.dateDebut = { $gte: new Date(startDate) };
+      query.dateFin = { $lte: new Date(endDate) };
     }
 
-    // Ajouter les filtres si présents
+    // Handle formateur filter
     if (formateurId && formateurId !== 'all') {
-      query.$or = [
-        { formateurs: formateurId },
-        { formateur: formateurId }
-      ];
+      query.formateur = new mongoose.Types.ObjectId(formateurId);
     }
 
+    // Handle formation type filter
     if (formationTypeId && formationTypeId !== 'all') {
       query.type = formationTypeId;
     }
 
+    // Handle status filter
     if (status && status !== 'all') {
       query.statut = status;
     }
 
+    // Handle search term
     if (searchTerm) {
-      query.$or = [
+      orConditions.push(
         { titre: { $regex: searchTerm, $options: 'i' } },
         { description: { $regex: searchTerm, $options: 'i' } }
-      ];
+      );
     }
 
-    console.log('MongoDB query:', JSON.stringify(query, null, 2));
+    // Combine all $or conditions if any exist
+    if (orConditions.length > 0) {
+      query.$or = orConditions;
+    }
 
-    // Récupérer les événements, formations et sessions
-    const [events, formations, sessions] = await Promise.all([
-      Event.find(query)
-        .populate('formateur', 'firstName lastName')
-        .populate('formation', 'titre')
-        .populate('session', 'titre'),
-      Formation.find(query).populate('formateurs', 'firstName lastName'),
-      Session.find(query).populate('formateur', 'firstName lastName')
-    ]);
+    // Fetch events with populated references
+    const events = await Event.find(query)
+      .populate('formateur', 'firstName lastName')
+      .populate('formation', 'titre')
+      .populate('session', 'titre')
+      .exec();
 
-    console.log('Found events:', events.length);
-    console.log('Found formations:', formations.length);
-    console.log('Found sessions:', sessions.length);
-
-    // Transformer les événements en format calendrier
-    const eventCalendarItems = events.map(event => ({
+    // Transform events to calendar format
+    const calendarEvents: CalendarEventResponse[] = events.map(event => ({
       id: event._id.toString(),
       summary: event.titre,
       description: event.description,
@@ -85,7 +102,7 @@ export const getEvents = async (req: Request, res: Response) => {
         timeZone: 'Europe/Paris'
       },
       location: event.salle?.nom || 'Non spécifié',
-      formateur: event.formateur 
+      formateur: event.formateur && 'firstName' in event.formateur
         ? `${event.formateur.firstName} ${event.formateur.lastName}`
         : 'Non assigné',
       participants: event.participants || 0,
@@ -93,62 +110,17 @@ export const getEvents = async (req: Request, res: Response) => {
       status: event.statut
     }));
 
-    // Transformer les formations en événements pour le calendrier
-    const formationEvents = formations.map(formation => ({
-      id: formation._id.toString(),
-      summary: formation.titre,
-      description: formation.description,
-      start: {
-        dateTime: formation.dateDebut.toISOString(),
-        timeZone: 'Europe/Paris'
-      },
-      end: {
-        dateTime: formation.dateFin.toISOString(),
-        timeZone: 'Europe/Paris'
-      },
-      location: 'Centre de formation',
-      formateur: formation.formateurs.length > 0 
-        ? `${formation.formateurs[0].firstName} ${formation.formateurs[0].lastName}`
-        : 'Non assigné',
-      participants: formation.placesDisponibles,
-      type: 'formation',
-      status: formation.statut
-    }));
+    return res.json({
+      success: true,
+      data: calendarEvents
+    });
 
-    // Transformer les sessions en événements pour le calendrier
-    const sessionEvents = sessions.map(session => ({
-      id: session._id.toString(),
-      summary: session.titre,
-      description: session.description,
-      start: {
-        dateTime: session.dateDebut.toISOString(),
-        timeZone: 'Europe/Paris'
-      },
-      end: {
-        dateTime: session.dateFin.toISOString(),
-        timeZone: 'Europe/Paris'
-      },
-      location: session.salle?.nom || 'Non spécifié',
-      formateur: session.formateur 
-        ? `${session.formateur.firstName} ${session.formateur.lastName}`
-        : 'Non assigné',
-      participants: session.participants?.length || 0,
-      type: 'session',
-      status: session.statut
-    }));
-
-    // Combiner et trier les événements par date de début
-    const allEvents = [...eventCalendarItems, ...formationEvents, ...sessionEvents].sort((a, b) => 
-      new Date(a.start.dateTime).getTime() - new Date(b.start.dateTime).getTime()
-    );
-
-    console.log('Total events:', allEvents.length);
-    res.json(allEvents);
   } catch (error) {
-    console.error('Erreur détaillée lors de la récupération des événements:', error);
-    res.status(500).json({ 
-      message: 'Erreur lors de la récupération des événements',
-      error: error instanceof Error ? error.message : 'Erreur inconnue'
+    console.error('Error fetching calendar events:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la récupération des événements du calendrier',
+      error: (error as Error).message
     });
   }
 };
@@ -207,4 +179,4 @@ export const checkAvailability = async (req: Request, res: Response) => {
     console.error('Erreur lors de la vérification de disponibilité:', error);
     res.status(500).json({ message: 'Erreur lors de la vérification de disponibilité' });
   }
-}; 
+};

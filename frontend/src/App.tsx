@@ -10,6 +10,7 @@ import { AuthService } from './services/authService';
 import LoadingFallback from './components/common/LoadingFallback';
 import AdminDashboard from './pages/admin/Dashboard';
 import UsersManagement from './pages/admin/UsersManagement';
+import RolesManagement from './pages/admin/RolesManagement';
 import CentresManagement from './pages/admin/CentresManagement';
 import AdminStats from './pages/admin/AdminStats';
 import CentreDashboard from './pages/centre/Dashboard';
@@ -28,6 +29,7 @@ import UserOpportunites from './pages/user/Opportunites';
 import MultiRoleDashboard from './pages/dashboard/MultiRoleDashboard';
 import AddUser from './pages/admin/AddUser';
 import UsersList from './pages/admin/UsersList';
+import Settings from './pages/dashboard/Settings';
 
 // Lazy loading avec prefetch
 const lazyWithPrefetch = (factory: () => Promise<any>, preload = false) => {
@@ -194,7 +196,12 @@ function AnimatedRoutes() {
           } />
           <Route path="/admin/users" element={
             <ProtectedRoute roles={['admin']}>
-              <UsersList />
+              <UsersManagement />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/users/roles" element={
+            <ProtectedRoute roles={['admin']}>
+              <RolesManagement />
             </ProtectedRoute>
           } />
           <Route path="/admin/users/add" element={
@@ -207,9 +214,19 @@ function AnimatedRoutes() {
               <CentresManagement />
             </ProtectedRoute>
           } />
+          <Route path="/admin/formations" element={
+            <ProtectedRoute roles={['admin']}>
+              <FormationsManagement />
+            </ProtectedRoute>
+          } />
           <Route path="/admin/stats" element={
             <ProtectedRoute roles={['admin']}>
               <AdminStats />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/settings" element={
+            <ProtectedRoute roles={['admin']}>
+              <Settings />
             </ProtectedRoute>
           } />
 
