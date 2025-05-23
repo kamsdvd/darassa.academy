@@ -117,9 +117,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {shouldShowSidebar && (
             <div 
               className={`
-                fixed left-0 top-16 h-[calc(100vh-4rem)] z-40
                 transition-all duration-300 ease-in-out
-                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                ${isSidebarOpen ? 'w-64' : 'w-16'}
               `}
             >
               <Sidebar isOpen={isSidebarOpen} onToggle={toggleSidebar} />
@@ -133,7 +132,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               ${shouldShowSidebar ? (isSidebarOpen ? 'ml-64' : 'ml-16') : ''}
             `}
           >
-            <div className="container mx-auto px-4 py-8">
+            <div className="w-full px-4 py-8">
               {children}
             </div>
           </main>
