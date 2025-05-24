@@ -129,7 +129,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <main 
             className={`
               flex-1 transition-all duration-300 ease-in-out
-              ${shouldShowSidebar ? (isSidebarOpen ? 'ml-64' : 'ml-16') : ''}
+              ${shouldShowSidebar ? (isSidebarOpen ? 'ml-1' : 'ml-0') : ''}
             `}
           >
             <div className="w-full px-4 py-8">
