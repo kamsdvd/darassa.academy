@@ -122,13 +122,21 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
 // Création utilisateur
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, password, firstName, lastName, userType } = req.body;
+    const { email, password, firstName, lastName, userType, specialites } = req.body;
     if (!email || !password || !firstName || !lastName || !userType) {
       return res.status(400).json({ message: 'Champs obligatoires manquants' });
     }
     const exists = await User.findOne({ email });
     if (exists) return res.status(409).json({ message: 'Email déjà utilisé' });
-    const user = new User({ email, password, firstName, lastName, userType });
+    
+    const userData: any = { email, password, firstName, lastName, userType };
+
+    // Si l'utilisateur est un formateur, ajouter les spécialités
+    if (userType === 'formateur' && specialites) {
+      userData.specialites = specialites.split(',').map((s: string) => s.trim()); // Séparer les spécialités par virgule
+    }
+
+    const user = new User(userData);
     await user.save();
     res.status(201).json({ message: 'Utilisateur créé', user: { ...user.toObject(), password: undefined } });
   } catch (err) {

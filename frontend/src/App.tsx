@@ -30,6 +30,12 @@ import MultiRoleDashboard from './pages/dashboard/MultiRoleDashboard';
 import AddUser from './pages/admin/AddUser';
 import UsersList from './pages/admin/UsersList';
 import Settings from './pages/dashboard/Settings';
+import AddFormateur from './pages/centre/AddFormateur';
+import FormateurDisponibilitesManagement from './pages/centre/FormateurDisponibilitesManagement';
+import CreateFormation from './pages/centre/CreateFormation';
+import PlanifierSession from './pages/centre/PlanifierSession';
+import PlanningMonthView from './pages/centre/PlanningMonthView';
+import PlanningWeekView from './pages/centre/PlanningWeekView';
 
 // Lazy loading avec prefetch
 const lazyWithPrefetch = (factory: () => Promise<any>, preload = false) => {
@@ -241,6 +247,26 @@ function AnimatedRoutes() {
               <FormateursManagement />
             </ProtectedRoute>
           } />
+          <Route path="/centre/formateurs/add" element={
+            <ProtectedRoute roles={['centre_manager']}>
+              <AddFormateur />
+            </ProtectedRoute>
+          } />
+          <Route path="/centre/formateurs/disponibilites" element={
+            <ProtectedRoute roles={['centre_manager']}>
+              <FormateurDisponibilitesManagement />
+            </ProtectedRoute>
+          } />
+          <Route path="/centre/formations/create" element={
+            <ProtectedRoute roles={['centre_manager']}>
+              <CreateFormation />
+            </ProtectedRoute>
+          } />
+          <Route path="/centre/formations/sessions" element={
+            <ProtectedRoute roles={['centre_manager']}>
+              <PlanifierSession />
+            </ProtectedRoute>
+          } />
           <Route path="/centre/formations" element={
             <ProtectedRoute roles={['centre_manager']}>
               <FormationsManagement />
@@ -249,6 +275,20 @@ function AnimatedRoutes() {
           <Route path="/centre/planning" element={
             <ProtectedRoute roles={['centre_manager']}>
               <PlanningManagement />
+            </ProtectedRoute>
+          } />
+
+          {/* Route pour la vue mensuelle du planning */}
+          <Route path="/centre/planning/month" element={
+            <ProtectedRoute roles={['centre_manager']}>
+              <PlanningMonthView />
+            </ProtectedRoute>
+          } />
+
+          {/* Route pour la vue hebdomadaire du planning */}
+          <Route path="/centre/planning/week" element={
+            <ProtectedRoute roles={['centre_manager']}>
+              <PlanningWeekView />
             </ProtectedRoute>
           } />
 
