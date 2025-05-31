@@ -58,7 +58,7 @@ const Inscription: React.FC = () => {
 
     if (!formData.email) {
       newErrors.email = 'L\'email est requis';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(formData.email)) {
       newErrors.email = 'L\'email n\'est pas valide';
     }
 
@@ -86,7 +86,8 @@ const Inscription: React.FC = () => {
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
-          password: formData.password
+          password: formData.password,
+          userType: 'apprenant'
         });
         
         if (response && response.user) {

@@ -34,4 +34,266 @@ Mettre en place un système d'authentification robuste et sécurisé.
 - [ ] Le système d'authentification est fonctionnel et sécurisé
 - [ ] Les tests passent avec une couverture > 80%
 - [ ] La documentation est complète et à jour
-- [ ] Les exemples sont clairs et fonctionnels 
+- [ ] Les exemples sont clairs et fonctionnels
+
+## Issues de Refactoring
+
+### 1. Consolidation des Services d'Authentification
+- [ ] Identifier et supprimer les services d'authentification dupliqués
+  - [ ] Analyser tous les fichiers contenant des services d'authentification
+  - [ ] Documenter les différences entre les implémentations
+  - [ ] Identifier les fonctionnalités uniques de chaque service
+  - [ ] Créer une liste des dépendances pour chaque service
+- [ ] Créer un service d'authentification unifié dans `src/modules/auth/services/auth.service.ts`
+  - [ ] Implémenter les méthodes de base (login, register, logout)
+  - [ ] Ajouter la gestion des tokens
+  - [ ] Implémenter la validation des données
+  - [ ] Ajouter la gestion des erreurs
+  - [ ] Implémenter les méthodes de rafraîchissement de token
+- [ ] Migrer toutes les références vers le nouveau service unifié
+  - [ ] Mettre à jour les imports dans tous les fichiers
+  - [ ] Adapter les composants utilisant l'ancien service
+  - [ ] Mettre à jour les tests existants
+  - [ ] Vérifier la compatibilité avec les hooks existants
+- [ ] Mettre à jour les tests pour utiliser le service unifié
+  - [ ] Créer des mocks pour les tests
+  - [ ] Écrire des tests unitaires pour chaque méthode
+  - [ ] Ajouter des tests d'intégration
+  - [ ] Implémenter des tests de performance
+
+### 2. Standardisation des Types
+- [ ] Créer un fichier unique pour les types d'authentification dans `src/modules/auth/types/index.ts`
+  - [ ] Définir une structure de base pour les types
+  - [ ] Ajouter des commentaires JSDoc pour chaque type
+  - [ ] Créer des types utilitaires (Partial, Required, etc.)
+- [ ] Définir des interfaces cohérentes pour :
+  - [ ] LoginCredentials
+    - [ ] email: string
+    - [ ] password: string
+    - [ ] rememberMe?: boolean
+  - [ ] RegisterCredentials
+    - [ ] email: string
+    - [ ] password: string
+    - [ ] confirmPassword: string
+    - [ ] firstName: string
+    - [ ] lastName: string
+    - [ ] acceptTerms: boolean
+  - [ ] AuthResponse
+    - [ ] user: User
+    - [ ] tokens: AuthTokens
+    - [ ] expiresIn: number
+  - [ ] User
+    - [ ] id: string
+    - [ ] email: string
+    - [ ] firstName: string
+    - [ ] lastName: string
+    - [ ] role: UserRole
+    - [ ] isEmailVerified: boolean
+    - [ ] createdAt: Date
+    - [ ] updatedAt: Date
+  - [ ] AuthTokens
+    - [ ] accessToken: string
+    - [ ] refreshToken: string
+    - [ ] expiresAt: Date
+- [ ] Mettre à jour toutes les références aux types dans l'application
+  - [ ] Identifier tous les fichiers utilisant les anciens types
+  - [ ] Mettre à jour les imports
+  - [ ] Adapter le code existant aux nouveaux types
+  - [ ] Vérifier la compatibilité avec les API externes
+
+### 3. Réorganisation de la Structure
+- [ ] Définir une structure de dossiers claire pour le module d'authentification
+  - [ ] Créer un diagramme de la nouvelle structure
+  - [ ] Documenter les responsabilités de chaque dossier
+  - [ ] Définir les conventions de nommage
+- [ ] Déplacer tous les fichiers liés à l'authentification dans `src/modules/auth/`
+  - [ ] Créer un script de migration
+  - [ ] Mettre à jour les imports
+  - [ ] Vérifier les dépendances circulaires
+- [ ] Organiser les sous-dossiers :
+  - [ ] `components/`
+    - [ ] LoginForm/
+    - [ ] RegisterForm/
+    - [ ] ForgotPasswordForm/
+    - [ ] ResetPasswordForm/
+    - [ ] AuthLayout/
+  - [ ] `services/`
+    - [ ] auth.service.ts
+    - [ ] token.service.ts
+    - [ ] validation.service.ts
+  - [ ] `hooks/`
+    - [ ] useAuth.ts
+    - [ ] useAuthGuard.ts
+    - [ ] useAuthRedirect.ts
+  - [ ] `types/`
+    - [ ] index.ts
+    - [ ] auth.types.ts
+    - [ ] user.types.ts
+  - [ ] `utils/`
+    - [ ] token.utils.ts
+    - [ ] validation.utils.ts
+    - [ ] error.utils.ts
+  - [ ] `constants/`
+    - [ ] auth.constants.ts
+    - [ ] routes.constants.ts
+  - [ ] `context/`
+    - [ ] AuthContext.tsx
+    - [ ] AuthProvider.tsx
+
+### 4. Amélioration de la Gestion des Tokens
+- [ ] Choisir et implémenter une approche unique pour le stockage des tokens
+  - [ ] Évaluer les options (localStorage, cookies, sessionStorage)
+  - [ ] Documenter les avantages et inconvénients
+  - [ ] Implémenter la solution choisie
+- [ ] Créer un service de gestion des tokens
+  - [ ] Implémenter les méthodes de stockage
+  - [ ] Ajouter la validation des tokens
+  - [ ] Gérer le rafraîchissement automatique
+- [ ] Implémenter la rotation des tokens
+  - [ ] Créer un système de refresh token
+  - [ ] Gérer l'expiration des tokens
+  - [ ] Implémenter la révocation des tokens
+- [ ] Ajouter la gestion des tokens expirés
+  - [ ] Détecter l'expiration
+  - [ ] Gérer le rafraîchissement automatique
+  - [ ] Gérer la déconnexion automatique
+- [ ] Mettre en place la validation des tokens
+  - [ ] Vérifier la signature
+  - [ ] Valider les claims
+  - [ ] Gérer les tokens révoqués
+
+### 5. Standardisation de la Gestion des Erreurs
+- [ ] Créer des types d'erreur standardisés
+  - [ ] AuthError
+  - [ ] ValidationError
+  - [ ] NetworkError
+  - [ ] TokenError
+- [ ] Implémenter un gestionnaire d'erreurs centralisé
+  - [ ] Créer une classe ErrorHandler
+  - [ ] Implémenter les méthodes de gestion
+  - [ ] Ajouter le logging
+- [ ] Ajouter des messages d'erreur localisés
+  - [ ] Créer un fichier de traductions
+  - [ ] Implémenter le système de localisation
+  - [ ] Ajouter les messages pour chaque type d'erreur
+- [ ] Mettre en place un système de logging des erreurs
+  - [ ] Choisir un service de logging
+  - [ ] Implémenter les niveaux de log
+  - [ ] Ajouter le contexte aux logs
+- [ ] Mettre à jour tous les gestionnaires d'erreurs existants
+  - [ ] Identifier les gestionnaires existants
+  - [ ] Migrer vers le nouveau système
+  - [ ] Tester la gestion des erreurs
+
+### 6. Documentation et Tests
+- [ ] Ajouter des commentaires JSDoc pour toutes les fonctions importantes
+  - [ ] Documenter les paramètres
+  - [ ] Documenter les retours
+  - [ ] Ajouter des exemples d'utilisation
+- [ ] Créer une documentation technique du flux d'authentification
+  - [ ] Documenter le flux de connexion
+  - [ ] Documenter le flux d'inscription
+  - [ ] Documenter la gestion des tokens
+  - [ ] Documenter la gestion des erreurs
+- [ ] Écrire des tests unitaires pour le service d'authentification
+  - [ ] Tester chaque méthode
+  - [ ] Tester les cas d'erreur
+  - [ ] Tester les cas limites
+- [ ] Écrire des tests d'intégration pour les flux d'authentification
+  - [ ] Tester le flux complet de connexion
+  - [ ] Tester le flux complet d'inscription
+  - [ ] Tester la gestion des tokens
+- [ ] Créer des exemples d'utilisation dans la documentation
+  - [ ] Exemples de code
+  - [ ] Cas d'utilisation courants
+  - [ ] Bonnes pratiques
+
+### 7. Sécurité
+- [ ] Implémenter la protection CSRF
+  - [ ] Générer des tokens CSRF
+  - [ ] Valider les tokens
+  - [ ] Gérer l'expiration
+- [ ] Ajouter la validation des entrées
+  - [ ] Valider les emails
+  - [ ] Valider les mots de passe
+  - [ ] Sanitizer les entrées
+- [ ] Mettre en place la limitation de taux (rate limiting)
+  - [ ] Configurer les limites
+  - [ ] Implémenter le compteur
+  - [ ] Gérer les dépassements
+- [ ] Configurer les en-têtes de sécurité
+  - [ ] Content-Security-Policy
+  - [ ] X-Frame-Options
+  - [ ] X-Content-Type-Options
+  - [ ] Strict-Transport-Security
+- [ ] Ajouter la journalisation des tentatives d'authentification
+  - [ ] Logger les tentatives de connexion
+  - [ ] Logger les échecs
+  - [ ] Détecter les patterns suspects
+- [ ] Implémenter la protection contre les attaques par force brute
+  - [ ] Bloquer les IPs après X tentatives
+  - [ ] Ajouter un délai entre les tentatives
+  - [ ] Notifier l'administrateur
+- [ ] Mettre en place la validation des sessions
+  - [ ] Vérifier l'activité
+  - [ ] Gérer la déconnexion automatique
+  - [ ] Permettre la déconnexion à distance
+
+## Problèmes Critiques du Formulaire d'Inscription
+
+### 1. Correction des Incohérences de Types
+- [ ] Unifier la structure des données d'inscription
+  - [ ] Définir une interface unique pour les données d'inscription
+  - [ ] Mettre à jour le schéma de validation
+  - [ ] Adapter le service d'authentification
+  - [ ] Mettre à jour les composants du formulaire
+
+### 2. Nettoyage des Composants Dupliqués
+- [ ] Identifier et supprimer les composants dupliqués
+  - [ ] Garder uniquement la version dans `src/modules/auth/components/`
+  - [ ] Supprimer les versions dans `src/pages/auth/` et `frontend/src/features/auth/`
+  - [ ] Mettre à jour les imports dans toute l'application
+  - [ ] Vérifier qu'aucune fonctionnalité n'est perdue
+
+### 3. Amélioration de la Validation
+- [ ] Mettre à jour le schéma de validation
+  - [ ] Ajouter la validation des champs firstName et lastName
+  - [ ] Améliorer les messages d'erreur
+  - [ ] Ajouter la validation côté client
+  - [ ] Implémenter la validation côté serveur
+
+### 4. Gestion des Erreurs
+- [ ] Améliorer la gestion des erreurs du formulaire
+  - [ ] Ajouter des messages d'erreur spécifiques
+  - [ ] Implémenter l'affichage des erreurs de validation
+  - [ ] Gérer les erreurs réseau
+  - [ ] Ajouter des retours visuels pour l'utilisateur
+
+### 5. Tests du Formulaire
+- [ ] Écrire des tests pour le formulaire d'inscription
+  - [ ] Tests unitaires pour la validation
+  - [ ] Tests d'intégration pour le flux complet
+  - [ ] Tests des cas d'erreur
+  - [ ] Tests de l'interface utilisateur
+
+## Priorités Mises à Jour
+1. Problèmes Critiques du Formulaire d'Inscription
+2. Consolidation des Services d'Authentification
+3. Standardisation des Types
+4. Amélioration de la Gestion des Tokens
+5. Standardisation de la Gestion des Erreurs
+6. Réorganisation de la Structure
+7. Documentation et Tests
+8. Sécurité
+
+## Estimation du Temps Mise à Jour
+- Problèmes du Formulaire d'Inscription : 2-3 jours
+- Consolidation des Services : 3-4 jours
+- Standardisation des Types : 2-3 jours
+- Gestion des Tokens : 2-3 jours
+- Gestion des Erreurs : 2-3 jours
+- Réorganisation : 2-3 jours
+- Documentation et Tests : 3-4 jours
+- Sécurité : 4-5 jours
+
+Total estimé : 20-28 jours de travail 
