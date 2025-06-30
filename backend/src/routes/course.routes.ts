@@ -1,8 +1,10 @@
 import express from 'express';
 import { authMiddleware } from '../common/middlewares/auth.middleware';
-import { CourseDto } from '../models/Course';
+// import { CourseDto } from '../models/Course'; // We'll use FormationController which returns IFormation data
+import { FormationController } from '../controllers/formation.controller.ts';
 
 const router = express.Router();
+const formationController = new FormationController();
 
 /**
  * @swagger
@@ -31,13 +33,11 @@ const router = express.Router();
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/CourseDto'
+ *                 $ref: '#/components/schemas/Formation' // Adjusted for clarity, though DTO mapping might be desired
  *       500:
  *         description: Erreur serveur
  */
-router.get('/', async (req, res) => {
-  // Implementation
-});
+router.get('/', formationController.getAllFormations);
 
 /**
  * @swagger
@@ -59,15 +59,13 @@ router.get('/', async (req, res) => {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/CourseDto'
+ *               $ref: '#/components/schemas/Formation' // Adjusted for clarity
  *       404:
  *         description: Cours non trouvé
  *       500:
  *         description: Erreur serveur
  */
-router.get('/:id', async (req, res) => {
-  // Implementation
-});
+router.get('/:id', formationController.getFormationById);
 
 /**
  * @swagger
@@ -90,7 +88,7 @@ router.get('/:id', async (req, res) => {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/CourseDto'
+ *               $ref: '#/components/schemas/Formation' // Adjusted for clarity
  *       401:
  *         description: Non autorisé
  *       403:
@@ -130,7 +128,7 @@ router.post('/', authMiddleware, async (req, res) => {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/CourseDto'
+ *               $ref: '#/components/schemas/Formation' // Adjusted for clarity
  *       401:
  *         description: Non autorisé
  *       403:

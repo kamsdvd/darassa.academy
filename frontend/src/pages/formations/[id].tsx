@@ -1,62 +1,107 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import { useFormations } from '../../hooks/useFormations';
-import Layout from '../../components/layout/Layout';
-import LoadingFallback from '../../components/common/LoadingFallback';
-import { Clock, Calendar, MapPin, Users, BookOpen, CheckCircle, ChevronRight } from 'lucide-react';
-import { useStore } from '../../store/useStore';
+import { useFormationById } from '../../../hooks/useFormations.ts'; // Corrected hook import
+import Layout from '../../components/layout/Layout.tsx'; // Added .tsx
+import LoadingFallback from '../../components/common/LoadingFallback.tsx'; // Added .tsx
+import { Clock, Calendar, MapPin, Users, BookOpen, CheckCircle, ChevronRight, AlertCircle } from 'lucide-react'; // Added AlertCircle
+import { useStore } from '../../store/useStore.ts'; // Added .ts
 
 const FormationDetail: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
-  const { user } = useStore();
+  const { user } = useStore(); // For enrollment button state
   const [activeTab, setActiveTab] = useState('overview');
 
-  const { getFormationById } = useFormations();
-  const { data: formation, isLoading, error } = getFormationById(id as string);
+  // Use the correct hook for fetching a single formation by ID
+  const { data: formation, isLoading, isError, error } = useFormationById(id as string | undefined);
 
-  if (isLoading) return <LoadingFallback />;
-  if (error) return <div>Une erreur est survenue</div>;
-  if (!formation) return <div>Formation non trouvée</div>;
+  if (isLoading) return <LoadingFallback message="Chargement de la formation..." />;
+  if (isError) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8 text-center">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-semibold text-red-600 mb-2">Erreur de chargement</h2>
+          <p className="text-gray-600">{error?.message || "Une erreur est survenue lors de la récupération des détails de la formation."}</p>
+          <button
+            onClick={() => router.back()}
+            className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Retour
+          </button>
+        </div>
+      </Layout>
+    );
+  }
+  if (!formation && !isLoading) { // Handle case where formation is not found after loading
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8 text-center">
+          <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-semibold text-yellow-600 mb-2">Formation non trouvée</h2>
+          <p className="text-gray-600">Désolé, la formation que vous cherchez n'existe pas ou plus.</p>
+          <button
+            onClick={() => router.push('/formations')} // Navigate to list page
+            className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Voir toutes les formations
+          </button>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Ensure formation is not null before proceeding (already handled by above checks but good for TS)
+  if (!formation) return null;
 
   const handleEnroll = async () => {
     if (!user) {
-      router.push('/connexion?redirect=' + encodeURIComponent(router.asPath));
+      router.push(`/auth/Connexion?redirect=${encodeURIComponent(router.asPath)}`); // Corrected path
       return;
     }
-    // TODO: Implement enrollment logic
+    // TODO: Implement enrollment logic using formation.id
+    console.log(`Attempting to enroll in formation: ${formation.id}`);
+    alert(`Logique d'inscription pour "${formation.title}" à implémenter.`);
   };
+
+  // Fallback image if imageUrl is not available
+  const fallbackImage = "https://via.placeholder.com/1200x600/2563eb/ffffff?text=Darassa+Academy";
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
         {/* En-tête de la formation */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-          <div className="relative h-96">
+          <div className="relative h-[300px] md:h-[400px] lg:h-[500px]"> {/* Responsive height */}
             <img
-              src={formation.thumbnail}
+              src={formation.imageUrl || fallbackImage}
               alt={formation.title}
               className="w-full h-full object-cover"
+              onError={(e) => { (e.target as HTMLImageElement).src = fallbackImage; }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-              <h1 className="text-4xl font-bold mb-4">{formation.title}</h1>
-              <div className="flex flex-wrap gap-4">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white">
+              <h1 className="text-3xl md:text-4xl font-bold mb-2 md:mb-4">{formation.title}</h1>
+              <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm md:text-base">
                 <div className="flex items-center">
-                  <Clock className="h-5 w-5 mr-2" />
+                  <Clock className="h-5 w-5 mr-2 flex-shrink-0" />
                   <span>{formation.duration}</span>
                 </div>
                 <div className="flex items-center">
-                  <Calendar className="h-5 w-5 mr-2" />
-                  <span>{formation.startDate}</span>
+                  <Calendar className="h-5 w-5 mr-2 flex-shrink-0" />
+                  {/* Using lastUpdated as a proxy for date, as startDate is not mapped yet */}
+                  <span>Dernière MàJ: {formation.lastUpdated}</span>
                 </div>
-                <div className="flex items-center">
+                {/* formation.location is not in current mapped type */}
+                {/* <div className="flex items-center">
                   <MapPin className="h-5 w-5 mr-2" />
-                  <span>{formation.location}</span>
-                </div>
+                  <span>{formation.location || 'En ligne'}</span>
+                </div> */}
                 <div className="flex items-center">
-                  <Users className="h-5 w-5 mr-2" />
-                  <span>{formation.maxStudents} places</span>
+                  <Users className="h-5 w-5 mr-2 flex-shrink-0" />
+                  <span>{formation.enrolledStudents} participants</span>
+                  {/* This uses enrolledStudents from mapping, which is based on inscriptions.length */}
+                  {/* For placesDisponibles, it would be formation.placesDisponibles from backend if directly mapped */}
                 </div>
               </div>
             </div>
