@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link'; // For navigation
-import { useFormations, FrontendPaginatedFormations, useDeleteFormation } from '../../../hooks/useFormations.ts'; // Adjusted path, added useDeleteFormation
-import { Formation } from '../../../types/formation.ts'; // Adjusted path
+import { useFormations, FrontendPaginatedFormations, useDeleteFormation } from '../../hooks/useFormations.ts'; // CORRECTED PATH
+import { Formation } from '../../types/formation.ts'; // CORRECTED PATH
 import { Trash2 } from 'lucide-react'; // Icon for delete button
 
 // Categories might become dynamic later, for now static for the filter

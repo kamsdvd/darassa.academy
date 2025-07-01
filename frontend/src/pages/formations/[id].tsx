@@ -1,10 +1,10 @@
 import React, { useState, Fragment } from 'react'; // Added Fragment
 import { useRouter } from 'next/router';
 import { useFormationById } from '../../../hooks/useFormations.ts'; // Corrected hook import
-import Layout from '../../components/layout/Layout.tsx'; // Added .tsx
-import LoadingFallback from '../../components/common/LoadingFallback.tsx'; // Added .tsx
+import Layout from '../../../components/layout/Layout.tsx'; // CORRECTED PATH
+import LoadingFallback from '../../../components/common/LoadingFallback.tsx'; // CORRECTED PATH
 import { Clock, Calendar, MapPin, Users, BookOpen, CheckCircle, ChevronRight, AlertCircle, Video, UsersRound, MapPinned } from 'lucide-react'; // Added Video, UsersRound, MapPinned
-import { useStore } from '../../store/useStore.ts'; // Added .ts
+import { useStore } from '../../../store/useStore.ts'; // Added .ts, path seems ok from pages root
 import { SessionFrontend } from '../../../types/formation.ts'; // Import SessionFrontend
 
 
