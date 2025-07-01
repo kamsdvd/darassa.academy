@@ -1,8 +1,23 @@
 import { Request, Response } from 'express';
+import { plainToClass } from 'class-transformer';
+import { validate, ValidationError } from 'class-validator';
 import { FormationService } from '../services/formation.service.ts';
-import { IFormation } from '../models/formation.model.ts'; // For type hinting if needed
+import { IFormation } from '../models/formation.model.ts';
+import { CreateFormationDto } from '../dtos/formation/create-formation.dto.ts';
+import { UpdateFormationDto } from '../dtos/formation/update-formation.dto.ts';
 
 const formationService = new FormationService();
+
+// Helper function to format validation errors
+const formatValidationErrors = (errors: ValidationError[]): any => {
+  return errors.map(err => {
+    return {
+      property: err.property,
+      constraints: err.constraints,
+      children: err.children ? formatValidationErrors(err.children) : [], // Handle nested errors
+    };
+  });
+};
 
 export class FormationController {
   public async getAllFormations(req: Request, res: Response): Promise<void> {
@@ -54,23 +69,24 @@ export class FormationController {
   }
 
   public async createFormation(req: Request, res: Response): Promise<void> {
-    try {
-      // Basic validation: Ensure body is not empty
-      if (Object.keys(req.body).length === 0) {
-        res.status(400).json({ success: false, message: "Le corps de la requête ne peut pas être vide." });
-        return;
-      }
-      // TODO: Add more robust validation (e.g., check for required fields like titre, description, code, etc.)
-      // For example, using a DTO with class-validator if in a full NestJS setup.
+    const createFormationDto = plainToClass(CreateFormationDto, req.body);
+    const errors = await validate(createFormationDto, { skipMissingProperties: false, whitelist: true, forbidNonWhitelisted: true });
 
-      const formationData: Partial<IFormation> = req.body;
-      const newFormation = await formationService.create(formationData);
+    if (errors.length > 0) {
+      res.status(400).json({ success: false, message: "Erreur de validation des données.", errors: formatValidationErrors(errors) });
+      return;
+    }
+
+    try {
+      // Pass validated DTO data to the service.
+      // The service expects Partial<IFormation>, and CreateFormationDto is compatible.
+      const newFormation = await formationService.create(createFormationDto as Partial<IFormation>);
       res.status(201).json({ success: true, message: "Formation créée avec succès.", data: newFormation });
     } catch (error) {
       console.error('Error in createFormation:', error);
-      if (error.name === 'ValidationError') { // Mongoose validation error
-        res.status(400).json({ success: false, message: "Erreur de validation.", errors: error.errors });
-      } else if (error.code === 11000) { // MongoError: Duplicate key
+      if (error.name === 'ValidationError') { // Mongoose schema validation error (should be caught by DTO, but as fallback)
+        res.status(400).json({ success: false, message: "Erreur de validation (schéma base de données).", errors: error.errors });
+      } else if (error.code === 11000) { // MongoError: Duplicate key (e.g. for 'code' field)
         res.status(409).json({ success: false, message: "Une formation avec ce code existe déjà." });
       } else {
         res.status(500).json({ success: false, message: 'Erreur serveur lors de la création de la formation.' });
@@ -79,16 +95,33 @@ export class FormationController {
   }
 
   public async updateFormation(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      if (Object.keys(req.body).length === 0) {
-        res.status(400).json({ success: false, message: "Le corps de la requête ne peut pas être vide pour une mise à jour." });
-        return;
-      }
-      // TODO: Add more robust validation for req.body
+    const { id } = req.params;
+    const updateFormationDto = plainToClass(UpdateFormationDto, req.body);
+    // For updates, skipMissingProperties should probably be true if not all fields are sent.
+    // However, if forbidNonWhitelisted is true, unknown properties will still cause an error.
+    // Whitelist ensures that only properties defined in DTO are passed through.
+    const errors = await validate(updateFormationDto, { skipMissingProperties: false, whitelist: true, forbidNonWhitelisted: true });
 
-      const formationData: Partial<IFormation> = req.body;
-      const updatedFormation = await formationService.update(id, formationData);
+    if (errors.length > 0) {
+      res.status(400).json({ success: false, message: "Erreur de validation des données pour la mise à jour.", errors: formatValidationErrors(errors) });
+      return;
+    }
+
+    // Ensure that if the body is empty after DTO transformation (e.g. only non-whitelisted props were sent),
+    // we don't proceed with an empty update.
+    if (Object.keys(updateFormationDto).length === 0 && Object.keys(req.body).length > 0) {
+        res.status(400).json({ success: false, message: "Aucun champ valide fourni pour la mise à jour." });
+        return;
+    }
+    if (Object.keys(updateFormationDto).length === 0 && Object.keys(req.body).length === 0) {
+         res.status(400).json({ success: false, message: "Le corps de la requête ne peut pas être vide pour une mise à jour." });
+        return;
+    }
+
+
+    try {
+      // Pass validated DTO data. UpdateFormationDto is Partial, compatible with service's Partial<IFormation>.
+      const updatedFormation = await formationService.update(id, updateFormationDto as Partial<IFormation>);
 
       if (!updatedFormation) {
         res.status(404).json({ success: false, message: 'Formation non trouvée pour la mise à jour.' });
@@ -96,15 +129,14 @@ export class FormationController {
       }
       res.status(200).json({ success: true, message: "Formation mise à jour avec succès.", data: updatedFormation });
     } catch (error) {
-      console.error(`Error in updateFormation for id ${req.params.id}:`, error);
-      if (error.name === 'ValidationError') {
-        res.status(400).json({ success: false, message: "Erreur de validation.", errors: error.errors });
-      } else if (error.kind === 'ObjectId') {
+      console.error(`Error in updateFormation for id ${id}:`, error);
+      if (error.name === 'ValidationError') { // Mongoose schema validation
+        res.status(400).json({ success: false, message: "Erreur de validation (schéma base de données).", errors: error.errors });
+      } else if (error.kind === 'ObjectId') { // Mongoose error for bad ID format
         res.status(400).json({ success: false, message: 'ID de formation invalide.' });
-      } else if (error.code === 11000) { // Duplicate key error, e.g. if trying to update 'code' to one that already exists
+      } else if (error.code === 11000) { // MongoError: Duplicate key
         res.status(409).json({ success: false, message: "Conflit de données, le code de formation doit être unique." });
-      }
-      else {
+      } else {
         res.status(500).json({ success: false, message: 'Erreur serveur lors de la mise à jour de la formation.' });
       }
     }
