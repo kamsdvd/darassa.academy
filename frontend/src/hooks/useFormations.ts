@@ -177,6 +177,95 @@ const mapBackendFormationToFrontend = (backendFormation: any): Formation => {
 };
 // --- End Helper: Mapper function ---
 
+
+// --- Helper: Inverse Mapper function (Frontend Formation Data -> Backend Payload) ---
+export const mapFrontendFormationToBackendPayload = (frontendData: Partial<Formation>): any => {
+  const payload: any = {};
+
+  // Direct string mappings or simple types
+  if (frontendData.title !== undefined) payload.titre = frontendData.title;
+  if (frontendData.description !== undefined) payload.description = frontendData.description;
+  if (frontendData.category !== undefined) payload.category = frontendData.category; // Assumes backend now expects 'category'
+  if (frontendData.price !== undefined) payload.prix = frontendData.price;
+  if (frontendData.prerequisites !== undefined) payload.prerequis = frontendData.prerequisites;
+  if (frontendData.objectives !== undefined) payload.objectifs = frontendData.objectives;
+  if (frontendData.features !== undefined) payload.competences = frontendData.features; // 'features' (frontend) maps to 'competences' (backend)
+  if (frontendData.googleMeetLink !== undefined) payload.googleMeetLink = frontendData.googleMeetLink;
+
+  // Mappings requiring transformation
+  if (frontendData.duration !== undefined) {
+    const durationMatch = frontendData.duration.match(/^(\d+)/); // Extract number from "X heures"
+    if (durationMatch && durationMatch[1]) {
+      payload.duree = parseInt(durationMatch[1], 10);
+    }
+  }
+
+  if (frontendData.level !== undefined) {
+    switch (frontendData.level.toLowerCase()) {
+      case 'débutant': payload.niveau = 'debutant'; break;
+      case 'intermédiaire': payload.niveau = 'intermediaire'; break;
+      case 'avancé': payload.niveau = 'avance'; break; // Ou 'expert' si le formulaire le permet
+      default: // Ne rien faire ou loguer une erreur si la valeur n'est pas reconnue
+        break;
+    }
+  }
+
+  if (frontendData.syllabus !== undefined) {
+    payload.modules = frontendData.syllabus.map(mod => ({
+      titre: mod.title,
+      description: mod.title, // Placeholder: IModule backend a 'description', frontend syllabus non. Utiliser titre comme description?
+      duree: 1, // Placeholder: IModule backend a 'duree', frontend syllabus non. Mettre une durée par défaut?
+      contenu: mod.content,
+      // evaluation: [] // Placeholder: IModule backend a 'evaluation', frontend syllabus non.
+    }));
+  }
+
+  // Champs qui seraient typiquement des IDs et que le formulaire devrait fournir comme tels
+  // s'ils sont modifiables via ce payload. Sinon, ils sont gérés par d'autres mécanismes.
+  // Exemple: si le formulaire permet de changer le centre de formation via un select d'IDs.
+  // if (frontendData.centreFormationId !== undefined) payload.centreFormation = frontendData.centreFormationId;
+  // if (frontendData.formateurIds !== undefined) payload.formateurs = frontendData.formateurIds;
+
+  // Champs de date (s'attendant à un format ISO string pour le backend DTO)
+  if (frontendData.startDate !== undefined) {
+    try {
+      payload.dateDebut = new Date(frontendData.startDate).toISOString();
+    } catch (e) { /* ignorer si la date n'est pas valide pour le payload */ }
+  }
+  if (frontendData.endDate !== undefined) {
+     try {
+      payload.dateFin = new Date(frontendData.endDate).toISOString();
+    } catch (e) { /* ignorer */ }
+  }
+
+  if (frontendData.maxStudents !== undefined) payload.placesDisponibles = frontendData.maxStudents;
+  if (frontendData.status !== undefined) { // Frontend status est déjà mappé en string lisible
+     switch (frontendData.status.toLowerCase()) {
+      case 'planifiée': payload.statut = 'planifiee'; break;
+      case 'en cours': payload.statut = 'en_cours'; break;
+      case 'terminée': payload.statut = 'terminee'; break;
+      case 'annulée': payload.statut = 'annulee'; break;
+      default: // Ne rien faire ou loguer
+        break;
+    }
+  }
+
+  // Le champ 'code' est important pour le backend (unique, requis à la création)
+  // Il faudrait s'assurer que le formulaire frontend le gère bien.
+  // Si frontendData est un objet Formation complet venant d'un GET, il n'a pas 'code'.
+  // Si c'est un formulaire de création, il devrait avoir 'code'.
+  // Ce mapping suppose que si 'code' est pertinent, il est dans frontendData.
+  if ((frontendData as any).code !== undefined) payload.code = (frontendData as any).code;
+
+
+  // Ne pas envoyer les champs qui sont purement frontend ou calculés (id, imageUrl, instructor object, rating, reviews, enrolledStudents, lastUpdated, language)
+  // Sauf si le backend a un moyen de les interpréter (ex: image upload séparé).
+
+  return payload;
+};
+// --- End Helper: Inverse Mapper function ---
+
+
 // Hook to fetch multiple formations
 export const useFormations = (params?: FormationParams): UseQueryResult<FrontendPaginatedFormations, Error> => {
   const formationService = FormationService.getInstance();
