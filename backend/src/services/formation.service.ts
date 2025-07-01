@@ -15,14 +15,14 @@ export class FormationService {
     const skip = (page - 1) * limit;
 
     const query: any = {};
-    if (category) {
-      // Assuming 'category' is a field in IFormation or needs to be mapped
-      // For now, let's assume it's a direct field or we'll adjust later
-      // query.category = category;
-      console.warn("Category filter not yet implemented in Formation model/service");
+    if (category && typeof category === 'string' && category.trim() !== '') {
+      // Utiliser une expression régulière pour une recherche insensible à la casse et partielle
+      // query.category = new RegExp(category, 'i');
+      // Ou pour une correspondance exacte (sensible à la casse par défaut):
+      query.category = category.trim();
     }
-    if (level) {
-      query.niveau = level; // 'niveau' exists in IFormation
+    if (level && typeof level === 'string' && level.trim() !== '') {
+      query.niveau = level.trim(); // 'niveau' exists in IFormation
     }
 
     const totalFormations = await Formation.countDocuments(query);

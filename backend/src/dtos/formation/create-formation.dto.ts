@@ -64,6 +64,11 @@ export class CreateFormationDto {
   // L'unicité du code sera gérée par l'index de la base de données, mais un check service pourrait exister.
   code: string;
 
+  @IsString({ message: "La catégorie doit être une chaîne de caractères." })
+  @IsNotEmpty({ message: "La catégorie est requise." })
+  @MaxLength(100, { message: "La catégorie ne peut pas dépasser 100 caractères."})
+  category: string;
+
   @IsNumber({}, { message: "La durée doit être un nombre (en heures)." })
   @Min(1, { message: "La durée doit être d'au moins 1 heure." })
   duree: number;

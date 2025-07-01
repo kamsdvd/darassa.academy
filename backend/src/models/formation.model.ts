@@ -44,6 +44,7 @@ export interface IFormation extends Document {
   titre: string;
   description: string;
   code: string;
+  category: string; // Nouveau champ
   duree: number;
   niveau: string;
   prix: number;
@@ -83,6 +84,12 @@ const formationSchema = new Schema({
     required: true,
     unique: true,
     trim: true
+  },
+  category: { // Nouveau champ
+    type: String,
+    required: true,
+    trim: true,
+    index: true // Ajout d'un index pour le filtrage
   },
   duree: {
     type: Number,

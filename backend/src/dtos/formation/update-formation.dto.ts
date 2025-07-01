@@ -62,6 +62,12 @@ export class UpdateFormationDto {
   code?: string;
 
   @IsOptional()
+  @IsString({ message: "La catégorie doit être une chaîne de caractères." })
+  @IsNotEmpty({ message: "La catégorie ne peut pas être vide si elle est fournie."})
+  @MaxLength(100, { message: "La catégorie ne peut pas dépasser 100 caractères."})
+  category?: string;
+
+  @IsOptional()
   @IsNumber({}, { message: "La durée doit être un nombre (en heures)." })
   @Min(1, { message: "La durée doit être d'au moins 1 heure." })
   duree?: number;
