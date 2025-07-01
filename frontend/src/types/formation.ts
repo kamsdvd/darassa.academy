@@ -37,4 +37,24 @@ export interface Formation {
 
   // features could be mapped from IFormation.competences or a dedicated field
   features?: string[];
+
+  sessions?: SessionFrontend[]; // Nouveau champ pour les sessions
+}
+
+// Nouvelle interface pour les données de session formatées pour le frontend
+export interface SessionFrontend {
+  id: string;
+  titre: string;
+  description?: string;
+  type: 'presentiel' | 'hybride' | 'en_ligne' | string; // string comme fallback
+  dateDebutFormatted: string; // ex: "Lundi 15 juillet 2024 à 10h00"
+  dureeFormatted: string; // ex: "2h30" ou "90 minutes"
+  formateurName?: string;
+  formateurAvatar?: string;
+  lienMeet?: string; // URL directe pour rejoindre
+  salle?: { // Optionnel, pour présentiel/hybride
+    nom: string;
+    capacite?: number;
+  };
+  // On pourrait ajouter d'autres champs si nécessaire: statut, participants (résumé), etc.
 } 

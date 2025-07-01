@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react'; // Added Fragment
 import { useRouter } from 'next/router';
 import { useFormationById } from '../../../hooks/useFormations.ts'; // Corrected hook import
 import Layout from '../../components/layout/Layout.tsx'; // Added .tsx
 import LoadingFallback from '../../components/common/LoadingFallback.tsx'; // Added .tsx
-import { Clock, Calendar, MapPin, Users, BookOpen, CheckCircle, ChevronRight, AlertCircle } from 'lucide-react'; // Added AlertCircle
+import { Clock, Calendar, MapPin, Users, BookOpen, CheckCircle, ChevronRight, AlertCircle, Video, UsersRound, MapPinned } from 'lucide-react'; // Added Video, UsersRound, MapPinned
 import { useStore } from '../../store/useStore.ts'; // Added .ts
+import { SessionFrontend } from '../../../types/formation.ts'; // Import SessionFrontend
+
 
 const FormationDetail: React.FC = () => {
   const router = useRouter();
@@ -114,8 +116,8 @@ const FormationDetail: React.FC = () => {
             {/* Onglets */}
             <div className="bg-white rounded-lg shadow-md mb-8">
               <div className="border-b border-gray-200">
-                <nav className="flex -mb-px">
-                  {['overview', 'curriculum', 'instructor', 'reviews'].map((tab) => (
+                <nav className="flex -mb-px overflow-x-auto"> {/* Added overflow-x-auto for smaller screens */}
+                  {['overview', 'curriculum', 'sessions', 'instructor', 'reviews'].map((tab) => ( // Added 'sessions' tab
                     <button
                       key={tab}
                       className={`py-4 px-6 text-sm font-medium ${
@@ -153,21 +155,86 @@ const FormationDetail: React.FC = () => {
                   <div>
                     <h2 className="text-2xl font-bold mb-4">Programme de la formation</h2>
                     <div className="space-y-4">
-                      {formation.curriculum?.map((module, index) => (
-                        <div key={index} className="border rounded-lg p-4">
-                          <h3 className="text-lg font-semibold mb-2">{module.title}</h3>
-                          <ul className="space-y-2">
-                            {module.lessons.map((lesson, lessonIndex) => (
-                              <li key={lessonIndex} className="flex items-center text-gray-600">
-                                <ChevronRight className="h-4 w-4 mr-2" />
-                                <span>{lesson.title}</span>
-                                <span className="ml-auto text-sm text-gray-500">{lesson.duration}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
+                      {/* Ensure formation.syllabus exists and is an array before mapping */}
+                      {Array.isArray(formation.syllabus) && formation.syllabus.length > 0 ? (
+                        formation.syllabus.map((module, index) => (
+                          <div key={index} className="border rounded-lg p-4">
+                            <h3 className="text-lg font-semibold mb-2">{module.title}</h3>
+                            {/* Ensure module.content exists and is an array */}
+                            {Array.isArray(module.content) && module.content.length > 0 ? (
+                              <ul className="space-y-2">
+                                {module.content.map((lessonTitle, lessonIndex) => (
+                                  <li key={lessonIndex} className="flex items-center text-gray-600">
+                                    <ChevronRight className="h-4 w-4 mr-2 flex-shrink-0" />
+                                    <span>{lessonTitle}</span>
+                                    {/* Duration per lesson is not in current simplified syllabus mapping */}
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : <p className="text-gray-500 text-sm">Contenu du module bientôt disponible.</p>}
+                          </div>
+                        ))
+                      ) : <p className="text-gray-500">Le programme détaillé sera bientôt disponible.</p>}
                     </div>
+                  </div>
+                )}
+
+                {activeTab === 'sessions' && (
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">Sessions Planifiées</h2>
+                    {Array.isArray(formation.sessions) && formation.sessions.length > 0 ? (
+                      <div className="space-y-6">
+                        {formation.sessions.map((session: SessionFrontend) => (
+                          <div key={session.id} className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-gray-50">
+                            <h3 className="text-xl font-semibold text-primary-700 mb-2">{session.titre}</h3>
+                            {session.description && <p className="text-gray-600 mb-3 text-sm whitespace-pre-wrap">{session.description}</p>}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-800">
+                              <div className="flex items-center">
+                                <Calendar className="h-4 w-4 mr-2 text-primary-500 flex-shrink-0" />
+                                <span>{session.dateDebutFormatted}</span>
+                              </div>
+                              <div className="flex items-center">
+                                <Clock className="h-4 w-4 mr-2 text-primary-500 flex-shrink-0" />
+                                <span>Durée : {session.dureeFormatted}</span>
+                              </div>
+                              <div className="flex items-center capitalize">
+                                {session.type === 'en_ligne' && <Video className="h-4 w-4 mr-2 text-green-500 flex-shrink-0" />}
+                                {session.type === 'presentiel' && <MapPinned className="h-4 w-4 mr-2 text-blue-500 flex-shrink-0" />}
+                                {session.type === 'hybride' && <UsersRound className="h-4 w-4 mr-2 text-purple-500 flex-shrink-0" />}
+                                <span>Type : <span className="font-medium">{session.type}</span></span>
+                              </div>
+                              {session.formateurName && (
+                                <div className="flex items-center">
+                                  <Users className="h-4 w-4 mr-2 text-primary-500 flex-shrink-0" />
+                                  <span>Formateur : {session.formateurName}</span>
+                                </div>
+                              )}
+                              {session.salle?.nom && (
+                                <div className="flex items-center">
+                                  <MapPin className="h-4 w-4 mr-2 text-primary-500 flex-shrink-0" />
+                                  <span>Salle : {session.salle.nom} {session.salle.capacite ? `(${session.salle.capacite} places)` : ''}</span>
+                                </div>
+                              )}
+                            </div>
+                            {(session.type === 'en_ligne' || session.type === 'hybride') && session.lienMeet && (
+                              <div className="mt-4">
+                                <a
+                                  href={session.lienMeet}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                >
+                                  <Video className="h-5 w-5 mr-2" />
+                                  Rejoindre la session en ligne
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500">Aucune session planifiée pour le moment.</p>
+                    )}
                   </div>
                 )}
 

@@ -1,6 +1,6 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { FormationService, FormationParams, PaginatedResponse as ServicePaginatedResponse } from '../services/formationService.ts';
-import { Formation } from '../types/formation.ts'; // Frontend specific Formation type
+import { Formation, SessionFrontend } from '../types/formation.ts'; // Frontend specific Formation type, import SessionFrontend
 
 // Define the frontend's expected paginated response structure
 export interface FrontendPaginatedFormations {
@@ -173,6 +173,78 @@ const mapBackendFormationToFrontend = (backendFormation: any): Formation => {
     maxStudents: typeof placesDisponibles === 'number' ? placesDisponibles : 0,
     status: statusString,
     features: features, // Mapped from competences
+
+    // Map sessions if they exist
+    sessions: Array.isArray(backendFormation.sessions)
+      ? backendFormation.sessions.map(mapBackendSessionToFrontend)
+      : undefined,
+  };
+};
+
+// --- Helper: Mapper function for ISession (backend) to SessionFrontend ---
+const mapBackendSessionToFrontend = (backendSession: any): SessionFrontend => {
+  if (!backendSession) {
+    // Should ideally not happen if called from mapBackendFormationToFrontend's check
+    return {
+      id: '', titre: 'Session non disponible', type: 'N/A',
+      dateDebutFormatted: 'N/A', dureeFormatted: 'N/A'
+    };
+  }
+
+  const {
+    _id,
+    titre,
+    description,
+    type,
+    dateDebut,
+    duree, // en minutes
+    formateur, // Populated: { firstName, lastName, email, profilePicture }
+    lienMeet,
+    salle,
+  } = backendSession;
+
+  // Format dateDebut
+  let dateDebutFormatted = 'Date non spécifiée';
+  if (dateDebut) {
+    try {
+      dateDebutFormatted = new Date(dateDebut).toLocaleString('fr-FR', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+    } catch (e) { /* ignore */ }
+  }
+
+  // Format duree
+  let dureeFormatted = 'Durée non spécifiée';
+  if (typeof duree === 'number' && duree > 0) {
+    const hours = Math.floor(duree / 60);
+    const minutes = duree % 60;
+    if (hours > 0 && minutes > 0) {
+      dureeFormatted = `${hours}h${minutes < 10 ? '0' : ''}${minutes}`;
+    } else if (hours > 0) {
+      dureeFormatted = `${hours}h`;
+    } else if (minutes > 0) {
+      dureeFormatted = `${minutes} min`;
+    }
+  }
+
+  let formateurName: string | undefined = undefined;
+  let formateurAvatar: string | undefined = '/default-avatar.png'; // Default avatar
+  if (formateur) {
+    formateurName = (`${formateur.firstName || ''} ${formateur.lastName || ''}`).trim() || undefined;
+    formateurAvatar = formateur.profilePicture || '/default-avatar.png';
+  }
+
+  return {
+    id: _id?.toString() || backendSession.id || '',
+    titre: titre || 'Session sans titre',
+    description: description || undefined,
+    type: type || 'N/A',
+    dateDebutFormatted: dateDebutFormatted,
+    dureeFormatted: dureeFormatted,
+    formateurName: formateurName,
+    formateurAvatar: formateurAvatar,
+    lienMeet: lienMeet || undefined,
+    salle: salle ? { nom: salle.nom || 'Salle non spécifiée', capacite: salle.capacite } : undefined,
   };
 };
 // --- End Helper: Mapper function ---
