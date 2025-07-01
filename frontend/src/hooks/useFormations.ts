@@ -205,7 +205,117 @@ export const useFormationById = (id: string | undefined): UseQueryResult<Formati
   );
 };
 
-// TODO: Add hooks for mutations (create, update, delete) using useMutation.
-// These would call FormationService methods and handle cache invalidation.
-// Example: queryClient.invalidateQueries(['formations']) after a successful mutation.
+import { useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
+
+// ... (keep existing useQuery hooks and mapBackendFormationToFrontend function)
+
+// Hook for Creating a Formation
+export const useCreateFormation = (): UseMutationResult<
+  Formation, // Type of data returned by the mutationFn
+  Error, // Type of error
+  Partial<Formation>, // Type of variables passed to the mutate function (formData)
+  unknown // Type of context (optional)
+> => {
+  const queryClient = useQueryClient();
+  const formationService = FormationService.getInstance();
+
+  return useMutation<Formation, Error, Partial<Formation>>(
+    async (formationData: Partial<Formation>) => {
+      // Rappel: formationService.createFormation attend Partial<Formation> (type frontend)
+      // et est supposé retourner le type Formation (frontend) après mapping interne si nécessaire.
+      // Si le backend attend IFormation et que createFormation ne fait pas le mapping,
+      // un mapping inverse (Frontend Formation -> Backend IFormation-like) serait nécessaire ici.
+      return formationService.createFormation(formationData);
+    },
+    {
+      onSuccess: (data) => {
+        // Invalidate and refetch the list of formations
+        queryClient.invalidateQueries(['formations']);
+        // Optionally, you could also set this newly created formation into the cache
+        // for its specific ID if you navigate to its detail page immediately.
+        // queryClient.setQueryData(['formation', data.id], data);
+
+        // TODO: Implement success notification (e.g., toast message)
+        console.log('Formation created successfully:', data);
+      },
+      onError: (error: Error) => {
+        // TODO: Implement error notification
+        console.error('Error creating formation:', error.message);
+      },
+    }
+  );
+};
+
+// Hook for Updating a Formation
+interface UpdateFormationVariables {
+  id: string;
+  data: Partial<Formation>;
+}
+
+export const useUpdateFormation = (): UseMutationResult<
+  Formation, // Type of data returned by the mutationFn
+  Error, // Type of error
+  UpdateFormationVariables, // Type of variables passed to the mutate function
+  unknown // Type of context
+> => {
+  const queryClient = useQueryClient();
+  const formationService = FormationService.getInstance();
+
+  return useMutation<Formation, Error, UpdateFormationVariables>(
+    async ({ id, data }) => {
+      // Rappel: formationService.updateFormation attend Partial<Formation> (type frontend)
+      // et est supposé retourner le type Formation (frontend) après mapping.
+      return formationService.updateFormation(id, data);
+    },
+    {
+      onSuccess: (updatedFormationData, variables) => {
+        // Invalidate the list of formations
+        queryClient.invalidateQueries(['formations']);
+        // Invalidate the specific formation query to refetch its details
+        queryClient.invalidateQueries(['formation', variables.id]);
+        // Optionally, directly update the cache for this specific formation
+        // queryClient.setQueryData(['formation', variables.id], updatedFormationData);
+
+        // TODO: Implement success notification
+        console.log(`Formation ${variables.id} updated successfully:`, updatedFormationData);
+      },
+      onError: (error: Error, variables) => {
+        // TODO: Implement error notification
+        console.error(`Error updating formation ${variables.id}:`, error.message);
+      },
+    }
+  );
+};
+
+// Hook for Deleting a Formation
+export const useDeleteFormation = (): UseMutationResult<
+  void, // Type of data returned by the mutationFn (deleteFormation returns void)
+  Error, // Type of error
+  string, // Type of variables passed to the mutate function (formationId)
+  unknown // Type of context
+> => {
+  const queryClient = useQueryClient();
+  const formationService = FormationService.getInstance();
+
+  return useMutation<void, Error, string>(
+    async (formationId: string) => {
+      return formationService.deleteFormation(formationId);
+    },
+    {
+      onSuccess: (data, formationId) => {
+        // Invalidate the list of formations
+        queryClient.invalidateQueries(['formations']);
+        // Remove the specific formation query from cache as it no longer exists
+        queryClient.removeQueries(['formation', formationId]);
+
+        // TODO: Implement success notification
+        console.log(`Formation ${formationId} deleted successfully.`);
+      },
+      onError: (error: Error, formationId) => {
+        // TODO: Implement error notification
+        console.error(`Error deleting formation ${formationId}:`, error.message);
+      },
+    }
+  );
+};
 ```
