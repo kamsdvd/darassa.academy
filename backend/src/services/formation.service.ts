@@ -52,6 +52,20 @@ export class FormationService {
       .exec();
   }
 
-  // TODO: Implement methods for CUD operations as per backlog
-  // create, update, delete
+  public async create(data: Partial<IFormation>): Promise<IFormation> {
+    // Add any necessary validation or data transformation before saving
+    const newFormation = new Formation(data);
+    return newFormation.save();
+  }
+
+  public async update(id: string, data: Partial<IFormation>): Promise<IFormation | null> {
+    // Add any necessary validation or data transformation
+    // { new: true } returns the modified document rather than the original
+    return Formation.findByIdAndUpdate(id, data, { new: true }).exec();
+  }
+
+  public async delete(id: string): Promise<IFormation | null> {
+    // findByIdAndDelete will return the deleted document
+    return Formation.findByIdAndDelete(id).exec();
+  }
 }

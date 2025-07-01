@@ -53,5 +53,80 @@ export class FormationController {
     }
   }
 
-  // TODO: Implement controller methods for CUD operations
+  public async createFormation(req: Request, res: Response): Promise<void> {
+    try {
+      // Basic validation: Ensure body is not empty
+      if (Object.keys(req.body).length === 0) {
+        res.status(400).json({ success: false, message: "Le corps de la requête ne peut pas être vide." });
+        return;
+      }
+      // TODO: Add more robust validation (e.g., check for required fields like titre, description, code, etc.)
+      // For example, using a DTO with class-validator if in a full NestJS setup.
+
+      const formationData: Partial<IFormation> = req.body;
+      const newFormation = await formationService.create(formationData);
+      res.status(201).json({ success: true, message: "Formation créée avec succès.", data: newFormation });
+    } catch (error) {
+      console.error('Error in createFormation:', error);
+      if (error.name === 'ValidationError') { // Mongoose validation error
+        res.status(400).json({ success: false, message: "Erreur de validation.", errors: error.errors });
+      } else if (error.code === 11000) { // MongoError: Duplicate key
+        res.status(409).json({ success: false, message: "Une formation avec ce code existe déjà." });
+      } else {
+        res.status(500).json({ success: false, message: 'Erreur serveur lors de la création de la formation.' });
+      }
+    }
+  }
+
+  public async updateFormation(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      if (Object.keys(req.body).length === 0) {
+        res.status(400).json({ success: false, message: "Le corps de la requête ne peut pas être vide pour une mise à jour." });
+        return;
+      }
+      // TODO: Add more robust validation for req.body
+
+      const formationData: Partial<IFormation> = req.body;
+      const updatedFormation = await formationService.update(id, formationData);
+
+      if (!updatedFormation) {
+        res.status(404).json({ success: false, message: 'Formation non trouvée pour la mise à jour.' });
+        return;
+      }
+      res.status(200).json({ success: true, message: "Formation mise à jour avec succès.", data: updatedFormation });
+    } catch (error) {
+      console.error(`Error in updateFormation for id ${req.params.id}:`, error);
+      if (error.name === 'ValidationError') {
+        res.status(400).json({ success: false, message: "Erreur de validation.", errors: error.errors });
+      } else if (error.kind === 'ObjectId') {
+        res.status(400).json({ success: false, message: 'ID de formation invalide.' });
+      } else if (error.code === 11000) { // Duplicate key error, e.g. if trying to update 'code' to one that already exists
+        res.status(409).json({ success: false, message: "Conflit de données, le code de formation doit être unique." });
+      }
+      else {
+        res.status(500).json({ success: false, message: 'Erreur serveur lors de la mise à jour de la formation.' });
+      }
+    }
+  }
+
+  public async deleteFormation(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const deletedFormation = await formationService.delete(id);
+
+      if (!deletedFormation) {
+        res.status(404).json({ success: false, message: 'Formation non trouvée pour la suppression.' });
+        return;
+      }
+      res.status(200).json({ success: true, message: "Formation supprimée avec succès.", data: deletedFormation });
+    } catch (error) {
+      console.error(`Error in deleteFormation for id ${req.params.id}:`, error);
+       if (error.kind === 'ObjectId') {
+        res.status(400).json({ success: false, message: 'ID de formation invalide.' });
+        return;
+      }
+      res.status(500).json({ success: false, message: 'Erreur serveur lors de la suppression de la formation.' });
+    }
+  }
 }

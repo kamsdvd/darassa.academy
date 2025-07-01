@@ -89,16 +89,29 @@ router.get('/:id', formationController.getFormationById);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Formation' // Adjusted for clarity
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/IFormation' # Assuming IFormation is the schema for creation
+ *     responses:
+ *       201:
+ *         description: Cours créé avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Formation'
  *       401:
  *         description: Non autorisé
  *       403:
  *         description: Accès refusé
+ *       409:
+ *         description: Conflit (ex: code de formation déjà existant)
  *       500:
  *         description: Erreur serveur
  */
-router.post('/', authMiddleware, async (req, res) => {
-  // Implementation
-});
+router.post('/', authMiddleware, formationController.createFormation);
 
 /**
  * @swagger
@@ -129,18 +142,31 @@ router.post('/', authMiddleware, async (req, res) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Formation' // Adjusted for clarity
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/IFormationPartial' # Assuming a partial schema for update
+ *     responses:
+ *       200:
+ *         description: Cours mis à jour avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Formation'
  *       401:
  *         description: Non autorisé
  *       403:
  *         description: Accès refusé
  *       404:
  *         description: Cours non trouvé
+ *       409:
+ *         description: Conflit
  *       500:
  *         description: Erreur serveur
  */
-router.put('/:id', authMiddleware, async (req, res) => {
-  // Implementation
-});
+router.put('/:id', authMiddleware, formationController.updateFormation);
 
 /**
  * @swagger
@@ -161,6 +187,10 @@ router.put('/:id', authMiddleware, async (req, res) => {
  *     responses:
  *       200:
  *         description: Cours supprimé avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Formation' # Returns the deleted course
  *       401:
  *         description: Non autorisé
  *       403:
@@ -170,8 +200,6 @@ router.put('/:id', authMiddleware, async (req, res) => {
  *       500:
  *         description: Erreur serveur
  */
-router.delete('/:id', authMiddleware, async (req, res) => {
-  // Implementation
-});
+router.delete('/:id', authMiddleware, formationController.deleteFormation);
 
 export default router; 
