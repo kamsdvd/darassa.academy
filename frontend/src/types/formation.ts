@@ -33,8 +33,8 @@ export interface Formation {
   status?: string; // From IFormation.statut, mapped to human-readable if needed
 
   // instructor might have more fields if available from backend User model
-  // instructor.bio?: string;
+  // instructor.bio?: string; // Placeholder, not in current User model from backend
 
   // features could be mapped from IFormation.competences or a dedicated field
-  // features?: string[];
+  features?: string[];
 } 

@@ -37,10 +37,10 @@ const mapBackendFormationToFrontend = (backendFormation: any): Formation => {
     documents,
     duree, // number
     prix,
-    // category - Missing in IFormation
+    category, // Now available from backend
     formateurs, // Array, populated
     niveau, // enum
-    // language - Missing in IFormation
+    // language - Still missing in IFormation
     prerequis,
     objectifs,
     modules, // Array of IModule
@@ -52,7 +52,7 @@ const mapBackendFormationToFrontend = (backendFormation: any): Formation => {
     centreFormation, // Populated
     placesDisponibles,
     statut, // enum
-    // competences - in IFormation, could map to 'features'
+    competences, // in IFormation, will map to 'features'
   } = backendFormation;
 
   // Image URL Logic
@@ -67,21 +67,21 @@ const mapBackendFormationToFrontend = (backendFormation: any): Formation => {
   }
 
   // Duration Logic
-  const durationString = duree ? `${duree} heures` : 'Durée non spécifiée';
+  const durationString = typeof duree === 'number' && duree > 0 ? `${duree} heures` : 'Durée non spécifiée';
 
   // Instructor Logic
   let instructor = {
     name: 'Instructeur non assigné',
-    title: 'Professionnel', // Placeholder
-    avatar: '/default-avatar.png', // Placeholder
-    // bio: 'Bio non disponible' // Placeholder
+    title: 'Formateur Expert', // Placeholder - No direct source from backend User model yet
+    avatar: '/default-avatar.png',
+    // bio: 'Bio non disponible' // Placeholder - No direct source
   };
   if (formateurs && formateurs.length > 0 && formateurs[0]) {
-    const mainInstructor = formateurs[0];
-    instructor.name = `${mainInstructor.firstName || ''} ${mainInstructor.lastName || ''}`.trim() || 'Instructeur non assigné';
-    // instructor.title = mainInstructor.title || 'Professionnel'; // If 'title' existed on User model
-    instructor.avatar = mainInstructor.profilePicture || '/default-avatar.png';
-    // instructor.bio = mainInstructor.bio || 'Bio non disponible'; // If 'bio' existed
+    const mainInstructor = formateurs[0]; // Assuming the first one is the primary
+    instructor.name = (`${mainInstructor.firstName || ''} ${mainInstructor.lastName || ''}`).trim() || 'Instructeur non assigné';
+    // instructor.title = mainInstructor.professionalTitle || 'Formateur Expert'; // If User model had 'professionalTitle'
+    instructor.avatar = mainInstructor.profilePicture || '/default-avatar.png'; // If User model had 'profilePicture'
+    // instructor.bio = mainInstructor.bio || 'Bio non disponible'; // If User model had 'bio'
   }
 
   // Level Mapping
@@ -98,55 +98,70 @@ const mapBackendFormationToFrontend = (backendFormation: any): Formation => {
   }
 
   // Syllabus Mapping
-  const syllabus = modules?.map((mod: any) => ({
+  const syllabus = Array.isArray(modules) ? modules.map((mod: any) => ({
     title: mod.titre || 'Module sans titre',
-    content: mod.contenu || [],
-    // description: mod.description, (Could be added to frontend type if needed)
-    // duration: mod.duree ? `${mod.duree}h` : undefined (Could be added)
-  })) || [];
+    content: Array.isArray(mod.contenu) ? mod.contenu : [],
+    // description: mod.description, // Potentially add to frontend type
+    // duration: mod.duree ? `${mod.duree}h` : undefined // Potentially add to frontend type
+  })) : [];
 
   // Rating and Reviews Logic
   let calculatedRating = 0;
-  const reviewsCount = evaluations?.length || 0;
+  const reviewsCount = Array.isArray(evaluations) ? evaluations.length : 0;
   if (reviewsCount > 0) {
-    const totalRating = evaluations.reduce((sum: number, evalItem: any) => sum + (evalItem.note || 0), 0);
-    calculatedRating = parseFloat((totalRating / reviewsCount).toFixed(1)); // Average rating to 1 decimal place
+    const totalRating = evaluations.reduce((sum: number, evalItem: any) => sum + (typeof evalItem.note === 'number' ? evalItem.note : 0), 0);
+    calculatedRating = reviewsCount > 0 ? parseFloat((totalRating / reviewsCount).toFixed(1)) : 0;
   }
 
   // Enrolled Students
-  const enrolledStudentsCount = inscriptions?.length || 0;
+  const enrolledStudentsCount = Array.isArray(inscriptions) ? inscriptions.length : 0;
 
   // Dates
-  const lastUpdatedString = updatedAt ? new Date(updatedAt).toLocaleDateString('fr-FR') : 'Date inconnue';
-  const startDateString = dateDebut ? new Date(dateDebut).toLocaleDateString('fr-FR') : undefined;
-  const endDateString = dateFin ? new Date(dateFin).toLocaleDateString('fr-FR') : undefined;
+  const dateFormatter = (dateInput: any): string | undefined => {
+    if (!dateInput) return undefined;
+    try {
+      return new Date(dateInput).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch (e) {
+      return undefined; // Or 'Date invalide'
+    }
+  };
+  const lastUpdatedString = dateFormatter(updatedAt) || 'Date inconnue';
+  const startDateString = dateFormatter(dateDebut);
+  const endDateString = dateFormatter(dateFin);
 
   // Location
-  // Could be 'En ligne' if centreFormation is null or specific field indicates online
-  const locationString = centreFormation?.nom ? `${centreFormation.nom}${centreFormation.adresse ? `, ${centreFormation.adresse}` : ''}` : 'Lieu non spécifié / En ligne';
+  const locationString = centreFormation?.nom
+    ? `${centreFormation.nom}${centreFormation.adresse ? `, ${centreFormation.adresse}` : ''}`
+    : 'Lieu non spécifié / En ligne';
 
-  // Status mapping (example)
-  let statusString = statut;
-  switch(statut?.toLowerCase()){
-    case 'planifiee': statusString = 'Planifiée'; break;
-    case 'en_cours': statusString = 'En cours'; break;
-    case 'terminee': statusString = 'Terminée'; break;
-    case 'annulee': statusString = 'Annulée'; break;
+  // Status mapping
+  let statusString = statut || 'Statut inconnu'; // Default if statut is undefined
+  if (statut) {
+    switch(statut.toLowerCase()){
+      case 'planifiee': statusString = 'Planifiée'; break;
+      case 'en_cours': statusString = 'En cours'; break;
+      case 'terminee': statusString = 'Terminée'; break;
+      case 'annulee': statusString = 'Annulée'; break;
+      default: statusString = statut; // Keep original if not matched
+    }
   }
 
+  // Features
+  const features = Array.isArray(competences) ? competences : [];
+
   return {
-    id: _id?.toString() || backendFormation.id || '', // Ensure ID is a string
+    id: _id?.toString() || backendFormation.id || '',
     title: titre || 'Titre non disponible',
     description: description || 'Description non disponible',
     imageUrl: imageUrl,
     duration: durationString,
-    price: prix || 0,
-    category: backendFormation.category || 'Non catégorisée', // Placeholder - still needs backend source
+    price: typeof prix === 'number' ? prix : 0,
+    category: category || 'Non catégorisée', // Mapped from backend
     instructor: instructor,
     level: frontendLevel,
-    language: backendFormation.language || 'Français', // Placeholder - needs backend source
-    prerequisites: prerequis || [],
-    objectives: objectifs || [],
+    language: 'Français', // Placeholder - Still no backend source for this
+    prerequisites: Array.isArray(prerequis) ? prerequis : [],
+    objectives: Array.isArray(objectifs) ? objectifs : [],
     syllabus: syllabus,
     rating: calculatedRating,
     reviews: reviewsCount,
@@ -155,9 +170,9 @@ const mapBackendFormationToFrontend = (backendFormation: any): Formation => {
     startDate: startDateString,
     endDate: endDateString,
     location: locationString,
-    maxStudents: placesDisponibles, // Assumes placesDisponibles is what's meant by maxStudents
+    maxStudents: typeof placesDisponibles === 'number' ? placesDisponibles : 0,
     status: statusString,
-    // features: backendFormation.competences || [], // Example if using competences as features
+    features: features, // Mapped from competences
   };
 };
 // --- End Helper: Mapper function ---
