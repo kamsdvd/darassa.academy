@@ -1,7 +1,7 @@
 import express from 'express';
 import { authMiddleware } from '../common/middlewares/auth.middleware';
 // import { CourseDto } from '../models/Course'; // We'll use FormationController which returns IFormation data
-import { FormationController } from '../controllers/formation.controller.ts';
+import { FormationController } from '../controllers/formation.controller';
 
 const router = express.Router();
 const formationController = new FormationController();

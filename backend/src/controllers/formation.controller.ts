@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import { plainToClass } from 'class-transformer';
 import { validate, ValidationError } from 'class-validator';
-import { FormationService } from '../services/formation.service.ts';
-import { IFormation } from '../models/formation.model.ts';
-import { CreateFormationDto } from '../dtos/formation/create-formation.dto.ts';
-import { UpdateFormationDto } from '../dtos/formation/update-formation.dto.ts';
+import { FormationService } from '../services/formation.service';
+import { IFormation } from '../models/formation.model';
+import { CreateFormationDto } from '../dtos/formation/create-formation.dto';
+import { UpdateFormationDto } from '../dtos/formation/update-formation.dto';
 
 const formationService = new FormationService();
 
@@ -59,8 +59,9 @@ export class FormationController {
       // Map to a DTO if necessary
       res.status(200).json({ success: true, data: formation });
     } catch (error) {
-      console.error(`Error in getFormationById for id ${req.params.id}:`, error);
-      if (error.kind === 'ObjectId') { // Mongoose specific error for bad ID format
+      const err = error as any;
+      console.error(`Error in getFormationById for id ${req.params.id}:`, err);
+      if (err.kind === 'ObjectId') { // Mongoose specific error for bad ID format
         res.status(400).json({ success: false, message: 'ID de formation invalide.' });
         return;
       }
@@ -78,15 +79,30 @@ export class FormationController {
     }
 
     try {
-      // Pass validated DTO data to the service.
-      // The service expects Partial<IFormation>, and CreateFormationDto is compatible.
-      const newFormation = await formationService.create(createFormationDto as Partial<IFormation>);
+      // Conversion des dates string en Date
+      // Mapping des modules pour garantir la compatibilité avec IModule
+      let modules: any = undefined;
+      if (Array.isArray(createFormationDto.modules)) {
+        modules = createFormationDto.modules.map((mod: any) => ({
+          ...mod,
+          contenu: Array.isArray(mod.contenu) ? mod.contenu : [],
+          evaluation: Array.isArray(mod.evaluation) ? mod.evaluation : [],
+        }));
+      }
+      const payload: Partial<IFormation> = {
+        ...createFormationDto,
+        dateDebut: new Date(createFormationDto.dateDebut),
+        dateFin: new Date(createFormationDto.dateFin),
+        modules
+      };
+      const newFormation = await formationService.create(payload);
       res.status(201).json({ success: true, message: "Formation créée avec succès.", data: newFormation });
     } catch (error) {
-      console.error('Error in createFormation:', error);
-      if (error.name === 'ValidationError') { // Mongoose schema validation error (should be caught by DTO, but as fallback)
-        res.status(400).json({ success: false, message: "Erreur de validation (schéma base de données).", errors: error.errors });
-      } else if (error.code === 11000) { // MongoError: Duplicate key (e.g. for 'code' field)
+      const err = error as any;
+      console.error('Error in createFormation:', err);
+      if (err.name === 'ValidationError') { // Mongoose schema validation error (should be caught by DTO, but as fallback)
+        res.status(400).json({ success: false, message: "Erreur de validation (schéma base de données).", errors: err.errors });
+      } else if (err.code === 11000) { // MongoError: Duplicate key (e.g. for 'code' field)
         res.status(409).json({ success: false, message: "Une formation avec ce code existe déjà." });
       } else {
         res.status(500).json({ success: false, message: 'Erreur serveur lors de la création de la formation.' });
@@ -129,12 +145,13 @@ export class FormationController {
       }
       res.status(200).json({ success: true, message: "Formation mise à jour avec succès.", data: updatedFormation });
     } catch (error) {
-      console.error(`Error in updateFormation for id ${id}:`, error);
-      if (error.name === 'ValidationError') { // Mongoose schema validation
-        res.status(400).json({ success: false, message: "Erreur de validation (schéma base de données).", errors: error.errors });
-      } else if (error.kind === 'ObjectId') { // Mongoose error for bad ID format
+      const err = error as any;
+      console.error(`Error in updateFormation for id ${id}:`, err);
+      if (err.name === 'ValidationError') { // Mongoose schema validation
+        res.status(400).json({ success: false, message: "Erreur de validation (schéma base de données).", errors: err.errors });
+      } else if (err.kind === 'ObjectId') { // Mongoose error for bad ID format
         res.status(400).json({ success: false, message: 'ID de formation invalide.' });
-      } else if (error.code === 11000) { // MongoError: Duplicate key
+      } else if (err.code === 11000) { // MongoError: Duplicate key
         res.status(409).json({ success: false, message: "Conflit de données, le code de formation doit être unique." });
       } else {
         res.status(500).json({ success: false, message: 'Erreur serveur lors de la mise à jour de la formation.' });
@@ -153,8 +170,9 @@ export class FormationController {
       }
       res.status(200).json({ success: true, message: "Formation supprimée avec succès.", data: deletedFormation });
     } catch (error) {
-      console.error(`Error in deleteFormation for id ${req.params.id}:`, error);
-       if (error.kind === 'ObjectId') {
+      const err = error as any;
+      console.error(`Error in deleteFormation for id ${req.params.id}:`, err);
+      if (err.kind === 'ObjectId') {
         res.status(400).json({ success: false, message: 'ID de formation invalide.' });
         return;
       }

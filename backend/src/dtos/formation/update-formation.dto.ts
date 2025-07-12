@@ -11,7 +11,8 @@ import {
   IsDateString,
   ArrayMinSize,
   IsBoolean,
-  Matches
+  Matches,
+  IsNotEmpty
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -23,15 +24,15 @@ class ModuleDto {
   @IsString({ message: "Le titre du module doit être une chaîne de caractères." })
   @IsNotEmpty({ message: "Le titre du module est requis." }) // Si un module est inclus, son titre est requis
   @MaxLength(100, { message: "Le titre du module ne peut pas dépasser 100 caractères."})
-  titre: string;
+  titre?: string;
 
   @IsString({ message: "La description du module doit être une chaîne de caractères." })
   @IsNotEmpty({ message: "La description du module est requise." }) // Si un module est inclus, sa description est requise
-  description: string;
+  description?: string;
 
   @IsNumber({}, { message: "La durée du module doit être un nombre." })
   @Min(1, { message: "La durée du module doit être d'au moins 1 heure." })  // Si un module est inclus, sa durée est requise
-  duree: number;
+  duree?: number;
 
   @IsArray({ message: "Le contenu du module doit être un tableau de chaînes." })
   @IsString({ each: true, message: "Chaque élément du contenu du module doit être une chaîne." })

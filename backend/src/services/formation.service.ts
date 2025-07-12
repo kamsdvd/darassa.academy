@@ -1,5 +1,5 @@
-import { Formation, IFormation } from '../models/formation.model.ts';
-import { Session, ISession } from '../models/session.model.ts'; // Import Session model
+import { Formation, IFormation } from '../models/formation.model';
+import { Session, ISession } from '../models/session.model'; // Import Session model
 
 // Utility for pagination if not using a library
 interface PaginatedResult<T> {
@@ -44,9 +44,9 @@ export class FormationService {
     };
   }
 
-  public async findById(id: string): Promise<(IFormation & { sessions?: ISession[] }) | null> {
+  public async findById(id: string): Promise<{ [key: string]: any; sessions: ISession[] } | null> {
     const formation = await Formation.findById(id)
-      .populate('formateurs', 'firstName lastName email profilePicture') // Added profilePicture
+      .populate('formateurs', 'firstName lastName email profilePicture')
       .populate('centreFormation', 'nom adresse')
       .exec();
 
@@ -56,16 +56,13 @@ export class FormationService {
 
     // Fetch associated sessions
     const sessions = await Session.find({ formation: formation._id })
-      .populate('formateur', 'firstName lastName email profilePicture') // Populate formateur for each session
-      .sort({ dateDebut: 1 }) // Sort sessions by start date
+      .populate('formateur', 'firstName lastName email profilePicture')
+      .sort({ dateDebut: 1 })
       .exec();
 
-    // Combine formation with its sessions
-    // Use toObject() or spread to make a plain JS object if we want to add properties
+    // Combine formation with its sessions as a plain object
     const formationObject = formation.toObject();
-    formationObject.sessions = sessions;
-
-    return formationObject as (IFormation & { sessions?: ISession[] });
+    return { ...formationObject, sessions };
   }
 
   public async create(data: Partial<IFormation>): Promise<IFormation> {

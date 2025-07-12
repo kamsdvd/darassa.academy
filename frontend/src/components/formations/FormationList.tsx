@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import Link from 'next/link'; // For navigation
+// import Link from 'next/link'; // For navigation
 import { useFormations, FrontendPaginatedFormations, useDeleteFormation } from '../../hooks/useFormations.ts'; // CORRECTED PATH
 import { Formation } from '../../types/formation.ts'; // CORRECTED PATH
 import { Trash2 } from 'lucide-react'; // Icon for delete button
