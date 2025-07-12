@@ -3,13 +3,13 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import session from 'express-session';
-import authRoutes from './routes/auth.routes';
-import centreRoutes from './routes/centre.routes';
-import calendarRoutes from './routes/calendar.routes';
-import googleAuthRoutes from './routes/google-auth.routes';
-import eventRoutes from './routes/event.routes';
+
+// Import routes depuis leurs dossiers métiers
+import authRoutes from './auth/auth.routes';
 import usersRoutes from './user/users.routes';
-import courseRoutes from './routes/course.routes'; // Import course routes
+import courseRoutes from './course/course.routes';
+import sessionRoutes from './session/session.routes';
+
 // ... autres imports
 
 dotenv.config();
@@ -34,14 +34,11 @@ app.use(session({
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/centre', centreRoutes);
-app.use('/api/calendar', calendarRoutes);
-app.use('/api/google', googleAuthRoutes);
-app.use('/api/events', eventRoutes);
 app.use('/api/users', usersRoutes);
-app.use('/api/courses', courseRoutes); // Register course routes
-// ... autres routes
+app.use('/api/courses', courseRoutes);
+app.use('/api/sessions', sessionRoutes);
+// ... autres routes conservées pour le MVP
 
-// ... reste du code
-
-export default app; 
+// ...existing code...
+export default app;
+// ...existing code...

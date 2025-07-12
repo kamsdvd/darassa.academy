@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { User } from '../models/user.model';
-import { ResetToken } from '../models/ResetToken';
-import { emailService } from '../services/email.service';
+import { User } from '../user/user.model';
+import { ResetToken } from './resetToken.model';
+import { emailService } from '../common/helpers/email.service';
 import { generateJWT, generateRefreshToken, generateRandomToken } from '../common/helpers/token.helper';
 import { getResetPasswordUrl, getVerificationUrl } from '../common/helpers/format.helper';
 import { config } from '../config/config';
