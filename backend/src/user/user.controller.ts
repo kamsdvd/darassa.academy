@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { User, IUser } from '../models/user.model';
+import { User, IUser } from './user.model';
 import mongoose from 'mongoose';
 import { paginate } from '../common/helpers/pagination.helper';
 
@@ -318,4 +318,4 @@ export const changeUserRole = async (req: Request, res: Response, next: NextFunc
   } catch (err) {
     next(err);
   }
-}; 
+};

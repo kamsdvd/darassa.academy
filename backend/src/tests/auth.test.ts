@@ -2,7 +2,7 @@ import axios from 'axios';
 import request from 'supertest';
 import mongoose from 'mongoose';
 import { app } from '../app';
-import { User } from '../models/user.model';
+import { User } from '../user/user.model';
 import { ResetToken } from '../models/ResetToken';
 import { emailService } from '../services/email.service';
 import passport from 'passport';

@@ -8,8 +8,8 @@ import centreRoutes from './routes/centre.routes';
 import calendarRoutes from './routes/calendar.routes';
 import googleAuthRoutes from './routes/google-auth.routes';
 import eventRoutes from './routes/event.routes';
-import usersRoutes from './routes/users.routes';
-import courseRoutes from './routes/course.routes.ts'; // Import course routes
+import usersRoutes from './user/users.routes';
+import courseRoutes from './routes/course.routes'; // Import course routes
 // ... autres imports
 
 dotenv.config();

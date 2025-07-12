@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { User } from '../models/user.model';
+import { User } from '../user/user.model';
 
 const testDatabase = async () => {
   try {

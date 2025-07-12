@@ -1,8 +1,8 @@
 import express, { Router } from 'express';
-import { getAllUsers, getUserById, createUser, updateUser, deleteUser, disableUser, changeUserRole } from '../user/user.controller';
+import { getAllUsers, getUserById, createUser, updateUser, deleteUser, disableUser, changeUserRole } from './user.controller';
 import { authMiddleware } from '../common/middlewares/auth.middleware';
 import { roleMiddleware } from '../common/middlewares/role.middleware';
-import { IUser } from '../user/user.model';
+import { IUser } from './user.model';
 
 const router: Router = express.Router();
 
@@ -23,4 +23,4 @@ router.patch('/:id/disable', roleMiddleware(['admin']) as express.RequestHandler
 // Changement de rôle (Admin only)
 router.patch('/:id/role', roleMiddleware(['admin']) as express.RequestHandler, changeUserRole as express.RequestHandler);
 
-// export default router;
+export default router;

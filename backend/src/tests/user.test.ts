@@ -1,7 +1,7 @@
 import request from 'supertest';
 import app from '../app';
 import mongoose from 'mongoose';
-import { User } from '../models/user.model';
+import { User } from '../user/user.model';
 
 let adminToken: string;
 let userId: string;

@@ -1,3 +1,50 @@
+# Organisation des branches MVP
+
+Pour livrer rapidement une version MVP, créez les branches suivantes :
+
+## Modules principaux
+
+- **auth-inscription** : Inscription utilisateur
+- **auth-connexion** : Connexion utilisateur
+- **auth-session** : Gestion de session (tokens)
+
+- **user-profil-affichage** : Affichage du profil utilisateur
+- **user-profil-edition** : Edition du profil utilisateur
+
+- **training-liste** : Liste des formations/cours
+- **training-detail** : Détail d’une formation
+- **training-inscription** : Inscription à une formation
+- **training-progression** : Suivi de progression
+
+- **common-ui** : Composants UI partagés (boutons, inputs, notifications)
+
+## Backend
+
+- **backend-crud** : Endpoints CRUD pour les entités principales
+- **backend-validation** : Validation des données reçues
+- **backend-erreurs** : Gestion et retour d’erreurs exploitables
+
+## Robustesse & UX
+
+- **frontend-validation** : Validation des formulaires côté frontend
+- **frontend-notifications** : Notifications utilisateur (succès/erreur)
+- **frontend-permissions** : Gestion des permissions
+- **frontend-loaders** : Loaders/spinners pour les chargements
+- **frontend-tests** : Tests unitaires et d’intégration de base
+
+---
+
+Repoussez les modules secondaires (blog, jobs, entreprise, centre, évaluations avancées, etc.) à des versions ultérieures.
+
+Organisez le code par module (dossier par domaine) :  
+- Components (UI)  
+- Services (API)  
+- Hooks (logique réutilisable)  
+- Types (TypeScript)  
+- Utils (fonctions utilitaires)  
+
+Livrez le parcours utilisateur principal de bout en bout, puis ajoutez la robustesse et gardez une structure modulaire pour faciliter l’évolution.
+
 # Issues à traiter pour le module Formation (ajoutées suite à la migration TanStack Query v5)
 
 ## Frontend
