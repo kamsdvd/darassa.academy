@@ -1,8 +1,10 @@
-import '@testing-library/jest-dom';
-import { cleanup } from '@testing-library/react';
-import { afterEach } from 'vitest';
+import { TextEncoder, TextDecoder } from 'util';
 
-// Nettoyage automatique après chaque test
-afterEach(() => {
-  cleanup();
-}); 
+if (typeof global.TextEncoder === 'undefined') {
+  // @ts-ignore
+  global.TextEncoder = TextEncoder;
+}
+if (typeof global.TextDecoder === 'undefined') {
+  // @ts-ignore
+  global.TextDecoder = TextDecoder;
+} 
