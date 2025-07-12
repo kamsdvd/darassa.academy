@@ -44,6 +44,7 @@ export interface IFormation extends Document {
   titre: string;
   description: string;
   code: string;
+  category: string; // Nouveau champ
   duree: number;
   niveau: string;
   prix: number;
@@ -61,6 +62,7 @@ export interface IFormation extends Document {
   evaluations: IEvaluationFormation[];
   documents: IDocument[];
   isActive: boolean;
+  googleMeetLink?: string; // Nouveau champ
   createdAt: Date;
   updatedAt: Date;
   calculerMoyenneEvaluations(): number;
@@ -82,6 +84,12 @@ const formationSchema = new Schema({
     required: true,
     unique: true,
     trim: true
+  },
+  category: { // Nouveau champ
+    type: String,
+    required: true,
+    trim: true,
+    index: true // Ajout d'un index pour le filtrage
   },
   duree: {
     type: Number,
@@ -243,6 +251,13 @@ const formationSchema = new Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  googleMeetLink: { // Nouveau champ
+    type: String,
+    required: false,
+    trim: true,
+    // On pourrait ajouter une validation regex pour le format du lien Google Meet ici si besoin
+    // match: /^https:\/\/meet\.google\.com\/[a-z\-]+$/
   }
 }, {
   timestamps: true
