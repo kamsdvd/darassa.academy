@@ -1,4 +1,5 @@
-import mongoose, { Schema, Document, PopulatedDoc } from 'mongoose';
+// Modèle Event migré pour Prisma : les types/interfaces sont conservés pour usage dans le code, mais la persistance se fait via Prisma.
+
 import { IUser } from './user.model';
 import { IFormation } from './formation.model';
 import { ISession } from './session.model';

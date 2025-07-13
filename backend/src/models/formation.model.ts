@@ -1,4 +1,5 @@
-import mongoose, { Document, Schema } from 'mongoose';
+// Modèle Formation migré pour Prisma : les types/interfaces sont conservés pour usage dans le code, mais la persistance se fait via Prisma.
+
 
 interface IEvaluation {
   type: string;

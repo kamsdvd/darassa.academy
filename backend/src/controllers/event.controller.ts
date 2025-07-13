@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
-import { Event } from '../models/event.model';
-import { Formation } from '../models/formation.model';
-import { Session } from '../models/session.model';
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 
 // Créer un nouvel événement
 export const createEvent = async (req: Request, res: Response) => {
@@ -20,40 +19,49 @@ export const createEvent = async (req: Request, res: Response) => {
     } = req.body;
 
     // Vérifier les conflits de disponibilité
-    const conflicts = await Event.find({
-      $or: [
-        {
-          dateDebut: { $lte: new Date(dateFin) },
-          dateFin: { $gte: new Date(dateDebut) }
-        }
-      ],
-      $or: [
-        { formateur },
-        { 'salle.nom': salle?.nom }
-      ]
+    const conflicts = await prisma.event.findMany({
+      where: {
+        OR: [
+          {
+            dateDebut: { lte: new Date(dateFin) },
+            dateFin: { gte: new Date(dateDebut) }
+          }
+        ],
+        AND: [
+          {
+            OR: [
+              { formateurId: formateur },
+              { salle: salle?.nom ? { equals: salle.nom } : undefined }
+            ]
+          }
+        ]
+      }
     });
-
     if (conflicts.length > 0) {
       return res.status(400).json({
         message: 'Conflit de disponibilité détecté',
         conflicts
       });
     }
-
-    const event = new Event({
-      titre,
-      description,
-      dateDebut,
-      dateFin,
-      type,
-      formateur,
-      salle,
-      participants,
-      formation,
-      session
+    const event = await prisma.event.create({
+      data: {
+        titre,
+        description,
+        dateDebut: new Date(dateDebut),
+        dateFin: new Date(dateFin),
+        type,
+        formateurId: formateur,
+        salle,
+        participants,
+        formationId: formation,
+        sessionId: session
+      },
+      include: {
+        formateur: { select: { id: true, firstName: true, lastName: true } },
+        formation: { select: { id: true, titre: true } },
+        session: { select: { id: true, titre: true } }
+      }
     });
-
-    await event.save();
     res.status(201).json(event);
   } catch (error) {
     console.error('Erreur lors de la création de l\'événement:', error);
@@ -73,38 +81,36 @@ export const getEvents = async (req: Request, res: Response) => {
       searchTerm
     } = req.query;
 
-    const query: any = {};
-
+    // Construction du filtre Prisma
+    const where: any = {};
     if (startDate && endDate) {
-      query.dateDebut = { $gte: new Date(startDate as string) };
-      query.dateFin = { $lte: new Date(endDate as string) };
+      where.dateDebut = { gte: new Date(startDate as string) };
+      where.dateFin = { lte: new Date(endDate as string) };
     }
-
     if (formateurId && formateurId !== 'all') {
-      query.formateur = formateurId;
+      where.formateurId = formateurId;
     }
-
     if (type && type !== 'all') {
-      query.type = type;
+      where.type = type;
     }
-
     if (status && status !== 'all') {
-      query.statut = status;
+      where.statut = status;
     }
-
     if (searchTerm) {
-      query.$or = [
-        { titre: { $regex: searchTerm, $options: 'i' } },
-        { description: { $regex: searchTerm, $options: 'i' } }
+      where.OR = [
+        { titre: { contains: searchTerm as string, mode: 'insensitive' } },
+        { description: { contains: searchTerm as string, mode: 'insensitive' } }
       ];
     }
-
-    const events = await Event.find(query)
-      .populate('formateur', 'firstName lastName')
-      .populate('formation', 'titre')
-      .populate('session', 'titre')
-      .sort({ dateDebut: 1 });
-
+    const events = await prisma.event.findMany({
+      where,
+      orderBy: { dateDebut: 'asc' },
+      include: {
+        formateur: { select: { id: true, firstName: true, lastName: true } },
+        formation: { select: { id: true, titre: true } },
+        session: { select: { id: true, titre: true } }
+      }
+    });
     res.json(events);
   } catch (error) {
     console.error('Erreur lors de la récupération des événements:', error);
@@ -115,15 +121,17 @@ export const getEvents = async (req: Request, res: Response) => {
 // Obtenir un événement par son ID
 export const getEventById = async (req: Request, res: Response) => {
   try {
-    const event = await Event.findById(req.params.id)
-      .populate('formateur', 'firstName lastName')
-      .populate('formation', 'titre')
-      .populate('session', 'titre');
-
+    const event = await prisma.event.findUnique({
+      where: { id: req.params.id },
+      include: {
+        formateur: { select: { id: true, firstName: true, lastName: true } },
+        formation: { select: { id: true, titre: true } },
+        session: { select: { id: true, titre: true } }
+      }
+    });
     if (!event) {
       return res.status(404).json({ message: 'Événement non trouvé' });
     }
-
     res.json(event);
   } catch (error) {
     console.error('Erreur lors de la récupération de l\'événement:', error);
@@ -149,51 +157,55 @@ export const updateEvent = async (req: Request, res: Response) => {
     } = req.body;
 
     // Vérifier les conflits de disponibilité
-    const conflicts = await Event.find({
-      _id: { $ne: req.params.id },
-      $or: [
-        {
-          dateDebut: { $lte: new Date(dateFin) },
-          dateFin: { $gte: new Date(dateDebut) }
-        }
-      ],
-      $or: [
-        { formateur },
-        { 'salle.nom': salle?.nom }
-      ]
+    const conflicts = await prisma.event.findMany({
+      where: {
+        id: { not: req.params.id },
+        OR: [
+          {
+            dateDebut: { lte: new Date(dateFin) },
+            dateFin: { gte: new Date(dateDebut) }
+          }
+        ],
+        AND: [
+          {
+            OR: [
+              { formateurId: formateur },
+              { salle: salle?.nom ? { equals: salle.nom } : undefined }
+            ]
+          }
+        ]
+      }
     });
-
     if (conflicts.length > 0) {
       return res.status(400).json({
         message: 'Conflit de disponibilité détecté',
         conflicts
       });
     }
-
-    const event = await Event.findByIdAndUpdate(
-      req.params.id,
-      {
+    const event = await prisma.event.update({
+      where: { id: req.params.id },
+      data: {
         titre,
         description,
-        dateDebut,
-        dateFin,
+        dateDebut: new Date(dateDebut),
+        dateFin: new Date(dateFin),
         type,
-        formateur,
+        formateurId: formateur,
         salle,
         participants,
         statut,
-        formation,
-        session
+        formationId: formation,
+        sessionId: session
       },
-      { new: true }
-    ).populate('formateur', 'firstName lastName')
-     .populate('formation', 'titre')
-     .populate('session', 'titre');
-
+      include: {
+        formateur: { select: { id: true, firstName: true, lastName: true } },
+        formation: { select: { id: true, titre: true } },
+        session: { select: { id: true, titre: true } }
+      }
+    });
     if (!event) {
       return res.status(404).json({ message: 'Événement non trouvé' });
     }
-
     res.json(event);
   } catch (error) {
     console.error('Erreur lors de la mise à jour de l\'événement:', error);
@@ -204,15 +216,13 @@ export const updateEvent = async (req: Request, res: Response) => {
 // Supprimer un événement
 export const deleteEvent = async (req: Request, res: Response) => {
   try {
-    const event = await Event.findByIdAndDelete(req.params.id);
-
+    const event = await prisma.event.delete({ where: { id: req.params.id } });
     if (!event) {
       return res.status(404).json({ message: 'Événement non trouvé' });
     }
-
     res.json({ message: 'Événement supprimé avec succès' });
   } catch (error) {
     console.error('Erreur lors de la suppression de l\'événement:', error);
     res.status(500).json({ message: 'Erreur lors de la suppression de l\'événement' });
   }
-}; 
+};

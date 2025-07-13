@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import express from 'express';
-import mongoose from 'mongoose';
+import { PrismaClient } from '@prisma/client';
+
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes';
@@ -65,31 +66,12 @@ app.use((req, res, next) => {
 // Middleware d'erreur global Express
 app.use(errorMiddleware);
 
+const prisma = new PrismaClient();
+
 const initializeDatabase = async () => {
   try {
-    console.log('🔄 Tentative de connexion à MongoDB...');
-    console.log('URI:', process.env.MONGODB_URI || 'mongodb://localhost:27017/darassa-academy');
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/darassa-academy');
-    console.log('✅ Connecté à MongoDB avec succès');
-
-    // Vérifier si la base de données est connectée
-    const db = mongoose.connection.db;
-    if (!db) {
-      throw new Error('La connexion à la base de données n\'est pas établie');
-    }
-
-    // Vérifier si la base de données est vide
-    const collections = await db.listCollections().toArray();
-    const isEmpty = collections.length === 0;
-
-    // Exécuter le seed en mode développement ou si la base est vide
-    if (process.env.NODE_ENV === 'development' || isEmpty) {
-      console.log(`${isEmpty ? '📥 Base de données vide' : '🔧 Mode développement'}, exécution du seed...`);
-      try {
-        await seedDatabase();
-        console.log('✅ Base de données initialisée avec succès');
-      } catch (error) {
-        console.error('❌ Erreur lors de l\'initialisation de la base de données:', error);
+    await prisma.$connect();
+    console.log('✅ Connecté à PostgreSQL avec Prisma');
         process.exit(1);
       }
     }

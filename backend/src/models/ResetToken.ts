@@ -1,4 +1,5 @@
-import { Schema, model, Document } from 'mongoose';
+// Modèle ResetToken migré pour Prisma : les types/interfaces sont conservés pour usage dans le code, mais la persistance se fait via Prisma.
+
 import { ApiProperty } from '@nestjs/swagger';
 
 export interface IResetToken extends Document {

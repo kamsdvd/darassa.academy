@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { User } from '../../models/user.model';
+import { PrismaClient } from '@prisma/client';
 import { verifyJWT } from '../helpers/token.helper';
 import { config } from '../../config/config';
+
+const prisma = new PrismaClient();
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -18,7 +20,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     try {
       const decoded = verifyJWT(token);
       
-      const user = await User.findById(decoded.id).select('-password');
+      const user = await prisma.user.findUnique({ where: { id: decoded.id } });
       if (!user) {
         return res.status(401).json({ 
           success: false,

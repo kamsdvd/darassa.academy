@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { User, IUser } from '../models/user.model';
-import mongoose from 'mongoose';
-import { paginate } from '../common/helpers/pagination.helper';
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 
 /**
  * @swagger
@@ -46,8 +45,17 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
     if (req.query.isActive !== undefined) filter.isActive = req.query.isActive === 'true';
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
-    const result = await paginate(User, filter, { page, limit });
-    res.status(200).json({ users: result.docs, total: result.total, page: result.page, limit: result.limit });
+    const skip = (page - 1) * limit;
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where: filter,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.user.count({ where: filter }),
+    ]);
+    res.status(200).json({ users, total, page, limit });
   } catch (err) {
     next(err);
   }
@@ -75,8 +83,10 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
 // Détail utilisateur
 export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID invalide' });
-    const user = await User.findById(req.params.id).select('-password');
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.id },
+      select: { password: false, id: true, email: true, firstName: true, lastName: true, userType: true, isActive: true, isEmailVerified: true, phone: true, profilePicture: true, createdAt: true, updatedAt: true }
+    });
     if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
     res.status(200).json(user);
   } catch (err) {
@@ -126,19 +136,12 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     if (!email || !password || !firstName || !lastName || !userType) {
       return res.status(400).json({ message: 'Champs obligatoires manquants' });
     }
-    const exists = await User.findOne({ email });
+    const exists = await prisma.user.findUnique({ where: { email } });
     if (exists) return res.status(409).json({ message: 'Email déjà utilisé' });
-    
-    const userData: any = { email, password, firstName, lastName, userType };
-
-    // Si l'utilisateur est un formateur, ajouter les spécialités
-    if (userType === 'formateur' && specialites) {
-      userData.specialites = specialites.split(',').map((s: string) => s.trim()); // Séparer les spécialités par virgule
-    }
-
-    const user = new User(userData);
-    await user.save();
-    res.status(201).json({ message: 'Utilisateur créé', user: { ...user.toObject(), password: undefined } });
+    const user = await prisma.user.create({
+      data: { email, password, firstName, lastName, userType, specialites },
+    });
+    res.status(201).json({ message: 'Utilisateur créé', user: { ...user, password: undefined } });
   } catch (err) {
     next(err);
   }
@@ -185,20 +188,19 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 // Modification utilisateur
 export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID invalide' });
-    
     const { email, firstName, lastName, userType, phone, profilePicture } = req.body;
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
-    
-    if (email) user.email = email;
-    if (firstName) user.firstName = firstName;
-    if (lastName) user.lastName = lastName;
-    if (userType) user.userType = userType;
-    if (phone) user.phone = phone;
-    if (profilePicture) user.profilePicture = profilePicture;
-    await user.save();
-    res.status(200).json({ message: 'Utilisateur modifié', user: { ...user.toObject(), password: undefined } });
+    const user = await prisma.user.update({
+      where: { id: req.params.id },
+      data: {
+        email,
+        firstName,
+        lastName,
+        userType,
+        phone,
+        profilePicture,
+      },
+    });
+    res.status(200).json({ message: 'Utilisateur modifié', user: { ...user, password: undefined } });
   } catch (err) {
     next(err);
   }
@@ -226,9 +228,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
 // Suppression utilisateur
 export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID invalide' });
-    
-    const user = await User.findByIdAndDelete(req.params.id);
+    const user = await prisma.user.delete({ where: { id: req.params.id } });
     if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
     res.status(200).json({ message: 'Utilisateur supprimé' });
   } catch (err) {
@@ -258,13 +258,11 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
 // Désactivation/réactivation utilisateur
 export const disableUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID invalide' });
-    
-    const user = await User.findById(req.params.id);
+    const user = await prisma.user.update({
+      where: { id: req.params.id },
+      data: { isActive: false },
+    });
     if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
-    
-    user.isActive = false;
-    await user.save();
     res.status(200).json({ message: 'Utilisateur désactivé' });
   } catch (err) {
     next(err);
@@ -304,18 +302,15 @@ export const disableUser = async (req: Request, res: Response, next: NextFunctio
 // Changement de rôle utilisateur
 export const changeUserRole = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID invalide' });
-    
     const { newRole } = req.body;
     if (!newRole) return res.status(400).json({ message: 'Nouveau rôle requis' });
-    
-    const user = await User.findById(req.params.id);
+    const user = await prisma.user.update({
+      where: { id: req.params.id },
+      data: { userType: newRole },
+    });
     if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
-    
-    user.userType = newRole;
-    await user.save();
     res.status(200).json({ message: 'Rôle modifié avec succès' });
   } catch (err) {
     next(err);
   }
-}; 
+};

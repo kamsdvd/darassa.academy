@@ -1,4 +1,5 @@
-import mongoose, { Schema, Document } from 'mongoose';
+// Modèle Session migré pour Prisma : les types/interfaces sont conservés pour usage dans le code, mais la persistance se fait via Prisma.
+
 
 export interface ISession extends Document {
   formation: mongoose.Types.ObjectId;

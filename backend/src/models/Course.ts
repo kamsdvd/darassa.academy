@@ -1,7 +1,8 @@
-import { Schema, model, Document } from 'mongoose';
+// Modèle Course migré pour Prisma : les types/interfaces sont conservés pour usage dans le code, mais la persistance se fait via Prisma.
+
 import { ApiProperty } from '@nestjs/swagger';
 
-export interface ICourse extends Document {
+export interface ICourse {
   title: string;
   description: string;
   price: number;

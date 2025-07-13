@@ -1,5 +1,5 @@
-import { Formation, IFormation } from '../models/formation.model';
-import { Session, ISession } from '../models/session.model'; // Import Session model
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 
 // Utility for pagination if not using a library
 interface PaginatedResult<T> {
@@ -25,16 +25,24 @@ export class FormationService {
       query.niveau = level.trim(); // 'niveau' exists in IFormation
     }
 
-    const totalFormations = await Formation.countDocuments(query);
-    const formations = await Formation.find(query)
-      .populate('formateurs', 'firstName lastName email') // Populate formateur details
-      .populate('centreFormation', 'nom adresse') // Populate centre details
-      // .populate('sessions') // If sessions are separate and need to be linked
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 }) // Default sort
-      .exec();
-
+    const where: any = {};
+    if (category && typeof category === 'string' && category.trim() !== '') {
+      where.category = category.trim();
+    }
+    if (level && typeof level === 'string' && level.trim() !== '') {
+      where.niveau = level.trim();
+    }
+    const totalFormations = await prisma.formation.count({ where });
+    const formations = await prisma.formation.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        formateurs: { select: { id: true, firstName: true, lastName: true, email: true } },
+        centreFormation: { select: { id: true, nom: true, adresse: true } },
+      },
+    });
     return {
       data: formations,
       page,
@@ -45,40 +53,38 @@ export class FormationService {
   }
 
   public async findById(id: string): Promise<{ [key: string]: any; sessions: ISession[] } | null> {
-    const formation = await Formation.findById(id)
-      .populate('formateurs', 'firstName lastName email profilePicture')
-      .populate('centreFormation', 'nom adresse')
-      .exec();
-
+    const formation = await prisma.formation.findUnique({
+      where: { id },
+      include: {
+        formateurs: { select: { id: true, firstName: true, lastName: true, email: true, profilePicture: true } },
+        centreFormation: { select: { id: true, nom: true, adresse: true } },
+      },
+    });
     if (!formation) {
       return null;
     }
-
-    // Fetch associated sessions
-    const sessions = await Session.find({ formation: formation._id })
-      .populate('formateur', 'firstName lastName email profilePicture')
-      .sort({ dateDebut: 1 })
-      .exec();
-
-    // Combine formation with its sessions as a plain object
-    const formationObject = formation.toObject();
-    return { ...formationObject, sessions };
+    const sessions = await prisma.session.findMany({
+      where: { formationId: id },
+      include: { formateur: { select: { id: true, firstName: true, lastName: true, email: true, profilePicture: true } } },
+      orderBy: { dateDebut: 'asc' },
+    });
+    return { ...formation, sessions };
   }
 
   public async create(data: Partial<IFormation>): Promise<IFormation> {
     // Add any necessary validation or data transformation before saving
-    const newFormation = new Formation(data);
-    return newFormation.save();
+    const newFormation = await prisma.formation.create({ data });
+    return newFormation;
   }
 
   public async update(id: string, data: Partial<IFormation>): Promise<IFormation | null> {
     // Add any necessary validation or data transformation
     // { new: true } returns the modified document rather than the original
-    return Formation.findByIdAndUpdate(id, data, { new: true }).exec();
+    return prisma.formation.update({ where: { id }, data });
   }
 
   public async delete(id: string): Promise<IFormation | null> {
     // findByIdAndDelete will return the deleted document
-    return Formation.findByIdAndDelete(id).exec();
+    return prisma.formation.delete({ where: { id } });
   }
 }

@@ -1,13 +1,12 @@
-import mongoose from 'mongoose';
-import { User, Admin, CentreManager, Formateur, Etudiant, DemandeurEmploi, Entreprise } from '../models/user.model';
-import { CentreFormation } from '../models/centreFormation.model';
-import { Formation } from '../models/formation.model';
+import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
+const prisma = new PrismaClient();
+
 const hashPassword = async (password: string): Promise<string> => {
-  console.log('🔐 Hachage du mot de passe:', password);
+  console.log(' Hachage du mot de passe:', password);
   const salt = await bcrypt.genSalt(10);
-  console.log('🧂 Salt généré:', salt);
+  console.log(' Salt généré:', salt);
   const hashedPassword = await bcrypt.hash(password, salt);
   console.log('✅ Mot de passe haché:', hashedPassword);
   return hashedPassword;
@@ -16,24 +15,34 @@ const hashPassword = async (password: string): Promise<string> => {
 const seedDatabase = async () => {
   try {
     console.log('🗑️ Nettoyage de la base de données...');
-    await mongoose.connection.dropDatabase();
+    await prisma.$transaction([
+      prisma.entreprise.deleteMany({}),
+      prisma.demandeurEmploi.deleteMany({}),
+      prisma.etudiant.deleteMany({}),
+      prisma.formateur.deleteMany({}),
+      prisma.centreManager.deleteMany({}),
+      prisma.formation.deleteMany({}),
+      prisma.centreFormation.deleteMany({}),
+      prisma.user.deleteMany({})
+    ]);
     console.log('✅ Base de données nettoyée');
 
     console.log('👤 Création de l\'administrateur...');
-    const admin = new Admin({
-      email: 'admin@darassa.academy',
-      password: 'admin123',
-      firstName: 'Admin',
-      lastName: 'System',
-      userType: 'admin',
-      permissions: ['all'],
-      accessLevel: 1
+    const admin = await prisma.user.create({
+      data: {
+        email: 'admin@darassa.academy',
+        password: await hashPassword('admin123'),
+        firstName: 'Admin',
+        lastName: 'System',
+        userType: 'admin',
+        permissions: ['all'],
+        accessLevel: 1
+      }
     });
-    await admin.save();
-    console.log('✅ Administrateur créé:', admin._id);
+    console.log('✅ Administrateur créé:', admin.id);
 
     console.log('🏫 Création du centre de formation...');
-    const centre1 = await CentreFormation.create({
+    const centre1 = await prisma.centreFormation.create({
       nom: 'Centre de Formation Digital Dakar',
       code: 'CFDD001',
       adresse: {
@@ -71,41 +80,42 @@ const seedDatabase = async () => {
     console.log('✅ Centre de formation créé:', centre1._id);
 
     console.log('👨‍💼 Création du gestionnaire de centre...');
-    const manager = new CentreManager({
-      email: 'manager@cfdd.sn',
-      password: 'manager123',
-      firstName: 'Mamadou',
-      lastName: 'Diallo',
-      userType: 'centre_manager',
-      centres: [centre1._id],
-      permissions: {
-        canManageFormateurs: true,
-        canManageFormations: true,
-        canValidateCertifications: true,
-        canViewReports: true
+    const manager = await prisma.centreManager.create({
+      data: {
+        email: 'manager@cfdd.sn',
+        password: await hashPassword('manager123'),
+        firstName: 'Mamadou',
+        lastName: 'Diallo',
+        userType: 'centre_manager',
+        centres: { connect: [{ id: centre1.id }] },
+        permissions: {
+          canManageFormateurs: true,
+          canManageFormations: true,
+          canValidateCertifications: true,
+          canViewReports: true
+        }
       }
     });
-    await manager.save();
-    console.log('✅ Gestionnaire créé:', manager._id);
+    console.log('✅ Gestionnaire créé:', manager.id);
 
     console.log('👨‍🏫 Création du formateur...');
-    const formateur1 = new Formateur({
-      email: 'formateur1@cfdd.sn',
-      password: 'formateur123',
-      firstName: 'Fatou',
-      lastName: 'Sow',
-      userType: 'formateur',
-      centreId: centre1._id,
-      specialites: ['Développement Web', 'Design UI/UX'],
-      formations: [],
-      evaluations: 4.5,
-      disponibilite: true
+    const formateur1 = await prisma.formateur.create({
+      data: {
+        email: 'formateur1@cfdd.sn',
+        password: await hashPassword('formateur123'),
+        firstName: 'Fatou',
+        lastName: 'Sow',
+        userType: 'formateur',
+        centreId: centre1.id,
+        specialites: ['Développement Web', 'Design UI/UX'],
+        evaluations: 4.5,
+        disponibilite: true
+      }
     });
-    await formateur1.save();
-    console.log('✅ Formateur créé:', formateur1._id);
+    console.log('✅ Formateur créé:', formateur1.id);
 
     console.log('📚 Création de la formation...');
-    const formation1 = await Formation.create({
+    const formation1 = await prisma.formation.create({
       titre: 'Développement Web Full Stack',
       description: 'Formation complète en développement web front-end et back-end',
       code: 'WEB001',
@@ -139,8 +149,8 @@ const seedDatabase = async () => {
           coefficient: 0.4
         }]
       }],
-      formateurs: [formateur1._id],
-      centreFormation: centre1._id,
+      formateurs: { connect: [{ id: formateur1.id }] },
+      centreFormationId: centre1.id,
       dateDebut: new Date('2024-05-01'),
       dateFin: new Date('2024-10-31'),
       placesDisponibles: 20
@@ -148,27 +158,30 @@ const seedDatabase = async () => {
     console.log('✅ Formation créée:', formation1._id);
 
     console.log('👨‍🎓 Création de l\'étudiant...');
-    const etudiant1 = new Etudiant({
-      email: 'etudiant1@example.com',
-      password: 'etudiant123',
-      firstName: 'Amadou',
-      lastName: 'Diop',
-      userType: 'etudiant',
-      centreId: centre1._id,
-      formationsInscrites: [{
-        formationId: formation1._id,
-        centreId: centre1._id,
-        dateInscription: new Date(),
-        progression: 0,
-        certificatObtenu: false
-      }],
-      competencesAcquises: []
+    const etudiant1 = await prisma.etudiant.create({
+      data: {
+        email: 'etudiant1@example.com',
+        password: await hashPassword('etudiant123'),
+        firstName: 'Amadou',
+        lastName: 'Diop',
+        userType: 'etudiant',
+        centreId: centre1.id,
+        competencesAcquises: [],
+        formationsInscrites: {
+          create: [{
+            formationId: formation1.id,
+            centreId: centre1.id,
+            dateInscription: new Date(),
+            progression: 0,
+            certificatObtenu: false
+          }]
+        }
+      }
     });
-    await etudiant1.save();
-    console.log('✅ Étudiant créé:', etudiant1._id);
+    console.log('✅ Étudiant créé:', etudiant1.id);
 
     console.log('🔍 Création du demandeur d\'emploi...');
-    const demandeur1 = new DemandeurEmploi({
+    const demandeur1 = await prisma.demandeurEmploi.create({
       email: 'demandeur1@example.com',
       password: 'demandeur123',
       firstName: 'Aïda',
@@ -189,13 +202,13 @@ const seedDatabase = async () => {
       cv: 'https://example.com/cv.pdf',
       disponibilite: 'immediate',
       rechercheEmploi: true,
-      formationsInscrites: [formation1._id]
+      formationsInscrites: { connect: [{ id: formation1.id }] }
     });
     await demandeur1.save();
     console.log('✅ Demandeur d\'emploi créé:', demandeur1._id);
 
     console.log('🏢 Création de l\'entreprise...');
-    const entreprise1 = new Entreprise({
+    const entreprise1 = await prisma.entreprise.create({
       email: 'contact@techsolutions.sn',
       password: 'entreprise123',
       firstName: 'Tech',
@@ -205,19 +218,15 @@ const seedDatabase = async () => {
       secteur: 'Technologies de l\'Information',
       taille: 'pme',
       adresse: '456 Avenue Cheikh Anta Diop, Dakar',
-      siteWeb: 'www.techsolutions.sn',
-      description: 'Entreprise spécialisée dans le développement de solutions numériques',
-      offresEmploi: [],
-      formationsProposees: []
     });
-    await entreprise1.save();
-    console.log('✅ Entreprise créée:', entreprise1._id);
+    console.log('✅ Entreprise créée');
 
     console.log('✅ Données de test créées avec succès !');
   } catch (error) {
     console.error('❌ Erreur lors de la création des données de test:', error);
     throw error;
   }
+}
 };
 
-export default seedDatabase; 
+export default seedDatabase;
