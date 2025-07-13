@@ -70,76 +70,7 @@ export interface IFormation extends Document {
   verifierDisponibilite(): boolean;
 }
 
-const formationSchema = new Schema({
-  titre: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  description: {
-    type: String,
-    required: true
-  },
-  code: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true
-  },
-  category: { // Nouveau champ
-    type: String,
-    required: true,
-    trim: true,
-    index: true // Ajout d'un index pour le filtrage
-  },
-  duree: {
-    type: Number,
-    required: true,
-    min: 1
-  },
-  niveau: {
-    type: String,
-    required: true,
-    enum: ['debutant', 'intermediaire', 'avance', 'expert']
-  },
-  prix: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  prerequis: [{
-    type: String
-  }],
-  objectifs: [{
-    type: String
-  }],
-  competences: [{
-    type: String
-  }],
-  modules: [{
-    titre: {
-      type: String,
-      required: true
-    },
-    description: {
-      type: String,
-      required: true
-    },
-    duree: {
-      type: Number,
-      required: true,
-      min: 1
-    },
-    contenu: [{
-      type: String
-    }],
-    evaluation: [{
-      type: {
-        type: String,
-        required: true
-      },
-      description: {
-        type: String,
+// Fichier obsolète depuis la migration vers Prisma/PostgreSQL. Toutes les opérations sont désormais gérées via Prisma.
         required: true
       },
       coefficient: {

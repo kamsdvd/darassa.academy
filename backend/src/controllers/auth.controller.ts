@@ -1,18 +1,19 @@
 import { Request, Response } from 'express';
-import { User } from '../models/user.model';
-import { ResetToken } from '../models/ResetToken';
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
+const prisma = new PrismaClient();
+
 import { emailService } from '../services/email.service';
 import { generateJWT, generateRefreshToken, generateRandomToken } from '../common/helpers/token.helper';
 import { getResetPasswordUrl, getVerificationUrl } from '../common/helpers/format.helper';
 import { config } from '../config/config';
-import { Types } from 'mongoose';
 
 export const register = async (req: Request, res: Response) => {
   try {
     const { email, password, firstName, lastName, userType } = req.body;
 
     // Vérifier si l'utilisateur existe déjà
-    const existingUser = await User.findOne({ email });
+    const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return res.status(409).json({
         success: false,
@@ -21,24 +22,25 @@ export const register = async (req: Request, res: Response) => {
     }
 
     // Créer le nouvel utilisateur
-    const user = new User({
-      email,
-      password,
-      firstName,
-      lastName,
-      userType,
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        userType
+      }
     });
-
-    await user.save();
 
     // Générer les tokens
     const accessToken = generateJWT({ 
-      id: (user._id as Types.ObjectId).toString(),
+      id: user.id,
       userType: user.userType,
       email: user.email
     });
     const refreshToken = generateRefreshToken({ 
-      id: (user._id as Types.ObjectId).toString(),
+      id: user.id,
       userType: user.userType,
       email: user.email
     });
@@ -47,7 +49,7 @@ export const register = async (req: Request, res: Response) => {
       success: true,
       data: {
         user: {
-          id: user._id,
+          id: user.id,
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
@@ -73,7 +75,7 @@ export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     // Trouver l'utilisateur
-    const user = await User.findOne({ email });
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -82,7 +84,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // Vérifier le mot de passe
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({
         success: false,
@@ -91,7 +93,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // Vérifier si le compte est actif
-    if (!user.isActive) {
+    if (user.isActive === false) {
       return res.status(403).json({
         success: false,
         message: 'Compte désactivé'
@@ -99,17 +101,19 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // Mettre à jour la dernière connexion
-    user.lastLogin = new Date();
-    await user.save();
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { lastLogin: new Date() }
+    });
 
     // Générer les tokens
     const accessToken = generateJWT({ 
-      id: (user._id as Types.ObjectId).toString(),
+      id: user.id,
       userType: user.userType,
       email: user.email
     });
     const refreshToken = generateRefreshToken({ 
-      id: (user._id as Types.ObjectId).toString(),
+      id: user.id,
       userType: user.userType,
       email: user.email
     });
@@ -118,7 +122,7 @@ export const login = async (req: Request, res: Response) => {
       success: true,
       data: {
         user: {
-          id: user._id,
+          id: user.id,
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
@@ -142,10 +146,10 @@ export const login = async (req: Request, res: Response) => {
 export const getProfile = async (req: Request, res: Response) => {
   try {
     // Correction du typage pour accéder à _id
-    const userId = (req.user && typeof req.user === 'object' && '_id' in req.user)
-      ? (req.user as any)._id
+    const userId = (req.user && typeof req.user === 'object' && 'id' in req.user)
+      ? (req.user as any).id
       : undefined;
-    const user = await User.findById(userId).select('-password');
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { password: false, id: true, email: true, firstName: true, lastName: true, userType: true, isEmailVerified: true, lastLogin: true } });
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -157,7 +161,7 @@ export const getProfile = async (req: Request, res: Response) => {
       success: true,
       data: {
         user: {
-          id: user._id,
+          id: user.id,
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
@@ -179,7 +183,7 @@ export const getProfile = async (req: Request, res: Response) => {
 export const requestPasswordReset = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
-    const user = await User.findOne({ email });
+    const user = await prisma.user.findUnique({ where: { email } });
     
     if (!user) {
       return res.status(404).json({
@@ -194,10 +198,13 @@ export const requestPasswordReset = async (req: Request, res: Response) => {
     expiresAt.setHours(expiresAt.getHours() + 1); // Expire dans 1 heure
 
     // Sauvegarder le token
-    await ResetToken.create({
-      userId: user._id,
-      token,
-      expiresAt
+    await prisma.resetToken.create({
+      data: {
+        userId: user.id,
+        token,
+        expiresAt,
+        used: false
+      }
     });
 
     // Envoyer l'email
@@ -222,10 +229,12 @@ export const resetPassword = async (req: Request, res: Response) => {
     const { token, password } = req.body;
 
     // Trouver le token valide
-    const resetToken = await ResetToken.findOne({
-      token,
-      used: false,
-      expiresAt: { $gt: new Date() }
+    const resetToken = await prisma.resetToken.findFirst({
+      where: {
+        token,
+        used: false,
+        expiresAt: { gt: new Date() }
+      }
     });
 
     if (!resetToken) {
@@ -236,20 +245,17 @@ export const resetPassword = async (req: Request, res: Response) => {
     }
 
     // Mettre à jour le mot de passe
-    const user = await User.findById(resetToken.userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'Utilisateur non trouvé'
-      });
-    }
-
-    user.password = password;
-    await user.save();
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await prisma.user.update({
+      where: { id: resetToken.userId },
+      data: { password: hashedPassword }
+    });
 
     // Marquer le token comme utilisé
-    resetToken.used = true;
-    await resetToken.save();
+    await prisma.resetToken.update({
+      where: { id: resetToken.id },
+      data: { used: true }
+    });
 
     res.status(200).json({
       success: true,
@@ -268,10 +274,12 @@ export const verifyEmail = async (req: Request, res: Response) => {
   try {
     const { token } = req.query;
 
-    // Trouver le token de vérification
-    const user = await User.findOne({
-      emailVerificationToken: token,
-      isEmailVerified: false
+    // Trouver l'utilisateur avec le token de vérification
+    const user = await prisma.user.findFirst({
+      where: {
+        emailVerificationToken: token as string,
+        isEmailVerified: false
+      }
     });
 
     if (!user) {
@@ -282,8 +290,10 @@ export const verifyEmail = async (req: Request, res: Response) => {
     }
 
     // Marquer l'email comme vérifié
-    user.isEmailVerified = true;
-    await user.save();
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { isEmailVerified: true }
+    });
 
     res.status(200).json({
       success: true,

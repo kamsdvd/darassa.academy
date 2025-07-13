@@ -31,19 +31,6 @@ export interface ISession extends Document {
   documents: {
     nom: string;
     url: string;
-    type: string;
-  }[];
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const SessionSchema: Schema = new Schema({
-  formation: {
-    type: Schema.Types.ObjectId,
-    ref: 'Formation',
-    required: true
-  },
-  titre: {
     type: String,
     required: true
   },
@@ -117,4 +104,4 @@ SessionSchema.index({ formation: 1, dateDebut: 1 });
 SessionSchema.index({ formateur: 1, dateDebut: 1 });
 SessionSchema.index({ statut: 1 });
 
-export const Session = mongoose.model<ISession>('Session', SessionSchema); 
+// Fichier obsolète depuis la migration vers Prisma/PostgreSQL. Toutes les opérations sont désormais gérées via Prisma.

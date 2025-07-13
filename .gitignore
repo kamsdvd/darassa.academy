@@ -53,3 +53,5 @@ frontend/public/uploads/
 *.pem
 .vercel
 .netlify
+
+/src/generated/prisma

@@ -17,19 +17,6 @@ export interface IEvent extends Document {
   };
   participants: number;
   statut: 'planifie' | 'en_cours' | 'termine' | 'annule';
-  formation?: PopulatedDoc<Document<mongoose.Types.ObjectId> & IFormation>;
-  session?: PopulatedDoc<Document<mongoose.Types.ObjectId> & ISession>;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const EventSchema: Schema = new Schema({
-  titre: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  description: {
     type: String,
     required: true
   },
@@ -82,4 +69,4 @@ EventSchema.index({ formateur: 1 });
 EventSchema.index({ type: 1 });
 EventSchema.index({ statut: 1 });
 
-export const Event = mongoose.model<IEvent>('Event', EventSchema);
+// Fichier obsolète depuis la migration vers Prisma/PostgreSQL. Toutes les opérations sont désormais gérées via Prisma.

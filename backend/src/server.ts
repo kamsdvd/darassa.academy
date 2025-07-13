@@ -72,9 +72,6 @@ const initializeDatabase = async () => {
   try {
     await prisma.$connect();
     console.log('✅ Connecté à PostgreSQL avec Prisma');
-        process.exit(1);
-      }
-    }
 
     // Démarrer le serveur
     app.listen(port, () => {
@@ -84,7 +81,7 @@ const initializeDatabase = async () => {
       console.log(`Documentation API: http://localhost:${port}/api/docs`);
     });
   } catch (error) {
-    console.error('❌ Erreur de connexion à MongoDB:', error);
+    console.error('❌ Erreur de connexion à PostgreSQL:', error);
     process.exit(1);
   }
 };

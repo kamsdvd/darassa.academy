@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: 'http://localhost:3000/api', // Corrected to match backend port
+  BASE_URL: '/api', // Utilise le proxy Vite pour router vers le backend (port 5000)
   TIMEOUT: 10000,
   RETRY_ATTEMPTS: 3,
   ENDPOINTS: {
@@ -11,4 +11,4 @@ export const API_CONFIG = {
     },
     // Ajoutez d'autres endpoints ici au besoin
   },
-}; 
+};
