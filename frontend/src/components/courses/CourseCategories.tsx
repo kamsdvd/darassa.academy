@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { formations } from '../../data/formations';
+import { courses } from '../../data/courses';
 
 const getFormationCount = (category: string) => {
-  return formations.filter(f => f.category === category).length;
+  return courses.filter(f => f.category === category).length;
 };
 
 const categories = [
@@ -86,7 +86,7 @@ const categories = [
   },
 ];
 
-const FormationCategories: React.FC = () => {
+const CourseCategories: React.FC = () => {
   return (
     <section className="py-16">
       <div className="text-center mb-12">
@@ -128,4 +128,4 @@ const FormationCategories: React.FC = () => {
   );
 };
 
-export default FormationCategories; 
+export default CourseCategories; 

@@ -34,7 +34,7 @@ const faqs = [
   },
 ];
 
-const FormationFAQ: React.FC = () => {
+const CourseFAQ: React.FC = () => {
   const [openId, setOpenId] = useState<number | null>(null);
 
   return (
@@ -103,4 +103,4 @@ const FormationFAQ: React.FC = () => {
   );
 };
 
-export default FormationFAQ; 
+export default CourseFAQ; 

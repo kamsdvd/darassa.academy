@@ -148,7 +148,7 @@ const Dashboard: React.FC = () => {
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold text-gray-900">Formations</h3>
         <Link
-          to="/entreprises/formations/nouvelle"
+          to="/entreprises/courses/nouvelle"
           className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
         >
           <Plus className="w-4 h-4 mr-2" />

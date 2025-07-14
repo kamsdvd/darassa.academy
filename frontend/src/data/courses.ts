@@ -1,4 +1,6 @@
-export const formations = [
+import { Course } from '../types/course';
+
+export const courses: Course[] = [
   // Bureautique - Microsoft Office
   {
     id: 1,
@@ -8,7 +10,7 @@ export const formations = [
     level: "Débutant",
     price: "199€",
     description: "Acquérez les compétences numériques fondamentales avec la certification IC3 mondialement reconnue",
-    image: "/images/formations/ic3.jpg",
+    imageUrl: "/images/formations/ic3.jpg",
   },
   // Microsoft Office
   {
@@ -19,7 +21,7 @@ export const formations = [
     level: "Débutant",
     price: "249€",
     description: "Maîtrisez les fonctionnalités essentielles de Microsoft Word et obtenez votre certification Associate",
-    image: "/images/formations/word-associate.jpg",
+    imageUrl: "/images/formations/word-associate.jpg",
   },
   {
     id: 3,
@@ -29,7 +31,7 @@ export const formations = [
     level: "Avancé",
     price: "299€",
     description: "Devenez expert dans l'utilisation avancée de Word : styles, documents longs, formulaires et automatisation",
-    image: "/images/formations/word-expert.jpg",
+    imageUrl: "/images/formations/word-expert.jpg",
   },
   {
     id: 4,
@@ -39,7 +41,7 @@ export const formations = [
     level: "Débutant",
     price: "249€",
     description: "Apprenez les fondamentaux d'Excel : formules, tableaux, graphiques et analyse de données basique",
-    image: "/images/formations/excel-associate.jpg",
+    imageUrl: "/images/formations/excel-associate.jpg",
   },
   {
     id: 5,
@@ -49,7 +51,7 @@ export const formations = [
     level: "Avancé",
     price: "349€",
     description: "Maîtrisez les fonctionnalités avancées d'Excel : tableaux croisés dynamiques, macros VBA, et analyse complexe",
-    image: "/images/formations/excel-expert.jpg",
+    imageUrl: "/images/formations/excel-expert.jpg",
   },
   {
     id: 6,
@@ -59,7 +61,7 @@ export const formations = [
     level: "Intermédiaire",
     price: "199€",
     description: "Créez des présentations professionnelles percutantes avec animations, transitions et contenus multimédias",
-    image: "/images/formations/powerpoint.jpg",
+    imageUrl: "/images/formations/powerpoint.jpg",
   },
   {
     id: 7,
@@ -69,7 +71,7 @@ export const formations = [
     level: "Débutant",
     price: "149€",
     description: "Optimisez votre communication professionnelle avec la gestion des emails, calendriers et contacts",
-    image: "/images/formations/outlook.jpg",
+    imageUrl: "/images/formations/outlook.jpg",
   },
   {
     id: 8,
@@ -79,7 +81,7 @@ export const formations = [
     level: "Avancé",
     price: "399€",
     description: "Développez des bases de données professionnelles avec formulaires, requêtes complexes et automatisation",
-    image: "/images/formations/access.jpg",
+    imageUrl: "/images/formations/access.jpg",
   },
   // Google Workspace
   {
@@ -90,7 +92,7 @@ export const formations = [
     level: "Débutant",
     price: "199€",
     description: "Maîtrisez le traitement de texte collaboratif avec Google Docs et ses fonctionnalités avancées",
-    image: "/images/formations/google-docs.jpg",
+    imageUrl: "/images/formations/google-docs.jpg",
   },
   {
     id: 10,
@@ -100,7 +102,7 @@ export const formations = [
     level: "Intermédiaire",
     price: "249€",
     description: "Exploitez la puissance des tableurs en ligne avec Google Sheets : formules, tableaux croisés et automatisation",
-    image: "/images/formations/google-sheets.jpg",
+    imageUrl: "/images/formations/google-sheets.jpg",
   },
   {
     id: 11,
@@ -110,7 +112,7 @@ export const formations = [
     level: "Débutant",
     price: "179€",
     description: "Créez des présentations collaboratives impactantes avec Google Slides",
-    image: "/images/formations/google-slides.jpg",
+    imageUrl: "/images/formations/google-slides.jpg",
   },
   {
     id: 12,
@@ -120,7 +122,7 @@ export const formations = [
     level: "Débutant",
     price: "149€",
     description: "Créez et analysez des formulaires professionnels avec Google Forms",
-    image: "/images/formations/google-forms.jpg",
+    imageUrl: "/images/formations/google-forms.jpg",
   },
   {
     id: 13,
@@ -130,7 +132,7 @@ export const formations = [
     level: "Débutant",
     price: "149€",
     description: "Optimisez le stockage et la collaboration en ligne avec Google Drive",
-    image: "/images/formations/google-drive.jpg",
+    imageUrl: "/images/formations/google-drive.jpg",
   },
   {
     id: 14,
@@ -140,7 +142,7 @@ export const formations = [
     level: "Avancé",
     price: "349€",
     description: "Gérez et administrez une suite Google Workspace pour votre organisation",
-    image: "/images/formations/google-workspace-admin.jpg",
+    imageUrl: "/images/formations/google-workspace-admin.jpg",
   },
   // Intelligence Artificielle
   {
@@ -151,7 +153,7 @@ export const formations = [
     level: "Avancé",
     price: "499€",
     description: "Apprenez à créer des modèles d'apprentissage automatique avec Python et scikit-learn",
-    image: "/images/formations/machine-learning.jpg",
+    imageUrl: "/images/formations/machine-learning.jpg",
   },
   {
     id: 16,
@@ -161,7 +163,7 @@ export const formations = [
     level: "Avancé",
     price: "599€",
     description: "Maîtrisez les réseaux de neurones et le deep learning avec TensorFlow et PyTorch",
-    image: "/images/formations/deep-learning.jpg",
+    imageUrl: "/images/formations/deep-learning.jpg",
   },
   // Langues
   {
@@ -172,7 +174,7 @@ export const formations = [
     level: "Tous niveaux",
     price: "299€",
     description: "Développez vos compétences en anglais des affaires et communication professionnelle",
-    image: "/images/formations/english.jpg",
+    imageUrl: "/images/formations/english.jpg",
   },
   {
     id: 18,
@@ -182,7 +184,7 @@ export const formations = [
     level: "Tous niveaux",
     price: "299€",
     description: "Apprenez le français pour une intégration réussie dans le monde professionnel francophone",
-    image: "/images/formations/french.jpg",
+    imageUrl: "/images/formations/french.jpg",
   },
   // Design
   {
@@ -193,6 +195,6 @@ export const formations = [
     level: "Intermédiaire",
     price: "399€",
     description: "Créez des interfaces utilisateur intuitives et des expériences utilisateur exceptionnelles",
-    image: "/images/formations/ui-ux.jpg",
+    imageUrl: "/images/formations/ui-ux.jpg"
   }
-]; 
+];

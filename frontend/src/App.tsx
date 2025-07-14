@@ -48,7 +48,7 @@ const lazyWithPrefetch = (factory: () => Promise<any>, preload = false) => {
 
 // Composants avec lazy loading
 const Home = lazyWithPrefetch(() => import('./pages/Home'), true);
-const Formations = lazyWithPrefetch(() => import('./pages/formations/Formations'));
+const Courses = lazyWithPrefetch(() => import('./pages/courses/Courses')); // MODIFIÉ
 const Affiliation = lazyWithPrefetch(() => import('./pages/affiliation/Affiliation'));
 const Blog = lazyWithPrefetch(() => import('./pages/blog/Blog'));
 const Contact = lazyWithPrefetch(() => import('./pages/contact/Contact'));
@@ -157,9 +157,9 @@ const RoutePrefetcher = () => {
   useEffect(() => {
     // Précharger les routes connexes en fonction de la route actuelle
     if (location.pathname === '/') {
-      import('./pages/formations/Formations');
+      import('./pages/courses/Courses'); // MODIFIÉ
       import('./pages/affiliation/Affiliation');
-    } else if (location.pathname.startsWith('/formations')) {
+    } else if (location.pathname.startsWith('/courses')) { // MODIFIÉ
       import('./pages/contact/Contact');
       import('./pages/entreprises/Inscription');
     }
@@ -179,7 +179,7 @@ function AnimatedRoutes() {
           {/* Routes publiques */}
           <Route path="/" element={<Home />} />
           <Route path="/a-propos" element={<APropos />} />
-          <Route path="/formations" element={<Formations />} />
+          <Route path="/courses" element={<Courses />} />
           <Route path="/affiliation" element={<Affiliation />} />
           <Route path="/opportunites" element={<Opportunites />} />
           <Route path="/opportunites/:id" element={<JobDetail />} />
@@ -220,7 +220,7 @@ function AnimatedRoutes() {
               <CentresManagement />
             </ProtectedRoute>
           } />
-          <Route path="/admin/formations" element={
+          <Route path="/admin/courses" element={
             <ProtectedRoute roles={['admin']}>
               <FormationsManagement />
             </ProtectedRoute>
@@ -257,17 +257,17 @@ function AnimatedRoutes() {
               <FormateurDisponibilitesManagement />
             </ProtectedRoute>
           } />
-          <Route path="/centre/formations/create" element={
+          <Route path="/centre/courses/create" element={
             <ProtectedRoute roles={['centre_manager']}>
               <CreateFormation />
             </ProtectedRoute>
           } />
-          <Route path="/centre/formations/sessions" element={
+          <Route path="/centre/courses/sessions" element={
             <ProtectedRoute roles={['centre_manager']}>
               <PlanifierSession />
             </ProtectedRoute>
           } />
-          <Route path="/centre/formations" element={
+          <Route path="/centre/courses" element={
             <ProtectedRoute roles={['centre_manager']}>
               <FormationsManagement />
             </ProtectedRoute>
@@ -325,7 +325,7 @@ function AnimatedRoutes() {
               <EmployesManagement />
             </ProtectedRoute>
           } />
-          <Route path="/entreprise/formations" element={
+          <Route path="/entreprise/courses" element={
             <ProtectedRoute roles={['entreprise']}>
               <EntrepriseFormations />
             </ProtectedRoute>

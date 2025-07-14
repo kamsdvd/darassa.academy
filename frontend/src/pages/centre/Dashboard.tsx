@@ -75,7 +75,7 @@ const CentreDashboard: React.FC = () => {
               <Link to="/centre/formateurs" className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
                 Gérer les formateurs
               </Link>
-              <Link to="/centre/formations" className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+              <Link to="/centre/courses" className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
                 Gérer les formations
               </Link>
               <Link to="/centre/planning" className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">

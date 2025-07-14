@@ -129,6 +129,24 @@ export default function Courses() {
     );
   }
 
+  // Handle case with no results after loading
+  if (!isLoading && courses.length === 0) {
+    return (
+      <MainLayout>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">Nos Cours</h1>
+          {/* Render filters here as well so user can change them */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            {/* Filters... */}
+          </div>
+          <div className="text-center py-16">
+            <p className="text-gray-500">Aucun cours ne correspond à vos critères de recherche.</p>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

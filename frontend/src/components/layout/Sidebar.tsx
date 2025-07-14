@@ -182,8 +182,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
       },
       {
         icon: <BookOpen className="h-5 w-5" />,
-        label: 'Gestion des formations',
-        path: '/admin/formations'
+        label: 'Gestion des cours',
+        path: '/admin/courses'
       },
       {
         icon: <FileText className="h-5 w-5" />,
@@ -233,18 +233,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
       },
       {
         icon: <BookOpen className="h-5 w-5" />,
-        label: 'Gestion des formations',
-        path: '/centre/formations',
+        label: 'Gestion des cours',
+        path: '/centre/courses',
         subItems: [
           {
             icon: <FileText className="h-4 w-4" />,
-            label: 'Créer une formation',
-            path: '/centre/formations/create'
+            label: 'Créer un cours',
+            path: '/centre/courses/create'
           },
           {
             icon: <Calendar className="h-4 w-4" />,
             label: 'Planifier une session',
-            path: '/centre/formations/sessions'
+            path: '/centre/courses/sessions'
           }
         ]
       },
@@ -496,11 +496,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
         {isOpen && <span>Tableau de bord</span>}
       </Link>
       <Link 
-        to="/user/formations" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/user/formations') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
+        to="/user/courses" 
+        className={`flex items-center px-4 py-2 text-sm ${isActive('/user/courses') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
       >
         <BookOpen className="mr-3 h-5 w-5" />
-        {isOpen && <span>Formations disponibles</span>}
+        {isOpen && <span>Cours disponibles</span>}
       </Link>
       <Link 
         to="/user/opportunites" 
@@ -546,11 +546,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
         {isOpen && <span>Gestion des employés</span>}
       </Link>
       <Link 
-        to="/entreprise/formations" 
-        className={`flex items-center px-4 py-2 text-sm ${isActive('/entreprise/formations') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
+        to="/entreprise/courses" 
+        className={`flex items-center px-4 py-2 text-sm ${isActive('/entreprise/courses') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
       >
         <BookOpen className="mr-3 h-5 w-5" />
-        {isOpen && <span>Formations</span>}
+        {isOpen && <span>Cours</span>}
       </Link>
       <Link 
         to="/entreprise/opportunites" 

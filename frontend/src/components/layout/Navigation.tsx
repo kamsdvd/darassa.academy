@@ -169,7 +169,7 @@ const Navigation: React.FC = () => {
             <Link to="/" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
               Accueil
             </Link>
-            <Link to="/formations" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
+            <Link to="/courses" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
               Formations
             </Link>
             <Link to="/affiliation" className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium">
@@ -268,7 +268,7 @@ const Navigation: React.FC = () => {
               Accueil
             </Link>
             <Link
-              to="/formations"
+              to="/courses"
               className="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium"
               onClick={toggleMenu}
             >

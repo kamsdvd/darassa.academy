@@ -72,10 +72,10 @@ const Dashboard: React.FC = () => {
         <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-lg mb-4">
           <BookOpen className="w-6 h-6 text-green-600" />
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Formations</h3>
-        <p className="text-sm text-gray-500 mb-4">Gérez les formations de votre centre</p>
-        <Link to="/centre/formations" className="text-green-600 hover:text-green-900 text-sm font-medium">
-          Gérer les formations →
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Cours</h3>
+        <p className="text-sm text-gray-500 mb-4">Gérez les cours de votre centre</p>
+        <Link to="/centre/courses" className="text-green-600 hover:text-green-900 text-sm font-medium">
+          Gérer les cours →
         </Link>
       </div>
 
@@ -146,10 +146,10 @@ const Dashboard: React.FC = () => {
         <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-lg mb-4">
           <BookOpen className="w-6 h-6 text-green-600" />
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Formations</h3>
-        <p className="text-sm text-gray-500 mb-4">Consultez les formations disponibles</p>
-        <Link to="/entreprise/formations" className="text-green-600 hover:text-green-900 text-sm font-medium">
-          Voir les formations →
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Cours</h3>
+        <p className="text-sm text-gray-500 mb-4">Consultez les cours disponibles</p>
+        <Link to="/entreprise/courses" className="text-green-600 hover:text-green-900 text-sm font-medium">
+          Voir les cours →
         </Link>
       </div>
 
@@ -172,10 +172,10 @@ const Dashboard: React.FC = () => {
         <div className="flex items-center justify-center w-12 h-12 bg-primary-100 rounded-lg mb-4">
           <BookOpen className="w-6 h-6 text-primary-600" />
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Mes formations</h3>
-        <p className="text-sm text-gray-500 mb-4">Accédez à vos formations en cours</p>
-        <Link to="/formations" className="text-primary-600 hover:text-primary-900 text-sm font-medium">
-          Voir mes formations →
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Mes cours</h3>
+        <p className="text-sm text-gray-500 mb-4">Accédez à vos cours en cours</p>
+        <Link to="/courses" className="text-primary-600 hover:text-primary-900 text-sm font-medium">
+          Voir mes cours →
         </Link>
       </div>
 

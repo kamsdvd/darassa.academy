@@ -43,7 +43,7 @@ export const FormationCard: React.FC<FormationCardProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105">
       <LazyImage
-        src={formation.imageUrl}
+        src={formation.imageUrl || (formation as any).image}
         alt={formation.title}
         className="w-full h-48"
       />

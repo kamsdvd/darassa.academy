@@ -30,10 +30,8 @@ const Navbar: React.FC = () => {
               Accueil
             </Link>
             <Link
-              to="/formations"
-              className={`text-sm font-medium ${
-                isActive('/formations') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
-              }`}
+              to="/courses"
+L35: isActive('/courses') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
             >
               Formations
             </Link>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useFormations, FrontendPaginatedFormations, useDeleteFormation } from '../../../hooks/useFormations.ts'; // Ajuster le chemin, importer useDeleteFormation
+import { formations as staticFormations } from '../../../data/formations';
 import { Formation } from '../../../types/formation.ts'; // Ajuster le chemin
 import Layout from '../../../components/layout/Layout.tsx'; // Utilisation du Layout général pour l'instant
 import { PlusCircle, Edit3, Trash2, AlertTriangle, Loader2 } from 'lucide-react'; // Importer Loader2 pour le spinner
@@ -10,58 +10,34 @@ const AdminFormationsPage: React.FC = () => {
   const itemsPerPage = 10; // Nombre d'items par page pour l'admin
   const [deletingId, setDeletingId] = useState<string | null>(null); // Pour suivre l'ID de la formation en cours de suppression
 
-  const {
-    data: paginatedFormations,
-    isLoading: isLoadingFormations, // Renommer pour clarté
-    isError,
-    error
-  } = useFormations({
-    page: currentPage,
-    limit: itemsPerPage,
-  });
+  // Pagination locale sur les données statiques
+  const [formations, setFormations] = useState(staticFormations);
+  const totalPages = Math.ceil(formations.length / itemsPerPage);
+  const paginatedFormations = formations.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  const deleteFormationMutation = useDeleteFormation();
-
-  const handleDelete = async (formationId: string, formationTitle: string) => {
+  const handleDelete = (formationId: string, formationTitle: string) => {
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer la formation "${formationTitle}" ?`)) {
-      setDeletingId(formationId);
-      deleteFormationMutation.mutate(formationId, {
-        onSuccess: () => {
-          console.log(`Formation "${formationTitle}" supprimée avec succès.`);
-          // La liste sera rafraîchie automatiquement grâce à l'invalidation des requêtes dans le hook
-          // On pourrait ajouter une notification Toast ici.
-          setDeletingId(null);
-        },
-        onError: (err) => {
-          console.error(`Erreur lors de la suppression de la formation "${formationTitle}":`, err);
-          alert(`Erreur lors de la suppression : ${err.message}`);
-          setDeletingId(null);
-        },
-      });
+      setFormations(prev => prev.filter(f => f.id !== formationId));
     }
   };
 
-  const formations = paginatedFormations?.data || [];
-  const meta = paginatedFormations?.meta;
-
-  // TODO: Implémenter une vraie pagination pour l'admin
   const renderPaginationControls = () => {
-    if (!meta || meta.totalPages <= 1) return null;
+    if (totalPages <= 1) return null;
     return (
       <div className="mt-6 flex justify-center items-center space-x-2">
         <button
           onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-          disabled={currentPage === 1 || isLoadingFormations || deleteFormationMutation.isLoading}
+          disabled={currentPage === 1}
           className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50 hover:bg-gray-100"
         >
           Précédent
         </button>
         <span className="text-sm">
-          Page {meta.currentPage} sur {meta.totalPages}
+          Page {currentPage} sur {totalPages}
         </span>
         <button
-          onClick={() => setCurrentPage(p => Math.min(meta.totalPages, p + 1))}
-          disabled={currentPage === meta.totalPages || isLoadingFormations || deleteFormationMutation.isLoading}
+          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+          disabled={currentPage === totalPages}
           className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50 hover:bg-gray-100"
         >
           Suivant
@@ -70,16 +46,6 @@ const AdminFormationsPage: React.FC = () => {
     );
   };
 
-  if (isLoadingFormations) { // Utilise le nom de variable renommé
-    return (
-      <Layout>
-        <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-6 text-gray-800">Gestion des Formations</h1>
-          <p className="text-center text-gray-500">Chargement des formations...</p> {/* TODO: Add a spinner component */}
-        </div>
-      </Layout>
-    );
-  }
 
   if (isError) {
     return (

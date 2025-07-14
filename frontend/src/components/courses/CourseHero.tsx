@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const FormationHero: React.FC = () => {
+const CourseHero: React.FC = () => {
   return (
     <div className="relative bg-gradient-to-r from-blue-600 to-blue-800 text-white">
       <div className="absolute inset-0">
@@ -36,4 +36,4 @@ const FormationHero: React.FC = () => {
   );
 };
 
-export default FormationHero; 
+export default CourseHero; 

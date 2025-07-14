@@ -35,7 +35,7 @@ const Header: React.FC = () => {
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
               <Link to="/" className="text-gray-700 hover:text-[#007BFF] transition-colors">Accueil</Link>
-              <Link to="/formations" className="text-gray-700 hover:text-[#007BFF] transition-colors">Formations</Link>
+              <Link to="/courses" className="text-gray-700 hover:text-[#007BFF] transition-colors">Cours</Link>
               <Link to="/programme-mlm" className="text-gray-700 hover:text-[#007BFF] transition-colors">Affiliation</Link>
               <Link to="/blog" className="text-gray-700 hover:text-[#007BFF] transition-colors">Blog</Link>
               <Link to="/contact" className="text-gray-700 hover:text-[#007BFF] transition-colors">Contact</Link>
@@ -61,7 +61,7 @@ const Header: React.FC = () => {
           <div className="md:hidden bg-white border-t">
             <div className="px-2 pt-2 pb-3 space-y-1">
               <Link to="/" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 transition-colors">Accueil</Link>
-              <Link to="/formations" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 transition-colors">Formations</Link>
+              <Link to="/courses" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 transition-colors">Cours</Link>
               <Link to="/programme-mlm" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 transition-colors">Affiliation</Link>
               <Link to="/blog" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 transition-colors">Blog</Link>
               <Link to="/contact" className="block px-3 py-2 text-gray-700 hover:bg-gray-50 transition-colors">Contact</Link>
