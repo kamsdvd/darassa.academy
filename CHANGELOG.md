@@ -7,6 +7,13 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Feat - 2025-07-14
+- **Implement dynamic colored course placeholders:**
+  - Replaced external `via.placeholder.com` image URLs with dynamically generated SVG data URIs for course images.
+  - Each course now displays a unique solid color placeholder derived from its ID, using the site's primary and secondary color palette.
+  - Fixed `TypeError: id.split is not a function` by ensuring course IDs are converted to strings before processing.
+  - Fixed `500 Internal Server Error` caused by duplicate `hash` variable declarations in `generateColorSvg` functions.
+
 ### Refactor - 2025-07-14
 - **Migration des formations vers les cours et utilisation de données statiques :**
   - Renommage de tous les composants, pages, données, hooks et services liés aux "formations" en "cours" dans le frontend.

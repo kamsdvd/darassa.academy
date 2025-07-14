@@ -67,7 +67,25 @@ const FormationDetail: React.FC = () => {
   };
 
   // Fallback image if imageUrl is not available
-  const fallbackImage = "https://via.placeholder.com/1200x600/2563eb/ffffff?text=Darassa+Academy";
+  const COLOR_PALETTE = [
+    "#0ea5e9", // primary-500
+    "#c026d3", // secondary-600
+    "#0284c7", // primary-600
+    "#a21caf", // secondary-700
+    "#0369a1", // primary-700
+    "#86198f", // secondary-800
+  ];
+
+  const generateColorSvg = (id: string | number) => {
+    const stringId = String(id);
+    const hash = stringId.split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0);
+    const colorIndex = Math.abs(hash) % COLOR_PALETTE.length;
+    const color = COLOR_PALETTE[colorIndex];
+    const svg = `<svg width="1200" height="600" viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg"><rect width="1200" height="600" fill="${color}"/></svg>`;
+    return `data:image/svg+xml;base64,${btoa(svg)}`;
+  };
+
+  const fallbackImage = generateColorSvg(formation.id);
 
   return (
     <Layout>
@@ -76,10 +94,10 @@ const FormationDetail: React.FC = () => {
         <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
           <div className="relative h-[300px] md:h-[400px] lg:h-[500px]"> {/* Responsive height */}
             <img
-              src={formation.imageUrl || fallbackImage}
+              src={formation.imageUrl || generateColorSvg(formation.id)}
               alt={formation.title}
               className="w-full h-full object-cover"
-              onError={(e) => { (e.target as HTMLImageElement).src = fallbackImage; }}
+              onError={(e) => { (e.target as HTMLImageElement).src = generateColorSvg(formation.id); }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white">

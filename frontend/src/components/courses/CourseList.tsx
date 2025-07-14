@@ -13,7 +13,23 @@ const STATIC_CATEGORIES = [
   "Analyse de Données", "Base de Données", "Ingénierie des Réseaux",
   "Administration Systèmes"
 ];
-const FALLBACK_IMAGE = "https://via.placeholder.com/600x400/2563eb/ffffff?text=Course+Darassa"; // MODIFIÉ
+const COLOR_PALETTE = [
+  "#0ea5e9", // primary-500
+  "#c026d3", // secondary-600
+  "#0284c7", // primary-600
+  "#a21caf", // secondary-700
+  "#0369a1", // primary-700
+  "#86198f", // secondary-800
+];
+
+const generateColorSvg = (id: string | number) => {
+  const stringId = String(id);
+  const hash = stringId.split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0);
+  const colorIndex = Math.abs(hash) % COLOR_PALETTE.length;
+  const color = COLOR_PALETTE[colorIndex];
+  const svg = `<svg width="600" height="400" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="400" fill="${color}"/></svg>`;
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
+};
 
 // --- Child Components ---
 const CourseCard: React.FC<{ course: Course }> = ({ course }) => {
@@ -26,10 +42,10 @@ const CourseCard: React.FC<{ course: Course }> = ({ course }) => {
     >
       <div className="relative h-48">
         <img
-          src={course.imageUrl || FALLBACK_IMAGE}
+          src={course.imageUrl || generateColorSvg(course.id)}
           alt={course.title}
           className="w-full h-full object-cover"
-          onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMAGE; }}
+          onError={(e) => { (e.target as HTMLImageElement).src = generateColorSvg(course.id); }}
         />
       </div>
       <div className="p-6 flex flex-col flex-grow">
