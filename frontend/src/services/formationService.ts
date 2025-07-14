@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Formation } from '../types/formation';
 import { API_CONFIG } from '../config/api.config.ts';
-import { mapFrontendFormationToBackendPayload, mapBackendFormationToFrontend } from '../hooks/useFormations.ts'; // Import mappers
+import { mapFrontendFormationToBackendPayload, mapBackendFormationToFrontend } from '../hooks/formationMappers';
 
 interface FormationParams {
   category?: string;

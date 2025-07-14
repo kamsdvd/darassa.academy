@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { FormationService } from '../services/formationService';
 import { cachedAxios } from '../services/cacheService';
 import { Formation } from '../types/formation';
 
@@ -41,4 +43,20 @@ export const useFormations = (category?: string): UseFormationsResult => {
     error,
     refetch: fetchFormations
   };
-}; 
+};
+
+// Hook pour supprimer une formation
+export const useDeleteFormation = () => {
+  const queryClient = useQueryClient();
+  const formationService = FormationService.getInstance();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await formationService.deleteFormation(id);
+    },
+    onSuccess: () => {
+      // Invalide les queries des formations pour rafraîchir la liste
+      queryClient.invalidateQueries({ queryKey: ['formations'] });
+    },
+  });
+};
