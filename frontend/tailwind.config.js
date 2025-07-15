@@ -62,6 +62,14 @@ export default {
       transitionTimingFunction: {
         'bounce-in': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
       },
+      keyframes: {
+        shimmer: {
+          '100%': { transform: 'translateX(100%)' },
+        },
+      },
+      animation: {
+        shimmer: 'shimmer 1.5s infinite',
+      },
     },
   },
   plugins: [],
