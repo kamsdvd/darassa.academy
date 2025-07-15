@@ -374,7 +374,7 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <Router future={{ v7_startTransition: true }}>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <AuthCheck>
           <RoutePrefetcher />
           <Layout>
