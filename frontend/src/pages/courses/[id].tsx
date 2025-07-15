@@ -20,36 +20,32 @@ const CourseDetail: React.FC = () => {
   if (isLoading) return <LoadingFallback message="Chargement de la formation..." />;
   if (isError) {
     return (
-      <Layout>
-        <div className="container mx-auto px-4 py-8 text-center">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold text-red-600 mb-2">Erreur de chargement</h2>
-          <p className="text-gray-600">{error?.message || "Une erreur est survenue lors de la récupération des détails de la formation."}</p>
-          <button
-            onClick={() => navigate(-1)}
-            className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Retour
-          </button>
-        </div>
-      </Layout>
+      <div className="container mx-auto px-4 py-8 text-center">
+        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+        <h2 className="text-2xl font-semibold text-red-600 mb-2">Erreur de chargement</h2>
+        <p className="text-gray-600">{error?.message || "Une erreur est survenue lors de la récupération des détails de la formation."}</p>
+        <button
+          onClick={() => navigate(-1)}
+          className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Retour
+        </button>
+      </div>
     );
   }
   if (!course && !isLoading) { // Handle case where course is not found after loading
     return (
-      <Layout>
-        <div className="container mx-auto px-4 py-8 text-center">
-          <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold text-yellow-600 mb-2">Formation non trouvée</h2>
-          <p className="text-gray-600">Désolé, la formation que vous cherchez n'existe pas ou plus.</p>
-          <button
-            onClick={() => navigate('/courses')} // Navigate to list page
-            className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Voir toutes les formations
-          </button>
-        </div>
-      </Layout>
+      <div className="container mx-auto px-4 py-8 text-center">
+        <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+        <h2 className="text-2xl font-semibold text-yellow-600 mb-2">Formation non trouvée</h2>
+        <p className="text-gray-600">Désolé, la formation que vous cherchez n'existe pas ou plus.</p>
+        <button
+          onClick={() => navigate('/courses')} // Navigate to list page
+          className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Voir toutes les formations
+        </button>
+      </div>
     );
   }
 
@@ -68,36 +64,44 @@ const CourseDetail: React.FC = () => {
 
   // Fallback image if imageUrl is not available
   const COLOR_PALETTE = [
-    "#0ea5e9", // primary-500
-    "#c026d3", // secondary-600
-    "#0284c7", // primary-600
-    "#a21caf", // secondary-700
-    "#0369a1", // primary-700
-    "#86198f", // secondary-800
-  ];
+  "#2563eb", // Bleu vif
+  "#10b981", // Vert émeraude
+  "#f59e42", // Orange doux
+  "#f43f5e", // Rose punchy
+  "#a21caf", // Violet profond
+  "#facc15", // Jaune lumineux
+  "#14b8a6", // Turquoise
+  "#6366f1", // Indigo
+  "#e11d48", // Framboise
+  "#fbbf24", // Jaune orangé
+];
 
   const generateColorSvg = (id: string | number) => {
     const stringId = String(id);
     const hash = stringId.split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0);
     const colorIndex = Math.abs(hash) % COLOR_PALETTE.length;
     const color = COLOR_PALETTE[colorIndex];
-    const svg = `<svg width="1200" height="600" viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg"><rect width="1200" height="600" fill="${color}"/></svg>`;
+    const svg = `<svg viewBox=\"0 0 1200 600\" xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"1200\" height=\"600\" fill=\"${color}\"/></svg>`; // No text, no explicit width/height
     return `data:image/svg+xml;base64,${btoa(svg)}`;
   };
 
   const fallbackImage = generateColorSvg(course.id);
 
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
         {/* En-tête de la formation */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
           <div className="relative h-[300px] md:h-[400px] lg:h-[500px]"> {/* Responsive height */}
             <img
-              src={course.imageUrl || generateColorSvg(course.id)}
+              src={course.imageUrl && course.imageUrl.trim() !== "" ? course.imageUrl : generateColorSvg(course.id)}
               alt={course.title}
               className="w-full h-full object-cover"
-              onError={(e) => { (e.target as HTMLImageElement).src = generateColorSvg(course.id); }}
+              onError={(e) => {
+                const img = e.target as HTMLImageElement;
+                if (!img.src.startsWith('data:image/svg+xml')) {
+                  img.src = generateColorSvg(course.id);
+                }
+              }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white">
@@ -349,7 +353,6 @@ const CourseDetail: React.FC = () => {
           </div>
         </div>
       </div>
-    </Layout>
   );
 };
 
