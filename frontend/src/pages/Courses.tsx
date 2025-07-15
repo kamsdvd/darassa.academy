@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
-import { FormationCard } from '../components/formations/FormationCard';
-import { formations as staticFormations } from '../data/formations';
+import { CourseCard } from '../components/courses/CourseCard';
+import { courses as staticCourses } from '../data/courses';
+import { Course } from '../types/course';
 
 // Extraire dynamiquement les catégories à partir des données statiques
-const categories = ['Tous', ...Array.from(new Set(staticFormations.map(f => f.category)))];
+const categories = ['Tous', ...Array.from(new Set(staticCourses.map(c => c.category)))];
 
-export const Formations: React.FC = () => {
+export const CoursesPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('Tous');
 
-  // Filtrer les formations selon la catégorie sélectionnée
+  // Filtrer les cours selon la catégorie sélectionnée
   const normalize = (str: string) => str.normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLowerCase();
-  const filteredFormations = selectedCategory === 'Tous'
-    ? staticFormations
-    : staticFormations.filter(f => f.category && normalize(f.category) === normalize(selectedCategory));
+  const filteredCourses = selectedCategory === 'Tous'
+    ? staticCourses
+    : staticCourses.filter(c => c.category && normalize(c.category) === normalize(selectedCategory));
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -32,16 +33,16 @@ export const Formations: React.FC = () => {
         ))}
       </div>
       
-      {filteredFormations.length === 0 ? (
+      {filteredCourses.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500">Aucune formation trouvée dans cette catégorie.</p>
+          <p className="text-gray-500">Aucun cours trouvé dans cette catégorie.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredFormations.map((formation) => (
-            <FormationCard
-              key={formation.id}
-              formation={formation}
+          {filteredCourses.map((course: Course) => (
+            <CourseCard
+              key={course.id}
+              course={course}
             />
           ))}
         </div>
@@ -49,3 +50,5 @@ export const Formations: React.FC = () => {
     </div>
   );
 };
+
+export default CoursesPage;

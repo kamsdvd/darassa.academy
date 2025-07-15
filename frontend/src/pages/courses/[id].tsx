@@ -1,21 +1,21 @@
-import React, { useState, Fragment } from 'react'; // Added Fragment
-import { useRouter } from 'next/router';
-import { useFormationById } from '../../../hooks/useFormations.ts'; // Corrected hook import
-import Layout from '../../../components/layout/Layout.tsx'; // CORRECTED PATH
-import LoadingFallback from '../../../components/common/LoadingFallback.tsx'; // CORRECTED PATH
-import { Clock, Calendar, MapPin, Users, BookOpen, CheckCircle, ChevronRight, AlertCircle, Video, UsersRound, MapPinned } from 'lucide-react'; // Added Video, UsersRound, MapPinned
-import { useStore } from '../../../store/useStore.ts'; // Added .ts, path seems ok from pages root
-import { SessionFrontend } from '../../../types/formation.ts'; // Import SessionFrontend
+import React, { useState, Fragment } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useCourseById } from '@/hooks/useCourse';
+import Layout from '@/components/layout/Layout';
+import LoadingFallback from '@/components/common/LoadingFallback';
+import { Clock, Calendar, MapPin, Users, BookOpen, CheckCircle, ChevronRight, AlertCircle, Video, UsersRound, MapPinned } from 'lucide-react';
+import { useStore } from '@/store/useStore';
+import { SessionFrontend } from '@/types/course';
 
 
-const FormationDetail: React.FC = () => {
-  const router = useRouter();
-  const { id } = router.query;
+const CourseDetail: React.FC = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const { user } = useStore(); // For enrollment button state
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Use the correct hook for fetching a single formation by ID
-  const { data: formation, isLoading, isError, error } = useFormationById(id as string | undefined);
+  // Use the correct hook for fetching a single course by ID
+  const { data: course, isLoading, isError, error } = useCourseById(id);
 
   if (isLoading) return <LoadingFallback message="Chargement de la formation..." />;
   if (isError) {
@@ -26,7 +26,7 @@ const FormationDetail: React.FC = () => {
           <h2 className="text-2xl font-semibold text-red-600 mb-2">Erreur de chargement</h2>
           <p className="text-gray-600">{error?.message || "Une erreur est survenue lors de la récupération des détails de la formation."}</p>
           <button
-            onClick={() => router.back()}
+            onClick={() => navigate(-1)}
             className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Retour
@@ -35,7 +35,7 @@ const FormationDetail: React.FC = () => {
       </Layout>
     );
   }
-  if (!formation && !isLoading) { // Handle case where formation is not found after loading
+  if (!course && !isLoading) { // Handle case where course is not found after loading
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8 text-center">
@@ -43,7 +43,7 @@ const FormationDetail: React.FC = () => {
           <h2 className="text-2xl font-semibold text-yellow-600 mb-2">Formation non trouvée</h2>
           <p className="text-gray-600">Désolé, la formation que vous cherchez n'existe pas ou plus.</p>
           <button
-            onClick={() => router.push('/formations')} // Navigate to list page
+            onClick={() => navigate('/courses')} // Navigate to list page
             className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Voir toutes les formations
@@ -53,17 +53,17 @@ const FormationDetail: React.FC = () => {
     );
   }
 
-  // Ensure formation is not null before proceeding (already handled by above checks but good for TS)
-  if (!formation) return null;
+  // Ensure course is not null before proceeding (already handled by above checks but good for TS)
+  if (!course) return null;
 
   const handleEnroll = async () => {
     if (!user) {
-      router.push(`/auth/Connexion?redirect=${encodeURIComponent(router.asPath)}`); // Corrected path
+      navigate(`/auth/Connexion?redirect=${encodeURIComponent(window.location.pathname)}`); // Corrected path
       return;
     }
-    // TODO: Implement enrollment logic using formation.id
-    console.log(`Attempting to enroll in formation: ${formation.id}`);
-    alert(`Logique d'inscription pour "${formation.title}" à implémenter.`);
+    // TODO: Implement enrollment logic using course.id
+    console.log(`Attempting to enroll in course: ${course.id}`);
+    alert(`Logique d'inscription pour "${course.title}" à implémenter.`);
   };
 
   // Fallback image if imageUrl is not available
@@ -85,7 +85,7 @@ const FormationDetail: React.FC = () => {
     return `data:image/svg+xml;base64,${btoa(svg)}`;
   };
 
-  const fallbackImage = generateColorSvg(formation.id);
+  const fallbackImage = generateColorSvg(course.id);
 
   return (
     <Layout>
@@ -94,34 +94,27 @@ const FormationDetail: React.FC = () => {
         <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
           <div className="relative h-[300px] md:h-[400px] lg:h-[500px]"> {/* Responsive height */}
             <img
-              src={formation.imageUrl || generateColorSvg(formation.id)}
-              alt={formation.title}
+              src={course.imageUrl || generateColorSvg(course.id)}
+              alt={course.title}
               className="w-full h-full object-cover"
-              onError={(e) => { (e.target as HTMLImageElement).src = generateColorSvg(formation.id); }}
+              onError={(e) => { (e.target as HTMLImageElement).src = generateColorSvg(course.id); }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white">
-              <h1 className="text-3xl md:text-4xl font-bold mb-2 md:mb-4">{formation.title}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold mb-2 md:mb-4">{course.title}</h1>
               <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm md:text-base">
                 <div className="flex items-center">
                   <Clock className="h-5 w-5 mr-2 flex-shrink-0" />
-                  <span>{formation.duration}</span>
+                  <span>{course.duration}</span>
                 </div>
                 <div className="flex items-center">
                   <Calendar className="h-5 w-5 mr-2 flex-shrink-0" />
                   {/* Using lastUpdated as a proxy for date, as startDate is not mapped yet */}
-                  <span>Dernière MàJ: {formation.lastUpdated}</span>
+                  <span>Dernière MàJ: {course.lastUpdated}</span>
                 </div>
-                {/* formation.location is not in current mapped type */}
-                {/* <div className="flex items-center">
-                  <MapPin className="h-5 w-5 mr-2" />
-                  <span>{formation.location || 'En ligne'}</span>
-                </div> */}
                 <div className="flex items-center">
                   <Users className="h-5 w-5 mr-2 flex-shrink-0" />
-                  <span>{formation.enrolledStudents} participants</span>
-                  {/* This uses enrolledStudents from mapping, which is based on inscriptions.length */}
-                  {/* For placesDisponibles, it would be formation.placesDisponibles from backend if directly mapped */}
+                  <span>{course.enrolledStudents} participants</span>
                 </div>
               </div>
             </div>
@@ -155,11 +148,11 @@ const FormationDetail: React.FC = () => {
                 {activeTab === 'overview' && (
                   <div>
                     <h2 className="text-2xl font-bold mb-4">À propos de cette formation</h2>
-                    <p className="text-gray-600 mb-6">{formation.description}</p>
+                    <p className="text-gray-600 mb-6">{course.description}</p>
                     
                     <h3 className="text-xl font-semibold mb-4">Ce que vous allez apprendre</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {formation.objectives?.map((objective, index) => (
+                      {course.objectives?.map((objective, index) => (
                         <div key={index} className="flex items-start">
                           <CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-1" />
                           <span>{objective}</span>
@@ -173,19 +166,16 @@ const FormationDetail: React.FC = () => {
                   <div>
                     <h2 className="text-2xl font-bold mb-4">Programme de la formation</h2>
                     <div className="space-y-4">
-                      {/* Ensure formation.syllabus exists and is an array before mapping */}
-                      {Array.isArray(formation.syllabus) && formation.syllabus.length > 0 ? (
-                        formation.syllabus.map((module, index) => (
+                      {Array.isArray(course.syllabus) && course.syllabus.length > 0 ? (
+                        course.syllabus.map((module, index) => (
                           <div key={index} className="border rounded-lg p-4">
                             <h3 className="text-lg font-semibold mb-2">{module.title}</h3>
-                            {/* Ensure module.content exists and is an array */}
                             {Array.isArray(module.content) && module.content.length > 0 ? (
                               <ul className="space-y-2">
                                 {module.content.map((lessonTitle, lessonIndex) => (
                                   <li key={lessonIndex} className="flex items-center text-gray-600">
                                     <ChevronRight className="h-4 w-4 mr-2 flex-shrink-0" />
                                     <span>{lessonTitle}</span>
-                                    {/* Duration per lesson is not in current simplified syllabus mapping */}
                                   </li>
                                 ))}
                               </ul>
@@ -200,9 +190,9 @@ const FormationDetail: React.FC = () => {
                 {activeTab === 'sessions' && (
                   <div>
                     <h2 className="text-2xl font-bold mb-4">Sessions Planifiées</h2>
-                    {Array.isArray(formation.sessions) && formation.sessions.length > 0 ? (
+                    {Array.isArray(course.sessions) && course.sessions.length > 0 ? (
                       <div className="space-y-6">
-                        {formation.sessions.map((session: SessionFrontend) => (
+                        {course.sessions.map((session: SessionFrontend) => (
                           <div key={session.id} className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-gray-50">
                             <h3 className="text-xl font-semibold text-primary-700 mb-2">{session.titre}</h3>
                             {session.description && <p className="text-gray-600 mb-3 text-sm whitespace-pre-wrap">{session.description}</p>}
@@ -256,19 +246,19 @@ const FormationDetail: React.FC = () => {
                   </div>
                 )}
 
-                {activeTab === 'instructor' && formation.instructor && (
+                {activeTab === 'instructor' && course.instructor && (
                   <div>
                     <h2 className="text-2xl font-bold mb-4">Votre instructeur</h2>
                     <div className="flex items-start space-x-4">
                       <img
-                        src={formation.instructor.avatar}
-                        alt={formation.instructor.name}
+                        src={course.instructor.avatar}
+                        alt={course.instructor.name}
                         className="w-24 h-24 rounded-full object-cover"
                       />
                       <div>
-                        <h3 className="text-xl font-semibold">{formation.instructor.name}</h3>
-                        <p className="text-gray-600 mb-2">{formation.instructor.title}</p>
-                        <p className="text-gray-600">{formation.instructor.bio}</p>
+                        <h3 className="text-xl font-semibold">{course.instructor.name}</h3>
+                        <p className="text-gray-600 mb-2">{course.instructor.title}</p>
+                        <p className="text-gray-600">{course.instructor.bio}</p>
                       </div>
                     </div>
                   </div>
@@ -277,9 +267,9 @@ const FormationDetail: React.FC = () => {
                 {activeTab === 'reviews' && (
                   <div>
                     <h2 className="text-2xl font-bold mb-4">Avis des participants</h2>
-                    {formation.reviews?.length > 0 ? (
+                    {course.reviews?.length > 0 ? (
                       <div className="space-y-6">
-                        {formation.reviews.map((review, index) => (
+                        {course.reviews.map((review, index) => (
                           <div key={index} className="border-b pb-6 last:border-b-0">
                             <div className="flex items-center mb-2">
                               <img
@@ -313,27 +303,27 @@ const FormationDetail: React.FC = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-8">
+            <div className="bg-white rounded-lg shadow-md p-6 lg:sticky lg:top-8">
               <div className="text-3xl font-bold text-primary-600 mb-4">
-                {formation.price} €
+                {course.price} €
               </div>
               
               <div className="space-y-4 mb-6">
                 <div className="flex items-center text-gray-600">
                   <Clock className="h-5 w-5 mr-2" />
-                  <span>Durée: {formation.duration}</span>
+                  <span>Durée: {course.duration}</span>
                 </div>
                 <div className="flex items-center text-gray-600">
                   <Calendar className="h-5 w-5 mr-2" />
-                  <span>Début: {formation.startDate}</span>
+                  <span>Début: {course.startDate}</span>
                 </div>
                 <div className="flex items-center text-gray-600">
                   <MapPin className="h-5 w-5 mr-2" />
-                  <span>Lieu: {formation.location}</span>
+                  <span>Lieu: {course.location}</span>
                 </div>
                 <div className="flex items-center text-gray-600">
                   <Users className="h-5 w-5 mr-2" />
-                  <span>{formation.maxStudents} places disponibles</span>
+                  <span>{course.maxStudents} places disponibles</span>
                 </div>
               </div>
 
@@ -347,7 +337,7 @@ const FormationDetail: React.FC = () => {
               <div className="mt-6">
                 <h3 className="font-semibold mb-2">Cette formation comprend :</h3>
                 <ul className="space-y-2">
-                  {formation.features?.map((feature, index) => (
+                  {course.features?.map((feature, index) => (
                     <li key={index} className="flex items-center text-gray-600">
                       <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
                       <span>{feature}</span>
@@ -363,4 +353,4 @@ const FormationDetail: React.FC = () => {
   );
 };
 
-export default FormationDetail; 
+export default CourseDetail; 

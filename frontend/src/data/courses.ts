@@ -10,7 +10,6 @@ export const courses: Course[] = [
     level: "Débutant",
     price: "199€",
     description: "Acquérez les compétences numériques fondamentales avec la certification IC3 mondialement reconnue",
-    imageUrl: "/images/formations/ic3.jpg",
   },
   // Microsoft Office
   {
@@ -21,7 +20,6 @@ export const courses: Course[] = [
     level: "Débutant",
     price: "249€",
     description: "Maîtrisez les fonctionnalités essentielles de Microsoft Word et obtenez votre certification Associate",
-    imageUrl: "/images/formations/word-associate.jpg",
   },
   {
     id: 3,
@@ -31,7 +29,6 @@ export const courses: Course[] = [
     level: "Avancé",
     price: "299€",
     description: "Devenez expert dans l'utilisation avancée de Word : styles, documents longs, formulaires et automatisation",
-    imageUrl: "/images/formations/word-expert.jpg",
   },
   {
     id: 4,
@@ -41,7 +38,6 @@ export const courses: Course[] = [
     level: "Débutant",
     price: "249€",
     description: "Apprenez les fondamentaux d'Excel : formules, tableaux, graphiques et analyse de données basique",
-    imageUrl: "/images/formations/excel-associate.jpg",
   },
   {
     id: 5,
@@ -51,7 +47,6 @@ export const courses: Course[] = [
     level: "Avancé",
     price: "349€",
     description: "Maîtrisez les fonctionnalités avancées d'Excel : tableaux croisés dynamiques, macros VBA, et analyse complexe",
-    imageUrl: "/images/formations/excel-expert.jpg",
   },
   {
     id: 6,
@@ -61,7 +56,6 @@ export const courses: Course[] = [
     level: "Intermédiaire",
     price: "199€",
     description: "Créez des présentations professionnelles percutantes avec animations, transitions et contenus multimédias",
-    imageUrl: "/images/formations/powerpoint.jpg",
   },
   {
     id: 7,
@@ -71,7 +65,6 @@ export const courses: Course[] = [
     level: "Débutant",
     price: "149€",
     description: "Optimisez votre communication professionnelle avec la gestion des emails, calendriers et contacts",
-    imageUrl: "/images/formations/outlook.jpg",
   },
   {
     id: 8,
@@ -81,7 +74,6 @@ export const courses: Course[] = [
     level: "Avancé",
     price: "399€",
     description: "Développez des bases de données professionnelles avec formulaires, requêtes complexes et automatisation",
-    imageUrl: "/images/formations/access.jpg",
   },
   // Google Workspace
   {
@@ -92,7 +84,6 @@ export const courses: Course[] = [
     level: "Débutant",
     price: "199€",
     description: "Maîtrisez le traitement de texte collaboratif avec Google Docs et ses fonctionnalités avancées",
-    imageUrl: "/images/formations/google-docs.jpg",
   },
   {
     id: 10,
@@ -102,7 +93,6 @@ export const courses: Course[] = [
     level: "Intermédiaire",
     price: "249€",
     description: "Exploitez la puissance des tableurs en ligne avec Google Sheets : formules, tableaux croisés et automatisation",
-    imageUrl: "/images/formations/google-sheets.jpg",
   },
   {
     id: 11,
@@ -112,7 +102,6 @@ export const courses: Course[] = [
     level: "Débutant",
     price: "179€",
     description: "Créez des présentations collaboratives impactantes avec Google Slides",
-    imageUrl: "/images/formations/google-slides.jpg",
   },
   {
     id: 12,
@@ -122,7 +111,6 @@ export const courses: Course[] = [
     level: "Débutant",
     price: "149€",
     description: "Créez et analysez des formulaires professionnels avec Google Forms",
-    imageUrl: "/images/formations/google-forms.jpg",
   },
   {
     id: 13,
@@ -132,7 +120,6 @@ export const courses: Course[] = [
     level: "Débutant",
     price: "149€",
     description: "Optimisez le stockage et la collaboration en ligne avec Google Drive",
-    imageUrl: "/images/formations/google-drive.jpg",
   },
   {
     id: 14,
@@ -142,7 +129,6 @@ export const courses: Course[] = [
     level: "Avancé",
     price: "349€",
     description: "Gérez et administrez une suite Google Workspace pour votre organisation",
-    imageUrl: "/images/formations/google-workspace-admin.jpg",
   },
   // Intelligence Artificielle
   {
@@ -153,7 +139,6 @@ export const courses: Course[] = [
     level: "Avancé",
     price: "499€",
     description: "Apprenez à créer des modèles d'apprentissage automatique avec Python et scikit-learn",
-    imageUrl: "/images/formations/machine-learning.jpg",
   },
   {
     id: 16,
@@ -163,7 +148,6 @@ export const courses: Course[] = [
     level: "Avancé",
     price: "599€",
     description: "Maîtrisez les réseaux de neurones et le deep learning avec TensorFlow et PyTorch",
-    imageUrl: "/images/formations/deep-learning.jpg",
   },
   // Langues
   {
@@ -174,7 +158,6 @@ export const courses: Course[] = [
     level: "Tous niveaux",
     price: "299€",
     description: "Développez vos compétences en anglais des affaires et communication professionnelle",
-    imageUrl: "/images/formations/english.jpg",
   },
   {
     id: 18,
@@ -184,7 +167,6 @@ export const courses: Course[] = [
     level: "Tous niveaux",
     price: "299€",
     description: "Apprenez le français pour une intégration réussie dans le monde professionnel francophone",
-    imageUrl: "/images/formations/french.jpg",
   },
   // Design
   {
@@ -195,6 +177,5 @@ export const courses: Course[] = [
     level: "Intermédiaire",
     price: "399€",
     description: "Créez des interfaces utilisateur intuitives et des expériences utilisateur exceptionnelles",
-    imageUrl: "/images/formations/ui-ux.jpg"
   }
 ];

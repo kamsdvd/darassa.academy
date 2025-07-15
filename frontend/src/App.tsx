@@ -1,41 +1,42 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import Layout from './components/layout/Layout';
-import { reportWebVitals } from './utils/webVitals';
-import NotFound from './pages/NotFound';
-import { ProtectedRoute } from './components/shared/ProtectedRoute';
-import { useStore } from './store/useStore';
-import { AuthService } from './services/authService';
-import LoadingFallback from './components/common/LoadingFallback';
-import AdminDashboard from './pages/admin/Dashboard';
-import UsersManagement from './pages/admin/UsersManagement';
-import RolesManagement from './pages/admin/RolesManagement';
-import CentresManagement from './pages/admin/CentresManagement';
-import AdminStats from './pages/admin/AdminStats';
-import CentreDashboard from './pages/centre/Dashboard';
-import FormateursManagement from './pages/centre/FormateursManagement';
-import FormationsManagement from './pages/centre/FormationsManagement';
-import PlanningManagement from './pages/centre/PlanningManagement';
-import FormateurDashboard from './pages/formateur/Dashboard';
-import FormateurCours from './pages/formateur/Cours';
-import FormateurRessources from './pages/formateur/Ressources';
-import FormateurEvaluations from './pages/formateur/Evaluations';
-import EmployesManagement from './pages/entreprise/EmployesManagement';
-import EntrepriseFormations from './pages/entreprise/Formations';
-import EntrepriseRapports from './pages/entreprise/Rapports';
-import Certificats from './pages/user/Certificats';
-import UserOpportunites from './pages/user/Opportunites';
-import MultiRoleDashboard from './pages/dashboard/MultiRoleDashboard';
-import AddUser from './pages/admin/AddUser';
-import UsersList from './pages/admin/UsersList';
-import Settings from './pages/dashboard/Settings';
-import AddFormateur from './pages/centre/AddFormateur';
-import FormateurDisponibilitesManagement from './pages/centre/FormateurDisponibilitesManagement';
-import CreateFormation from './pages/centre/CreateFormation';
-import PlanifierSession from './pages/centre/PlanifierSession';
-import PlanningMonthView from './pages/centre/PlanningMonthView';
-import PlanningWeekView from './pages/centre/PlanningWeekView';
+import Layout from '@/components/layout/Layout';
+import { reportWebVitals } from '@/utils/webVitals';
+import NotFound from '@/pages/NotFound';
+import { ProtectedRoute } from '@/components/shared/ProtectedRoute';
+import { useStore } from '@/store/useStore';
+import { AuthService } from '@/services/authService';
+import LoadingFallback from '@/components/common/LoadingFallback';
+import AdminDashboard from '@/pages/admin/Dashboard';
+import UsersManagement from '@/pages/admin/UsersManagement';
+import RolesManagement from '@/pages/admin/RolesManagement';
+import CentresManagement from '@/pages/admin/CentresManagement';
+import AdminStats from '@/pages/admin/AdminStats';
+import CentreDashboard from '@/pages/centre/Dashboard';
+import FormateursManagement from '@/pages/centre/FormateursManagement';
+import CoursesManagement from '@/pages/centre/CoursesManagement';
+import PlanningManagement from '@/pages/centre/PlanningManagement';
+import FormateurDashboard from '@/pages/formateur/Dashboard';
+import FormateurCours from '@/pages/formateur/Cours';
+import FormateurRessources from '@/pages/formateur/Ressources';
+import FormateurEvaluations from '@/pages/formateur/Evaluations';
+import EmployesManagement from '@/pages/entreprise/EmployesManagement';
+import EntrepriseCourses from '@/pages/entreprise/Courses';
+import EntrepriseRapports from '@/pages/entreprise/Rapports';
+import Certificats from '@/pages/user/Certificats';
+import UserOpportunites from '@/pages/user/Opportunites';
+import MultiRoleDashboard from '@/pages/dashboard/MultiRoleDashboard';
+import AddUser from '@/pages/admin/AddUser';
+import UsersList from '@/pages/admin/UsersList';
+import Settings from '@/pages/dashboard/Settings';
+import AddFormateur from '@/pages/centre/AddFormateur';
+import FormateurDisponibilitesManagement from '@/pages/centre/FormateurDisponibilitesManagement';
+import CreateCourse from '@/pages/centre/CreateCourse';
+import PlanifierSession from '@/pages/centre/PlanifierSession';
+import PlanningMonthView from '@/pages/centre/PlanningMonthView';
+import PlanningWeekView from '@/pages/centre/PlanningWeekView';
+import CourseDetail from '@/pages/courses/[id]';
 
 // Lazy loading avec prefetch
 const lazyWithPrefetch = (factory: () => Promise<any>, preload = false) => {
@@ -47,25 +48,25 @@ const lazyWithPrefetch = (factory: () => Promise<any>, preload = false) => {
 };
 
 // Composants avec lazy loading
-const Home = lazyWithPrefetch(() => import('./pages/Home'), true);
-const Courses = lazyWithPrefetch(() => import('./pages/courses/Courses')); // MODIFIÉ
-const Affiliation = lazyWithPrefetch(() => import('./pages/affiliation/Affiliation'));
-const Blog = lazyWithPrefetch(() => import('./pages/blog/Blog'));
-const Contact = lazyWithPrefetch(() => import('./pages/contact/Contact'));
-const Opportunites = lazyWithPrefetch(() => import('./pages/opportunites/Opportunites'));
-const JobDetail = lazyWithPrefetch(() => import('./pages/opportunites/JobDetail'));
-const Entreprises = lazyWithPrefetch(() => import('./pages/entreprises/Entreprises'));
-const InscriptionEntreprise = lazyWithPrefetch(() => import('./pages/entreprises/Inscription'));
-const EntrepriseDashboard = lazyWithPrefetch(() => import('./pages/entreprises/Dashboard'));
-const InscriptionParticulier = lazyWithPrefetch(() => import('./pages/auth/Inscription'));
-const Connexion = lazyWithPrefetch(() => import('./pages/auth/Connexion'), true);
-const APropos = lazyWithPrefetch(() => import('./pages/a-propos/APropos'));
-const FAQ = lazyWithPrefetch(() => import('./pages/faq/FAQ'));
-const MentionsLegales = lazyWithPrefetch(() => import('./pages/legal/MentionsLegales'));
-const PolitiqueConfidentialite = lazyWithPrefetch(() => import('./pages/legal/PolitiqueConfidentialite'));
-const ConditionsUtilisation = lazyWithPrefetch(() => import('./pages/legal/ConditionsUtilisation'));
-const ApprenantDashboard = lazyWithPrefetch(() => import('./pages/apprenant/Dashboard'));
-const DemandeurDashboard = lazyWithPrefetch(() => import('./pages/demandeur/Dashboard'));
+const Home = lazyWithPrefetch(() => import('@/pages/Home'), true);
+const CoursesPage = lazyWithPrefetch(() => import('@/pages/Courses'));
+const Affiliation = lazyWithPrefetch(() => import('@/pages/affiliation/Affiliation'));
+const Blog = lazyWithPrefetch(() => import('@/pages/blog/Blog'));
+const Contact = lazyWithPrefetch(() => import('@/pages/contact/Contact'));
+const Opportunites = lazyWithPrefetch(() => import('@/pages/opportunites/Opportunites'));
+const JobDetail = lazyWithPrefetch(() => import('@/pages/opportunites/JobDetail'));
+const Entreprises = lazyWithPrefetch(() => import('@/pages/entreprises/Entreprises'));
+const InscriptionEntreprise = lazyWithPrefetch(() => import('@/pages/entreprises/Inscription'));
+const EntrepriseDashboard = lazyWithPrefetch(() => import('@/pages/entreprises/Dashboard'));
+const InscriptionParticulier = lazyWithPrefetch(() => import('@/pages/auth/Inscription'));
+const Connexion = lazyWithPrefetch(() => import('@/pages/auth/Connexion'), true);
+const APropos = lazyWithPrefetch(() => import('@/pages/a-propos/APropos'));
+const FAQ = lazyWithPrefetch(() => import('@/pages/faq/FAQ'));
+const MentionsLegales = lazyWithPrefetch(() => import('@/pages/legal/MentionsLegales'));
+const PolitiqueConfidentialite = lazyWithPrefetch(() => import('@/pages/legal/PolitiqueConfidentialite'));
+const ConditionsUtilisation = lazyWithPrefetch(() => import('@/pages/legal/ConditionsUtilisation'));
+const ApprenantDashboard = lazyWithPrefetch(() => import('@/pages/apprenant/Dashboard'));
+const DemandeurDashboard = lazyWithPrefetch(() => import('@/pages/demandeur/Dashboard'));
 
 // Error component
 const ErrorFallback = ({ error }: { error: Error }) => (
@@ -157,11 +158,11 @@ const RoutePrefetcher = () => {
   useEffect(() => {
     // Précharger les routes connexes en fonction de la route actuelle
     if (location.pathname === '/') {
-      import('./pages/courses/Courses'); // MODIFIÉ
-      import('./pages/affiliation/Affiliation');
-    } else if (location.pathname.startsWith('/courses')) { // MODIFIÉ
-      import('./pages/contact/Contact');
-      import('./pages/entreprises/Inscription');
+      import('@/pages/Courses');
+      import('@/pages/affiliation/Affiliation');
+    } else if (location.pathname.startsWith('/courses')) {
+      import('@/pages/contact/Contact');
+      import('@/pages/entreprises/Inscription');
     }
   }, [location]);
 
@@ -179,7 +180,8 @@ function AnimatedRoutes() {
           {/* Routes publiques */}
           <Route path="/" element={<Home />} />
           <Route path="/a-propos" element={<APropos />} />
-          <Route path="/courses" element={<Courses />} />
+          <Route path="/courses" element={<CoursesPage />} />
+          <Route path="/courses/:id" element={<CourseDetail />} />
           <Route path="/affiliation" element={<Affiliation />} />
           <Route path="/opportunites" element={<Opportunites />} />
           <Route path="/opportunites/:id" element={<JobDetail />} />
@@ -222,7 +224,7 @@ function AnimatedRoutes() {
           } />
           <Route path="/admin/courses" element={
             <ProtectedRoute roles={['admin']}>
-              <FormationsManagement />
+              <CoursesManagement />
             </ProtectedRoute>
           } />
           <Route path="/admin/stats" element={
@@ -259,7 +261,7 @@ function AnimatedRoutes() {
           } />
           <Route path="/centre/courses/create" element={
             <ProtectedRoute roles={['centre_manager']}>
-              <CreateFormation />
+              <CreateCourse />
             </ProtectedRoute>
           } />
           <Route path="/centre/courses/sessions" element={
@@ -269,7 +271,7 @@ function AnimatedRoutes() {
           } />
           <Route path="/centre/courses" element={
             <ProtectedRoute roles={['centre_manager']}>
-              <FormationsManagement />
+              <CoursesManagement />
             </ProtectedRoute>
           } />
           <Route path="/centre/planning" element={
@@ -327,7 +329,7 @@ function AnimatedRoutes() {
           } />
           <Route path="/entreprise/courses" element={
             <ProtectedRoute roles={['entreprise']}>
-              <EntrepriseFormations />
+              <EntrepriseCourses />
             </ProtectedRoute>
           } />
           <Route path="/entreprise/rapports" element={

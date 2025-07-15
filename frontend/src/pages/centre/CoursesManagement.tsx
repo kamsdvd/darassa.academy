@@ -1,54 +1,77 @@
 import React, { useState } from 'react';
-import { Search, Filter, BookOpen, Users, Calendar, Clock, Star, MoreVertical } from 'lucide-react';
+import { BookOpen, Search, Filter, Plus, Calendar, Users, Clock, MoreVertical } from 'lucide-react';
 
-const EntrepriseFormations: React.FC = () => {
+const CoursesManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
   // Données fictives pour l'exemple
-  const formations = [
+  const courses = [
     {
       id: 1,
-      titre: 'Développement Web Frontend',
-      formateur: 'Jean Dupont',
-      dateDebut: '2024-04-01',
-      duree: '3 mois',
-      apprenants: 15,
-      note: 4.5,
+      title: 'Développement Web Full Stack',
+      category: 'Développement',
+      instructor: 'John Doe',
+      startDate: '2024-03-01',
+      endDate: '2024-06-30',
+      duration: '4 mois',
+      students: 25,
       status: 'en_cours'
     },
     {
       id: 2,
-      titre: 'Design UI/UX Avancé',
-      formateur: 'Marie Martin',
-      dateDebut: '2024-05-15',
-      duree: '2 mois',
-      apprenants: 12,
-      note: 4.8,
+      title: 'Design UI/UX Avancé',
+      category: 'Design',
+      instructor: 'Jane Smith',
+      startDate: '2024-04-15',
+      endDate: '2024-07-15',
+      duration: '3 mois',
+      students: 20,
       status: 'planifie'
     },
     {
       id: 3,
-      titre: 'Marketing Digital',
-      formateur: 'Pierre Durand',
-      dateDebut: '2024-03-01',
-      duree: '4 mois',
-      apprenants: 20,
-      note: 4.2,
+      title: 'Marketing Digital',
+      category: 'Marketing',
+      instructor: 'Bob Johnson',
+      startDate: '2024-02-01',
+      endDate: '2024-05-01',
+      duration: '3 mois',
+      students: 30,
       status: 'termine'
+    },
+    {
+      id: 4,
+      title: 'Gestion de Projet Agile',
+      category: 'Management',
+      instructor: 'Alice Brown',
+      startDate: '2024-05-01',
+      endDate: '2024-08-01',
+      duration: '3 mois',
+      students: 15,
+      status: 'planifie'
+    },
+    {
+      id: 5,
+      title: 'Data Science & Machine Learning',
+      category: 'Data',
+      instructor: 'Charlie Wilson',
+      startDate: '2024-03-15',
+      endDate: '2024-08-15',
+      duration: '5 mois',
+      students: 18,
+      status: 'en_cours'
     }
   ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'en_cours':
-        return 'bg-blue-100 text-blue-800';
-      case 'planifie':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'termine':
         return 'bg-green-100 text-green-800';
-      case 'annule':
-        return 'bg-red-100 text-red-800';
+      case 'planifie':
+        return 'bg-blue-100 text-blue-800';
+      case 'termine':
+        return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -62,8 +85,6 @@ const EntrepriseFormations: React.FC = () => {
         return 'Planifié';
       case 'termine':
         return 'Terminé';
-      case 'annule':
-        return 'Annulé';
       default:
         return status;
     }
@@ -72,9 +93,9 @@ const EntrepriseFormations: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Formations</h1>
+        <h1 className="text-3xl font-bold">Gestion des formations</h1>
         <button className="bg-primary-600 text-white px-4 py-2 rounded-md flex items-center">
-          <BookOpen className="w-4 h-4 mr-2" />
+          <Plus className="w-4 h-4 mr-2" />
           Ajouter une formation
         </button>
       </div>
@@ -102,7 +123,6 @@ const EntrepriseFormations: React.FC = () => {
               <option value="en_cours">En cours</option>
               <option value="planifie">Planifié</option>
               <option value="termine">Terminé</option>
-              <option value="annule">Annulé</option>
             </select>
           </div>
         </div>
@@ -118,16 +138,13 @@ const EntrepriseFormations: React.FC = () => {
                   Formateur
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date de début
+                  Dates
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Durée
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Apprenants
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Note
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Statut
@@ -138,58 +155,47 @@ const EntrepriseFormations: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {formations.map((formation) => (
-                <tr key={formation.id}>
+              {courses.map((course) => (
+                <tr key={course.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      <div className="flex items-center">
-                        <BookOpen className="h-4 w-4 mr-1 text-gray-400" />
-                        {formation.titre}
+                    <div className="flex items-center">
+                      <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
+                        <BookOpen className="h-5 w-5 text-primary-600" />
                       </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">{course.title}</div>
+                        <div className="text-sm text-gray-500">{course.category}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{course.instructor}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      <Calendar className="inline-block w-4 h-4 mr-1" />
+                      {course.startDate} - {course.endDate}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      <div className="flex items-center">
-                        <Users className="h-4 w-4 mr-1 text-gray-400" />
-                        {formation.formateur}
-                      </div>
+                      <Clock className="inline-block w-4 h-4 mr-1" />
+                      {course.duration}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-1 text-gray-400" />
-                        {formation.dateDebut}
-                      </div>
+                      <Users className="inline-block w-4 h-4 mr-1" />
+                      {course.students}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-1 text-gray-400" />
-                        {formation.duree}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{formation.apprenants}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 mr-1 text-yellow-400" />
-                        {formation.note}/5
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(formation.status)}`}>
-                      {getStatusText(formation.status)}
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(course.status)}`}>
+                      {getStatusText(course.status)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button className="text-gray-600 hover:text-gray-900">
+                    <button className="text-primary-600 hover:text-primary-900">
                       <MoreVertical className="h-5 w-5" />
                     </button>
                   </td>
@@ -203,4 +209,4 @@ const EntrepriseFormations: React.FC = () => {
   );
 };
 
-export default EntrepriseFormations; 
+export default CoursesManagement; 

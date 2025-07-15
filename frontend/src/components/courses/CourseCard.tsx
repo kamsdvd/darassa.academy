@@ -2,24 +2,15 @@ import React from 'react';
 import { LazyImage } from '../shared/LazyImage';
 import { Skeleton } from '../shared/Skeleton';
 import { Link } from 'react-router-dom';
+import { Course } from '../../types/course';
 
-interface Formation {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  duration: string;
-  price: number;
-  category: string;
-}
-
-interface FormationCardProps {
-  formation?: Formation;
+interface CourseCardProps {
+  course?: Course;
   isLoading?: boolean;
 }
 
-export const FormationCard: React.FC<FormationCardProps> = ({
-  formation,
+export const CourseCard: React.FC<CourseCardProps> = ({
+  course,
   isLoading = false
 }) => {
   if (isLoading) {
@@ -38,24 +29,24 @@ export const FormationCard: React.FC<FormationCardProps> = ({
     );
   }
 
-  if (!formation) return null;
+  if (!course) return null;
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105">
       <LazyImage
-        src={formation.imageUrl || (formation as any).image}
-        alt={formation.title}
+        src={course.imageUrl || (course as any).image}
+        alt={course.title}
         className="w-full h-48"
       />
       <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">{formation.title}</h3>
-        <p className="text-gray-600 text-sm mb-4">{formation.description}</p>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">{course.title}</h3>
+        <p className="text-gray-600 text-sm mb-4">{course.description}</p>
         <div className="flex justify-between items-center">
           <div className="text-sm text-gray-500">
-            Durée: {formation.duration}
+            Durée: {course.duration}
           </div>
           <Link 
-            to={`/formations/${formation.id}`}
+            to={`/courses/${course.id}`}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
           >
             En savoir plus
