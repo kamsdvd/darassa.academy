@@ -1,9 +1,8 @@
 const CACHE_NAME = 'darassa-academy-v1';
 const urlsToCache = [
-  '/',
   '/index.html',
-  '/manifest.json',
-  ];
+  '/manifest.json'
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
