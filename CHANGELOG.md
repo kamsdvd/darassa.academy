@@ -7,6 +7,19 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fix - 2025-07-22
+- **Résolution complète des erreurs Prisma backend :**
+  - Correction de l'erreur `@prisma/client did not initialize yet` en exécutant `npx prisma generate`.
+  - Résolution des erreurs de validation du schéma Prisma (P1012) :
+    * Suppression des définitions dupliquées des modèles `User` et `CentreFormation`
+    * Ajout des relations manquantes `formationInscriptions` et `evaluationFormations` au modèle `User`
+    * Correction des types de relations dans le modèle `CentreFormation` (changement de `User[]` vers `Etudiant[]` pour `etudiants`)
+    * Ajout de la relation `centreManagers` manquante dans `CentreFormation`
+  - Résolution de l'erreur d'authentification PostgreSQL (P1000) en corrigeant le mot de passe dans `DATABASE_URL`.
+  - Résolution du conflit de port (EADDRINUSE) en libérant le port 5000.
+  - Le backend démarre maintenant correctement sans erreurs et toutes les routes API sont fonctionnelles.
+  - **Impact :** Backend pleinement opérationnel, connexion PostgreSQL stable, routes `/api/users`, `/api/auth`, `/api/courses` accessibles.
+
 ### Feat - 2025-07-14
 - **Implement dynamic colored course placeholders:**
   - Replaced external `via.placeholder.com` image URLs with dynamically generated SVG data URIs for course images.
