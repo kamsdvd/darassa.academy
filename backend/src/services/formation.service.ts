@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Formation, Session } from '../generated/prisma';
 const prisma = new PrismaClient();
 
 // Utility for pagination if not using a library
@@ -11,19 +11,8 @@ interface PaginatedResult<T> {
 }
 
 export class FormationService {
-  public async findAll(page: number = 1, limit: number = 10, category?: string, level?: string): Promise<PaginatedResult<IFormation>> {
+  public async findAll(page: number = 1, limit: number = 10, category?: string, level?: string): Promise<PaginatedResult<Formation>> {
     const skip = (page - 1) * limit;
-
-    const query: any = {};
-    if (category && typeof category === 'string' && category.trim() !== '') {
-      // Utiliser une expression régulière pour une recherche insensible à la casse et partielle
-      // query.category = new RegExp(category, 'i');
-      // Ou pour une correspondance exacte (sensible à la casse par défaut):
-      query.category = category.trim();
-    }
-    if (level && typeof level === 'string' && level.trim() !== '') {
-      query.niveau = level.trim(); // 'niveau' exists in IFormation
-    }
 
     const where: any = {};
     if (category && typeof category === 'string' && category.trim() !== '') {
@@ -39,8 +28,8 @@ export class FormationService {
       take: limit,
       orderBy: { createdAt: 'desc' },
       include: {
-        formateurs: { select: { id: true, firstName: true, lastName: true, email: true } },
-        centreFormation: { select: { id: true, nom: true, adresse: true } },
+        formateurs: true,
+        centreFormation: true,
       },
     });
     return {
@@ -52,12 +41,12 @@ export class FormationService {
     };
   }
 
-  public async findById(id: string): Promise<{ [key: string]: any; sessions: ISession[] } | null> {
+  public async findById(id: string): Promise<{ formation: Formation, sessions: Session[] } | null> {
     const formation = await prisma.formation.findUnique({
       where: { id },
       include: {
-        formateurs: { select: { id: true, firstName: true, lastName: true, email: true, profilePicture: true } },
-        centreFormation: { select: { id: true, nom: true, adresse: true } },
+        formateurs: true,
+        centreFormation: true,
       },
     });
     if (!formation) {
@@ -65,26 +54,27 @@ export class FormationService {
     }
     const sessions = await prisma.session.findMany({
       where: { formationId: id },
-      include: { formateur: { select: { id: true, firstName: true, lastName: true, email: true, profilePicture: true } } },
+      include: { formateur: true },
       orderBy: { dateDebut: 'asc' },
     });
-    return { ...formation, sessions };
+    return { formation, sessions };
   }
 
-  public async create(data: Partial<IFormation>): Promise<IFormation> {
+  public async create(data: Formation): Promise<Formation> {
     // Add any necessary validation or data transformation before saving
     const newFormation = await prisma.formation.create({ data });
     return newFormation;
   }
 
-  public async update(id: string, data: Partial<IFormation>): Promise<IFormation | null> {
+  public async update(id: string, data: Partial<Formation>): Promise<Formation | null> {
     // Add any necessary validation or data transformation
     // { new: true } returns the modified document rather than the original
     return prisma.formation.update({ where: { id }, data });
   }
 
-  public async delete(id: string): Promise<IFormation | null> {
+  public async delete(id: string): Promise<Formation | null> {
     // findByIdAndDelete will return the deleted document
     return prisma.formation.delete({ where: { id } });
   }
 }
+

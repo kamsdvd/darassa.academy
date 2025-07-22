@@ -63,33 +63,35 @@ enum DemandeurDisponibilite {
 }
 
 model User {
-  id               String   @id @default(uuid())
-  email            String   @unique
-  password         String
-  firstName        String
-  lastName         String
-  phone            String?
-  profilePicture   String?
-  userType         UserType
-  isActive         Boolean  @default(true)
-  isEmailVerified  Boolean  @default(false)
-  lastLogin        DateTime?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  // Relations
-  courses          Course[]        @relation("InstructorCourses")
-  formations       Formation[]     @relation("FormateurFormations")
-  centreFormations CentreFormation[] @relation("CentreFormateur")
-  sessions         Session[]       @relation("SessionFormateur")
-  events           Event[]         @relation("EventFormateur")
-  resetTokens      ResetToken[]
-  // Discriminators (see below for extended models)
-  Admin            Admin?
-  CentreManager    CentreManager?
-  Formateur        Formateur?
-  Etudiant         Etudiant?
-  DemandeurEmploi  DemandeurEmploi?
-  Entreprise       Entreprise?
+  id                     String                @id @default(uuid())
+  email                  String                @unique
+  password               String
+  firstName              String
+  lastName               String
+  phone                  String?
+  profilePicture         String?
+  userType               UserType
+  isActive               Boolean               @default(true)
+  isEmailVerified        Boolean               @default(false)
+  emailVerificationToken String?               @unique
+  lastLogin              DateTime?
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+  courses                Course[]              @relation("InstructorCourses")
+  centreFormations       CentreFormation[]     @relation("CentreFormateur")
+  sessions               Session[]             @relation("SessionFormateur")
+  events                 Event[]               @relation("EventFormateur")
+  resetTokens            ResetToken[]
+  evaluationFormations   EvaluationFormation[]
+  Admin                  Admin?
+  CentreManager          CentreManager?
+  Formateur              Formateur?
+  Etudiant               Etudiant?
+  DemandeurEmploi        DemandeurEmploi?
+  Entreprise             Entreprise?
+  SessionParticipant     SessionParticipant[]
+  CentreFormation        CentreFormation?      @relation(fields: [centreFormationId], references: [id])
+  centreFormationId      String?
 }
 
 model Admin {
@@ -101,18 +103,18 @@ model Admin {
 }
 
 model CentreManager {
-  id          String   @id @default(uuid())
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String   @unique
-  centres     CentreFormation[] @relation("CentreManagerCentres")
-  canManageFormateurs        Boolean @default(true)
-  canManageFormations        Boolean @default(true)
-  canValidateCertifications  Boolean @default(true)
-  canViewReports             Boolean @default(true)
+  id                        String            @id @default(uuid())
+  user                      User              @relation(fields: [userId], references: [id])
+  userId                    String            @unique
+  centres                   CentreFormation[] @relation("CentreManagerCentres")
+  canManageFormateurs       Boolean           @default(true)
+  canManageFormations       Boolean           @default(true)
+  canValidateCertifications Boolean           @default(true)
+  canViewReports            Boolean           @default(true)
 }
 
 model CentreFormation {
-  id                String   @id @default(uuid())
+  id                String             @id @default(uuid())
   nom               String
   code              String
   adresseRue        String
@@ -129,31 +131,32 @@ model CentreFormation {
   equipements       Equipement[]
   salles            Salle[]
   formations        Formation[]
-  formateurs        User[] @relation("CentreFormateur")
+  formateurs        User[]             @relation("CentreFormateur")
   etudiants         User[]
   evaluations       CentreEvaluation[]
   documents         CentreDocument[]
-  isActive          Boolean @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  centreManagers    CentreManager[] @relation("CentreManagerCentres")
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  centreManagers    CentreManager[]    @relation("CentreManagerCentres")
+  Formateur         Formateur[]
+  Etudiant          Etudiant[]
 }
 
-
 model Formateur {
-  id          String   @id @default(uuid())
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String   @unique
-  centreId    String?
-  centre      CentreFormation? @relation(fields: [centreId], references: [id])
-  specialites String[]
-  formations  Formation[] @relation("FormateurFormations")
-  evaluations Int @default(0)
-  disponibilite Boolean @default(true)
+  id            String           @id @default(uuid())
+  user          User             @relation(fields: [userId], references: [id])
+  userId        String           @unique
+  centreId      String?
+  centre        CentreFormation? @relation(fields: [centreId], references: [id])
+  specialites   String[]
+  formations    Formation[]      @relation("FormateurFormations")
+  evaluations   Int              @default(0)
+  disponibilite Boolean          @default(true)
 }
 
 model Formation {
-  id                String   @id @default(uuid())
+  id                String                 @id @default(uuid())
   titre             String
   description       String
   code              String
@@ -165,65 +168,54 @@ model Formation {
   objectifs         String[]
   competences       String[]
   modules           Module[]
-  formateurs        User[]  @relation("FormateurFormations")
-  centreFormation   CentreFormation @relation(fields: [centreFormationId], references: [id])
+  formateurs        Formateur[]            @relation("FormateurFormations")
+  centreFormation   CentreFormation        @relation(fields: [centreFormationId], references: [id])
   centreFormationId String
   dateDebut         DateTime
   dateFin           DateTime
   placesDisponibles Int
-  statut            FormationStatus @default(planifiee)
+  statut            FormationStatus        @default(planifiee)
   inscriptions      FormationInscription[]
   evaluations       EvaluationFormation[]
   documents         Document[]
-  isActive          Boolean @default(true)
+  isActive          Boolean                @default(true)
   googleMeetLink    String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  entreprise        Entreprise?            @relation("EntrepriseFormations", fields: [entrepriseId], references: [id])
+  entrepriseId      String?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  DemandeurEmploi   DemandeurEmploi?       @relation(fields: [demandeurEmploiId], references: [id])
+  demandeurEmploiId String?
+  Event             Event[]
+  Session           Session[]
 }
-
 
 model Etudiant {
-  id          String   @id @default(uuid())
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String   @unique
-  centreId    String?
-  centre      CentreFormation? @relation(fields: [centreId], references: [id])
-  formationsInscrites FormationInscrite[]
+  id                  String                 @id @default(uuid())
+  user                User                   @relation(fields: [userId], references: [id])
+  userId              String                 @unique
+  centreId            String?
+  centre              CentreFormation?       @relation(fields: [centreId], references: [id])
+  formationsInscrites FormationInscription[] @relation("EtudiantFormationInscriptions")
   competencesAcquises String[]
-  offresEmploi      OffreEmploi[]
-}
-
-// Suppression du modèle FormationInscrite dupliqué, utiliser FormationInscription uniquement
-// model FormationInscrite {
-  id                String   @id @default(uuid())
-  etudiant          Etudiant @relation(fields: [etudiantId], references: [id])
-  etudiantId        String
-  formation         Formation @relation(fields: [formationId], references: [id])
-  formationId       String
-  centre            CentreFormation @relation(fields: [centreId], references: [id])
-  centreId          String
-  dateInscription   DateTime @default(now())
-  progression       Int      @default(0)
-  certificatObtenu  Boolean @default(false)
-  demandeur         DemandeurEmploi? @relation(fields: [demandeurId], references: [id])
-  demandeurId       String?
+  offresEmploi        OffreEmploi[]
 }
 
 model DemandeurEmploi {
-  id                String   @id @default(uuid())
-  user              User     @relation(fields: [userId], references: [id])
-  userId            String   @unique
-  competences       String[]
-  experience        Experience[]
-  education         Education[]
-  cv                String?
-  disponibilite     DemandeurDisponibilite @default(immediate)
-  rechercheEmploi   Boolean @default(true)
+  id                  String                 @id @default(uuid())
+  user                User                   @relation(fields: [userId], references: [id])
+  userId              String                 @unique
+  competences         String[]
+  experience          Experience[]
+  education           Education[]
+  cv                  String?
+  disponibilite       DemandeurDisponibilite @default(immediate)
+  rechercheEmploi     Boolean                @default(true)
   formationsInscrites Formation[]
 }
 
 model Experience {
-  id          String   @id @default(uuid())
+  id          String          @id @default(uuid())
   demandeur   DemandeurEmploi @relation(fields: [demandeurId], references: [id])
   demandeurId String
   entreprise  String
@@ -233,7 +225,7 @@ model Experience {
 }
 
 model Education {
-  id          String   @id @default(uuid())
+  id          String          @id @default(uuid())
   demandeur   DemandeurEmploi @relation(fields: [demandeurId], references: [id])
   demandeurId String
   institution String
@@ -242,46 +234,48 @@ model Education {
 }
 
 model Entreprise {
-  id                String   @id @default(uuid())
-  user              User     @relation(fields: [userId], references: [id])
-  userId            String   @unique
-  nomEntreprise     String
-  secteur           String
-  taille            String
-  adresse           String
-  siteWeb           String?
-  description       String
-  logo              String?
-  offresEmploi      OffreEmploi[]
-  formationsProposees Formation[] @relation("EntrepriseFormations")
+  id                  String        @id @default(uuid())
+  user                User          @relation(fields: [userId], references: [id])
+  userId              String        @unique
+  nomEntreprise       String
+  secteur             String
+  taille              String
+  adresse             String
+  siteWeb             String?
+  description         String
+  logo                String?
+  offresEmploi        OffreEmploi[]
+  formationsProposees Formation[]   @relation("EntrepriseFormations")
 }
 
 model OffreEmploi {
-  id            String   @id @default(uuid())
-  entreprise    Entreprise @relation(fields: [entrepriseId], references: [id])
-  entrepriseId  String
-  titre         String
-  description   String
-  dateDebut     DateTime
-  dateFin       DateTime
+  id           String     @id @default(uuid())
+  entreprise   Entreprise @relation(fields: [entrepriseId], references: [id])
+  entrepriseId String
+  titre        String
+  description  String
+  dateDebut    DateTime
+  dateFin      DateTime
+  Etudiant     Etudiant?  @relation(fields: [etudiantId], references: [id])
+  etudiantId   String?
 }
 
 model Course {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  price       Float
-  duration    Int
-  level       CourseLevel
-  category    String
-  instructor  User     @relation("InstructorCourses", fields: [instructorId], references: [id])
+  id           String      @id @default(uuid())
+  title        String
+  description  String
+  price        Float
+  duration     Int
+  level        CourseLevel
+  category     String
+  instructor   User        @relation("InstructorCourses", fields: [instructorId], references: [id])
   instructorId String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }
 
 model Event {
-  id          String   @id @default(uuid())
+  id          String     @id @default(uuid())
   titre       String
   description String
   dateDebut   DateTime
@@ -289,45 +283,45 @@ model Event {
   type        EventType
   formation   Formation? @relation(fields: [formationId], references: [id])
   formationId String?
-  session     Session? @relation(fields: [sessionId], references: [id])
+  session     Session?   @relation(fields: [sessionId], references: [id])
   sessionId   String?
-  formateur   User? @relation("EventFormateur", fields: [formateurId], references: [id])
+  formateur   User?      @relation("EventFormateur", fields: [formateurId], references: [id])
   formateurId String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model Session {
-  id          String   @id @default(uuid())
-  formation   Formation @relation(fields: [formationId], references: [id])
-  formationId String
-  titre       String
-  description String
-  type        SessionType
-  dateDebut   DateTime
-  dateFin     DateTime
-  duree       Int
-  formateur   User     @relation("SessionFormateur", fields: [formateurId], references: [id])
-  formateurId String
-  salleNom    String?
-  salleCapacite Int?
+  id               String               @id @default(uuid())
+  formation        Formation            @relation(fields: [formationId], references: [id])
+  formationId      String
+  titre            String
+  description      String
+  type             SessionType
+  dateDebut        DateTime
+  dateFin          DateTime
+  duree            Int
+  formateur        User                 @relation("SessionFormateur", fields: [formateurId], references: [id])
+  formateurId      String
+  salleNom         String?
+  salleCapacite    Int?
   salleEquipements String[]
   salleDescription String?
-  lienMeet    String?
-  statut      SessionStatus @default(planifiee)
-  participants SessionParticipant[]
-  materiel    Materiel[]
-  documents   Document[]
-  events      Event[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  lienMeet         String?
+  statut           SessionStatus        @default(planifiee)
+  participants     SessionParticipant[]
+  materiel         Materiel[]
+  documents        Document[]
+  events           Event[]
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
 }
 
 model SessionParticipant {
-  id          String   @id @default(uuid())
-  session     Session  @relation(fields: [sessionId], references: [id])
+  id          String  @id @default(uuid())
+  session     Session @relation(fields: [sessionId], references: [id])
   sessionId   String
-  etudiant    User     @relation(fields: [etudiantId], references: [id])
+  etudiant    User    @relation(fields: [etudiantId], references: [id])
   etudiantId  String
   presence    String
   note        Float?
@@ -336,8 +330,8 @@ model SessionParticipant {
 }
 
 model Materiel {
-  id          String   @id @default(uuid())
-  session     Session  @relation(fields: [sessionId], references: [id])
+  id          String  @id @default(uuid())
+  session     Session @relation(fields: [sessionId], references: [id])
   sessionId   String
   nom         String
   quantite    Int
@@ -345,47 +339,20 @@ model Materiel {
 }
 
 model Document {
-  id          String   @id @default(uuid())
-  session     Session? @relation(fields: [sessionId], references: [id])
+  id          String     @id @default(uuid())
+  session     Session?   @relation(fields: [sessionId], references: [id])
   sessionId   String?
   type        String
   url         String
   dateAjout   DateTime
   description String?
-}
-
-model Formation {
-  id                String   @id @default(uuid())
-  titre             String
-  description       String
-  code              String
-  category          String
-  duree             Int
-  niveau            String
-  prix              Float
-  prerequis         String[]
-  objectifs         String[]
-  competences       String[]
-  modules           Module[]
-  formateurs        User[]  @relation("FormateurFormations")
-  centreFormation   CentreFormation @relation(fields: [centreFormationId], references: [id])
-  centreFormationId String
-  dateDebut         DateTime
-  dateFin           DateTime
-  placesDisponibles Int
-  statut            FormationStatus @default(planifiee)
-  inscriptions      FormationInscription[]
-  evaluations       EvaluationFormation[]
-  documents         Document[]
-  isActive          Boolean @default(true)
-  googleMeetLink    String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  Formation   Formation? @relation(fields: [formationId], references: [id])
+  formationId String?
 }
 
 model Module {
-  id          String   @id @default(uuid())
-  formation   Formation @relation(fields: [formationId], references: [id])
+  id          String       @id @default(uuid())
+  formation   Formation    @relation(fields: [formationId], references: [id])
   formationId String
   titre       String
   description String
@@ -395,8 +362,8 @@ model Module {
 }
 
 model Evaluation {
-  id          String   @id @default(uuid())
-  module      Module   @relation(fields: [moduleId], references: [id])
+  id          String @id @default(uuid())
+  module      Module @relation(fields: [moduleId], references: [id])
   moduleId    String
   type        String
   description String
@@ -404,12 +371,12 @@ model Evaluation {
 }
 
 model FormationInscription {
-  id                String   @id @default(uuid())
+  id                String    @id @default(uuid())
   formation         Formation @relation(fields: [formationId], references: [id])
   formationId       String
-  etudiant          User     @relation(fields: [etudiantId], references: [id])
+  etudiant          Etudiant  @relation("EtudiantFormationInscriptions", fields: [etudiantId], references: [id])
   etudiantId        String
-  dateInscription   DateTime @default(now())
+  dateInscription   DateTime  @default(now())
   statut            String
   paiementMontant   Float
   paiementDate      DateTime
@@ -417,68 +384,29 @@ model FormationInscription {
   paiementReference String
 }
 
-model User {
-  // ... autres champs ...
-  formationInscriptions FormationInscription[]
-}
-
-
 model EvaluationFormation {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   formation   Formation @relation(fields: [formationId], references: [id])
   formationId String
-  etudiant    User     @relation(fields: [etudiantId], references: [id])
+  etudiant    User      @relation(fields: [etudiantId], references: [id])
   etudiantId  String
   note        Float
   commentaire String
   date        DateTime
 }
 
-model User {
-  // ... autres champs ...
-  evaluationFormations EvaluationFormation[]
-}
-
-
-model CentreFormation {
-  id                String   @id @default(uuid())
-  nom               String
-  code              String
-  adresseRue        String
-  adresseVille      String
-  adresseCodePostal String
-  adressePays       String
-  contactEmail      String
-  contactTelephone  String
-  contactSiteWeb    String?
-  directeur         String
-  dateCreation      DateTime
-  agrements         Agrement[]
-  capaciteAccueil   Int
-  equipements       Equipement[]
-  salles            Salle[]
-  formations        Formation[]
-  formateurs        User[] @relation("CentreFormateur")
-  etudiants         User[]
-  evaluations       CentreEvaluation[]
-  documents         CentreDocument[]
-  isActive          Boolean @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-}
-
 model Agrement {
-  id          String   @id @default(uuid())
-  centre      CentreFormation @relation(fields: [centreId], references: [id])
-  centreId    String
-  numero      String
-  date        DateTime
-  validite    DateTime
-  type        String
+  id       String          @id @default(uuid())
+  centre   CentreFormation @relation(fields: [centreId], references: [id])
+  centreId String
+  numero   String
+  date     DateTime
+  validite DateTime
+  type     String
 }
 
 model Equipement {
-  id          String   @id @default(uuid())
+  id          String          @id @default(uuid())
   centre      CentreFormation @relation(fields: [centreId], references: [id])
   centreId    String
   nom         String
@@ -487,7 +415,7 @@ model Equipement {
 }
 
 model Salle {
-  id          String   @id @default(uuid())
+  id          String          @id @default(uuid())
   centre      CentreFormation @relation(fields: [centreId], references: [id])
   centreId    String
   nom         String
@@ -497,7 +425,7 @@ model Salle {
 }
 
 model CentreEvaluation {
-  id          String   @id @default(uuid())
+  id          String          @id @default(uuid())
   centre      CentreFormation @relation(fields: [centreId], references: [id])
   centreId    String
   note        Float
@@ -507,7 +435,7 @@ model CentreEvaluation {
 }
 
 model CentreDocument {
-  id          String   @id @default(uuid())
+  id          String          @id @default(uuid())
   centre      CentreFormation @relation(fields: [centreId], references: [id])
   centreId    String
   type        String
@@ -517,12 +445,12 @@ model CentreDocument {
 }
 
 model ResetToken {
-  id          String   @id @default(uuid())
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String
-  token       String   @unique
-  expiresAt   DateTime
-  used        Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

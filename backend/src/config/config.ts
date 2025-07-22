@@ -9,7 +9,7 @@ if (!process.env.JWT_SECRET) {
 
 export const config = {
   port: process.env.PORT || 5000,
-  databaseUrl: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/darassa'
+  databaseUrl: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/darassa',
   auth: {
     jwtSecret: process.env.JWT_SECRET,
     jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',

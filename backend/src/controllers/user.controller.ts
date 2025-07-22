@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../generated/prisma';
 const prisma = new PrismaClient();
 
 /**
@@ -139,7 +139,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     const exists = await prisma.user.findUnique({ where: { email } });
     if (exists) return res.status(409).json({ message: 'Email déjà utilisé' });
     const user = await prisma.user.create({
-      data: { email, password, firstName, lastName, userType, specialites },
+      data: { email, password, firstName, lastName, userType },
     });
     res.status(201).json({ message: 'Utilisateur créé', user: { ...user, password: undefined } });
   } catch (err) {

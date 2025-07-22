@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from './generated/prisma';
 
 import cors from 'cors';
 import dotenv from 'dotenv';

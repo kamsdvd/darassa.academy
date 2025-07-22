@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { plainToClass } from 'class-transformer';
 import { validate, ValidationError } from 'class-validator';
 import { FormationService } from '../services/formation.service';
-import { IFormation } from '../models/formation.model';
+import { Formation } from '../generated/prisma';
 import { CreateFormationDto } from '../dtos/formation/create-formation.dto';
 import { UpdateFormationDto } from '../dtos/formation/update-formation.dto';
 
@@ -81,21 +81,12 @@ export class FormationController {
     try {
       // Conversion des dates string en Date
       // Mapping des modules pour garantir la compatibilité avec IModule
-      let modules: any = undefined;
-      if (Array.isArray(createFormationDto.modules)) {
-        modules = createFormationDto.modules.map((mod: any) => ({
-          ...mod,
-          contenu: Array.isArray(mod.contenu) ? mod.contenu : [],
-          evaluation: Array.isArray(mod.evaluation) ? mod.evaluation : [],
-        }));
-      }
-      const payload: Partial<IFormation> = {
+      const payload: Partial<Formation> = {
         ...createFormationDto,
         dateDebut: new Date(createFormationDto.dateDebut),
         dateFin: new Date(createFormationDto.dateFin),
-        modules
       };
-      const newFormation = await formationService.create(payload);
+      const newFormation = await formationService.create(payload as Formation);
       res.status(201).json({ success: true, message: "Formation créée avec succès.", data: newFormation });
     } catch (error) {
       const err = error as any;
@@ -137,7 +128,7 @@ export class FormationController {
 
     try {
       // Pass validated DTO data. UpdateFormationDto is Partial, compatible with service's Partial<IFormation>.
-      const updatedFormation = await formationService.update(id, updateFormationDto as Partial<IFormation>);
+      const updatedFormation = await formationService.update(id, updateFormationDto as Partial<Formation>);
 
       if (!updatedFormation) {
         res.status(404).json({ success: false, message: 'Formation non trouvée pour la mise à jour.' });
