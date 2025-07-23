@@ -1,8 +1,10 @@
 import '@testing-library/jest-dom';
-import { cleanup } from '@testing-library/react';
-import { afterEach } from 'vitest';
 
-// Nettoyage automatique après chaque test
-afterEach(() => {
-  cleanup();
-}); 
+// Mock de l'IntersectionObserver pour les tests JSDOM
+const intersectionObserverMock = () => ({
+  observe: () => null,
+  unobserve: () => null,
+  disconnect: () => null,
+});
+
+window.IntersectionObserver = jest.fn().mockImplementation(intersectionObserverMock);

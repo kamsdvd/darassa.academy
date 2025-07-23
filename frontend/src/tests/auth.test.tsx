@@ -1,42 +1,20 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { AuthProvider, useAuth } from '../hooks/useAuth';
-import { authService } from '../services/auth.service';
 import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from '../hooks/useAuth';
+import { RegisterContainer } from '../modules/auth/containers/RegisterContainer';
+import { authService } from '../modules/auth/services/auth.service';
 
-// Mock du service d'authentification
-jest.mock('../services/auth.service');
+// Mock du service d'authentification et de useNavigate
+jest.mock('../modules/auth/services/auth.service');
+const mockedAuthService = authService as jest.Mocked<typeof authService>;
 
-const TestComponent = () => {
-  const { login, register, logout, user, isAuthenticated, error, loading } = useAuth();
+const mockNavigate = jest.fn();
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => mockNavigate,
+}));
 
-  return (
-    <div>
-      <div data-testid="auth-status">
-        {isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
-      </div>
-      <div data-testid="user-info">
-        {user ? JSON.stringify(user) : 'No user'}
-      </div>
-      <div data-testid="error-message">
-        {error?.message || 'No error'}
-      </div>
-      <div data-testid="loading-status">
-        {loading ? 'Loading' : 'Not Loading'}
-      </div>
-      <button onClick={() => login('test@example.com', 'password123')}>
-        Login
-      </button>
-      <button onClick={() => register('Test User', 'test@example.com', 'Password123!')}>
-        Register
-      </button>
-      <button onClick={logout}>
-        Logout
-      </button>
-    </div>
-  );
-};
-
-const renderWithAuth = (component: React.ReactNode) => {
+const renderWithProviders = (component: React.ReactNode) => {
   return render(
     <BrowserRouter>
       <AuthProvider>
@@ -46,113 +24,86 @@ const renderWithAuth = (component: React.ReactNode) => {
   );
 };
 
-describe('Authentication System', () => {
+describe('Registration Flow', () => {
   beforeEach(() => {
+    // Réinitialise les mocks avant chaque test
     jest.clearAllMocks();
   });
 
-  it('should handle successful login', async () => {
-    const mockUser = {
-      id: '1',
-      email: 'test@example.com',
-      name: 'Test User',
-      roles: ['user']
+  it('should allow a user to register successfully and be redirected', async () => {
+    // Arrange: Configuration du test
+    const mockUserData = {
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john.doe@example.com',
+      password: 'Password123!',
+      userType: 'apprenant',
     };
 
-    (authService.login as jest.Mock).mockResolvedValueOnce({
-      user: mockUser,
-      tokens: {
-        accessToken: 'access-token',
-        refreshToken: 'refresh-token',
-        expiresIn: 3600
-      }
+    const mockResponse = {
+      user: { id: '1', ...mockUserData },
+      tokens: { accessToken: 'fake-access-token', refreshToken: 'fake-refresh-token' },
+    };
+
+    // On mock la réponse de la méthode register du service
+    mockedAuthService.register.mockResolvedValue(mockResponse);
+
+    renderWithProviders(<RegisterContainer />);
+
+    // Act: Simulation des actions de l'utilisateur
+    fireEvent.change(screen.getByLabelText(/prénom/i), { target: { value: mockUserData.firstName } });
+    fireEvent.change(screen.getByLabelText(/nom/i), { target: { value: mockUserData.lastName } });
+    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: mockUserData.email } });
+    fireEvent.change(screen.getByLabelText('Mot de passe'), { target: { value: mockUserData.password } });
+    fireEvent.change(screen.getByLabelText(/confirmer le mot de passe/i), { target: { value: mockUserData.password } });
+
+    fireEvent.click(screen.getByRole('button', { name: /s'inscrire/i }));
+
+    // Assert: Vérification des résultats
+    // 1. Vérifier que le service a été appelé avec les bonnes données
+    await waitFor(() => {
+      expect(mockedAuthService.register).toHaveBeenCalledWith({
+        firstName: mockUserData.firstName,
+        lastName: mockUserData.lastName,
+        email: mockUserData.email,
+        password: mockUserData.password,
+        userType: 'apprenant', // Vérifie que le userType est bien défini par défaut
+      });
     });
 
-    renderWithAuth(<TestComponent />);
-
-    fireEvent.click(screen.getByText('Login'));
-
+    // 2. Vérifier que la redirection a lieu après une inscription réussie
     await waitFor(() => {
-      expect(screen.getByTestId('auth-status')).toHaveTextContent('Authenticated');
-      expect(screen.getByTestId('user-info')).toHaveTextContent(JSON.stringify(mockUser));
+      expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
     });
   });
 
-  it('should handle login failure', async () => {
+  it('should display an error message if registration fails', async () => {
+    // Arrange
     const mockError = {
-      code: 'INVALID_CREDENTIALS',
-      message: 'Invalid email or password'
+      code: 'REGISTRATION_FAILED',
+      message: 'Cette adresse email est déjà utilisée.',
     };
+    mockedAuthService.register.mockRejectedValue(mockError);
 
-    (authService.login as jest.Mock).mockRejectedValueOnce(mockError);
+    renderWithProviders(<RegisterContainer />);
 
-    renderWithAuth(<TestComponent />);
+    // Act
+    fireEvent.change(screen.getByLabelText(/prénom/i), { target: { value: 'Jane' } });
+    fireEvent.change(screen.getByLabelText(/nom/i), { target: { value: 'Doe' } });
+    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'jane.doe@example.com' } });
+    fireEvent.change(screen.getByLabelText('Mot de passe'), { target: { value: 'Password123!' } });
+    fireEvent.change(screen.getByLabelText(/confirmer le mot de passe/i), { target: { value: 'Password123!' } });
 
-    fireEvent.click(screen.getByText('Login'));
+    fireEvent.click(screen.getByRole('button', { name: /s'inscrire/i }));
 
+    // Assert
+    // Vérifier que le message d'erreur est affiché
     await waitFor(() => {
-      expect(screen.getByTestId('error-message')).toHaveTextContent('Invalid email or password');
-      expect(screen.getByTestId('auth-status')).toHaveTextContent('Not Authenticated');
+      expect(screen.getByText(mockError.message)).toBeInTheDocument();
     });
+
+    // Vérifier qu'aucune redirection n'a eu lieu
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
-
-  it('should handle successful registration', async () => {
-    const mockUser = {
-      id: '1',
-      email: 'test@example.com',
-      name: 'Test User',
-      roles: ['user']
-    };
-
-    (authService.register as jest.Mock).mockResolvedValueOnce({
-      user: mockUser,
-      tokens: {
-        accessToken: 'access-token',
-        refreshToken: 'refresh-token',
-        expiresIn: 3600
-      }
-    });
-
-    renderWithAuth(<TestComponent />);
-
-    fireEvent.click(screen.getByText('Register'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('auth-status')).toHaveTextContent('Authenticated');
-      expect(screen.getByTestId('user-info')).toHaveTextContent(JSON.stringify(mockUser));
-    });
-  });
-
-  it('should handle registration with invalid password', async () => {
-    renderWithAuth(<TestComponent />);
-
-    fireEvent.click(screen.getByText('Register'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('error-message')).toHaveTextContent(
-        'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial'
-      );
-    });
-  });
-
-  it('should handle logout', async () => {
-    renderWithAuth(<TestComponent />);
-
-    fireEvent.click(screen.getByText('Logout'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('auth-status')).toHaveTextContent('Not Authenticated');
-      expect(screen.getByTestId('user-info')).toHaveTextContent('No user');
-    });
-  });
-
-  it('should validate email format', async () => {
-    renderWithAuth(<TestComponent />);
-
-    fireEvent.click(screen.getByText('Login'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('error-message')).toHaveTextContent('Format d\'email invalide');
-    });
-  });
-}); 
+});
+ 

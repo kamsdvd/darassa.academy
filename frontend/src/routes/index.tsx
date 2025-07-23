@@ -6,13 +6,13 @@ import { useAuth } from '../hooks/useAuth';
 
 // Lazy loading des pages
 const Home = lazy(() => import('../pages/Home'));
-const Register = lazy(() => import('../features/auth/containers/RegisterContainer'));
+const Register = lazy(() => import('../modules/auth/containers/RegisterContainer'));
 const Dashboard = lazy(() => import('../pages/Dashboard'));
-const Courses = lazy(() => import('../features/courses/containers/CoursesContainer'));
-const CourseDetail = lazy(() => import('../features/courses/containers/CourseDetailContainer'));
-const Profile = lazy(() => import('../features/profile/containers/ProfileContainer'));
+// const Courses = lazy(() => import('../features/courses/containers/CoursesContainer'));
+// const CourseDetail = lazy(() => import('../features/courses/containers/CourseDetailContainer'));
+// const Profile = lazy(() => import('../features/profile/containers/ProfileContainer'));
 const NotFound = lazy(() => import('../pages/NotFound'));
-const Connexion = lazy(() => import('../features/auth/containers/ConnexionContainer'));
+// const Connexion = lazy(() => import('../features/auth/containers/ConnexionContainer'));
 
 // Composant de chargement
 const LoadingFallback = () => (
@@ -30,7 +30,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/connexion" replace />;
+    // Redirige vers une page de connexion qui devra être créée
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;
@@ -43,10 +44,10 @@ export const AppRoutes = () => {
         {/* Routes publiques */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
-          <Route path="/connexion" element={<Connexion />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/courses/:id" element={<CourseDetail />} />
+          {/* <Route path="/connexion" element={<Connexion />} /> */}
+          <Route path="/inscription" element={<Register />} />
+          {/* <Route path="/courses" element={<Courses />} /> */}
+          {/* <Route path="/courses/:id" element={<CourseDetail />} /> */}
         </Route>
 
         {/* Routes protégées */}
@@ -59,14 +60,14 @@ export const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
-          <Route
+          {/* <Route
             path="/profile"
             element={
               <ProtectedRoute>
                 <Profile />
               </ProtectedRoute>
             }
-          />
+          /> */}
         </Route>
 
         {/* Route 404 */}
@@ -74,4 +75,5 @@ export const AppRoutes = () => {
       </Routes>
     </Suspense>
   );
-}; 
+};
+ 

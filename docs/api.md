@@ -1,149 +1,145 @@
-# Référence API
+# Documentation de l'API
 
-Cette documentation décrit les endpoints disponibles dans l'API de Darassa Academy.
-
-## Base URL
-
-```
-https://api.darassa.academy/v1
-```
+Ce document décrit les endpoints de l'API pour le projet Darassa Academy.
 
 ## Authentification
 
-Toutes les requêtes API nécessitent un token JWT dans le header :
+Le processus d'authentification est basé sur des tokens JWT (Access Token et Refresh Token).
 
-```
-Authorization: Bearer <votre_token>
-```
+### Endpoints
 
-## Endpoints
+---
 
-### Utilisateurs
+#### 1. Inscription d'un nouvel utilisateur
 
-#### Inscription
-```http
-POST /auth/register
-```
+*   **Méthode :** `POST`
+*   **Endpoint :** `/api/auth/register`
+*   **Description :** Crée un nouvel utilisateur dans le système.
+*   **Payload (Request Body) :**
+    ```json
+    {
+      "email": "user@example.com",
+      "password": "a_strong_password",
+      "firstName": "John",
+      "lastName": "Doe",
+      "userType": "student"
+    }
+    ```
+*   **Réponse en cas de succès (201 Created) :**
+    ```json
+    {
+      "data": {
+        "user": {
+          "id": "clx...",
+          "email": "user@example.com",
+          "firstName": "John",
+          "lastName": "Doe",
+          "userType": "student"
+        },
+        "tokens": {
+          "accessToken": "ey...",
+          "refreshToken": "ey..."
+        }
+      }
+    }
+    ```
 
-**Body**
-```json
-{
-  "email": "string",
-  "password": "string",
-  "firstName": "string",
-  "lastName": "string"
-}
-```
+---
 
-#### Connexion
-```http
-POST /auth/login
-```
+#### 2. Connexion d'un utilisateur
 
-**Body**
-```json
-{
-  "email": "string",
-  "password": "string"
-}
-```
+*   **Méthode :** `POST`
+*   **Endpoint :** `/api/auth/login`
+*   **Description :** Authentifie un utilisateur et retourne les tokens.
+*   **Payload (Request Body) :**
+    ```json
+    {
+      "email": "user@example.com",
+      "password": "a_strong_password"
+    }
+    ```
+*   **Réponse en cas de succès (200 OK) :**
+    ```json
+    {
+      "data": {
+        "user": {
+          "id": "clx...",
+          "email": "user@example.com",
+          "firstName": "John",
+          "lastName": "Doe",
+          "userType": "student"
+        },
+        "tokens": {
+          "accessToken": "ey...",
+          "refreshToken": "ey..."
+        }
+      }
+    }
+    ```
 
-### Cours
+---
 
-#### Liste des cours
-```http
-GET /courses
-```
+#### 3. Récupérer le profil de l'utilisateur connecté
 
-**Query Parameters**
-- `page` (number, optional): Numéro de page
-- `limit` (number, optional): Nombre d'éléments par page
-- `category` (string, optional): Filtre par catégorie
+*   **Méthode :** `GET`
+*   **Endpoint :** `/api/auth/profile`
+*   **Description :** Récupère les informations de l'utilisateur actuellement authentifié grâce à son `accessToken`.
+*   **Header d'autorisation :**
+    ```
+    Authorization: Bearer <accessToken>
+    ```
+*   **Réponse en cas de succès (200 OK) :**
+    ```json
+    {
+      "data": {
+        "user": {
+          "id": "clx...",
+          "email": "user@example.com",
+          "firstName": "John",
+          "lastName": "Doe",
+          "userType": "student"
+        }
+      }
+    }
+    ```
 
-#### Détails d'un cours
-```http
-GET /courses/:id
-```
+---
 
-### Leçons
+#### 4. Déconnexion
 
-#### Liste des leçons d'un cours
-```http
-GET /courses/:courseId/lessons
-```
+*   **Méthode :** `POST`
+*   **Endpoint :** `/api/auth/logout`
+*   **Description :** Invalide le `refreshToken` de l'utilisateur. (Le frontend se charge de supprimer les tokens du stockage local).
+*   **Payload (Request Body) :**
+    ```json
+    {
+      "refreshToken": "ey..."
+    }
+    ```
+*   **Réponse en cas de succès (204 No Content) :**
+    *   Pas de contenu dans la réponse.
 
-#### Détails d'une leçon
-```http
-GET /lessons/:id
-```
+---
 
-### Progression
+#### 5. Rafraîchir les tokens d'authentification
 
-#### Mettre à jour la progression
-```http
-POST /progress
-```
-
-**Body**
-```json
-{
-  "lessonId": "string",
-  "completed": boolean
-}
-```
-
-#### Obtenir la progression
-```http
-GET /progress
-```
-
-## Codes d'erreur
-
-| Code | Description |
-|------|-------------|
-| 400 | Requête invalide |
-| 401 | Non authentifié |
-| 403 | Non autorisé |
-| 404 | Ressource non trouvée |
-| 500 | Erreur serveur |
-
-## Format de réponse
-
-Toutes les réponses suivent le format suivant :
-
-```json
-{
-  "success": boolean,
-  "data": object | array | null,
-  "error": {
-    "code": string,
-    "message": string
-  } | null
-}
-```
-
-## Pagination
-
-Les réponses paginées incluent les métadonnées suivantes :
-
-```json
-{
-  "success": true,
-  "data": [...],
-  "pagination": {
-    "page": number,
-    "limit": number,
-    "total": number,
-    "pages": number
-  }
-}
-```
-
-## Rate Limiting
-
-- 100 requêtes par minute par IP
-- 1000 requêtes par heure par utilisateur authentifié
-
-## Versioning
-
-L'API utilise le versioning dans l'URL. La version actuelle est v1. 
+*   **Méthode :** `POST`
+*   **Endpoint :** `/api/auth/refresh`
+*   **Description :** Génère une nouvelle paire de tokens (`accessToken`, `refreshToken`) en utilisant un `refreshToken` valide.
+*   **Payload (Request Body) :**
+    ```json
+    {
+      "refreshToken": "ey..."
+    }
+    ```
+*   **Réponse en cas de succès (200 OK) :**
+    ```json
+    {
+      "data": {
+        "tokens": {
+          "accessToken": "ey.new...",
+          "refreshToken": "ey.new..."
+        }
+      }
+    }
+    ```

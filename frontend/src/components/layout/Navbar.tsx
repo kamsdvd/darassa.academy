@@ -31,58 +31,12 @@ const Navbar: React.FC = () => {
             </Link>
             <Link
               to="/courses"
-L35: isActive('/courses') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
+              className={`text-sm font-medium ${
+                isActive('/courses') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
+              }`}
             >
               Formations
             </Link>
             <Link
               to="/opportunites"
-              className={`text-sm font-medium ${
-                isActive('/opportunites') ? 'text-primary-600' : 'text-gray-500 hover:text-gray-900'
-              }`}
-            >
-              Opportunités
-            </Link>
-          </div>
-
-          {/* Boutons de connexion/inscription ou profil */}
-          <div className="flex items-center space-x-4">
-            {user ? (
-              <>
-                <Link
-                  to="/dashboard"
-                  className="text-sm font-medium text-gray-500 hover:text-gray-900"
-                >
-                  Tableau de bord
-                </Link>
-                <button
-                  onClick={logout}
-                  className="text-sm font-medium text-gray-500 hover:text-gray-900"
-                >
-                  Déconnexion
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/connexion"
-                  className="text-sm font-medium text-gray-500 hover:text-gray-900"
-                >
-                  Connexion
-                </Link>
-                <Link
-                  to="/inscription"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
-                >
-                  S'inscrire
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-};
-
-export default Navbar; 
+              className={`

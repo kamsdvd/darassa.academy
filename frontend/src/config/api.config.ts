@@ -8,6 +8,7 @@ export const API_CONFIG = {
       REGISTER: '/auth/register',
       LOGOUT: '/auth/logout',
       ME: '/auth/profile',
+      REFRESH: '/auth/refresh',
     },
     // Ajoutez d'autres endpoints ici au besoin
   },

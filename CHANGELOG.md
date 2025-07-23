@@ -7,6 +7,33 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Test - 2025-07-23
+- **Ajout des tests d'intégration pour l'inscription :**
+  - Le fichier de test `auth.test.tsx` a été entièrement réécrit pour tester le flux d'inscription complet via le `RegisterContainer`.
+  - Les tests simulent la saisie utilisateur, la soumission du formulaire et mockent les réponses du service pour valider la redirection en cas de succès et l'affichage des erreurs.
+
+### Docs - 2025-07-23
+- **Documentation du flux d'authentification frontend :**
+  - Un diagramme de séquence Mermaid a été ajouté au `frontend/README.md` pour visualiser le déroulement du processus d'inscription.
+
+### Fix - 2025-07-23
+- **Correction de l'incohérence architecturale du frontend :**
+  - Le fichier de routage (`src/routes/index.tsx`) a été nettoyé pour ne plus faire référence à une structure de dossiers `features` inexistante.
+  - Les routes et importations obsolètes (Connexion, Courses, Profile) ont été commentées, laissant uniquement les routes fonctionnelles.
+  - L'architecture est maintenant alignée sur la structure `modules` existante, garantissant la cohérence et la stabilité du code.
+
+### Refactor - 2025-07-23
+- **Finalisation du service et des hooks d'authentification frontend :**
+  - Le service d'authentification (`auth.service.ts`) gère désormais le cycle de vie complet des tokens, y compris le stockage et le rafraîchissement des `refreshTokens`.
+  - La structure modulaire a été validée : la logique métier réside dans `modules/auth`, tandis que `hooks/useAuth.tsx` sert de fournisseur de contexte global, assurant une architecture propre et sans doublons.
+  - Les tâches 2 et 3 du plan de refactorisation sont considérées comme terminées.
+
+### Docs - 2025-07-23
+- **Définition du contrat de l'API d'authentification :**
+  - La documentation de l'API (`docs/api.md`) a été entièrement réécrite pour refléter les besoins exacts du frontend.
+  - Ce contrat, basé sur `auth.service.ts`, définit les endpoints (`/register`, `/login`, `/profile`, `/logout`, `/refresh`), les payloads et les structures de réponse attendues.
+  - Il sert de spécification officielle pour le développement futur du backend, conformément à l'approche "frontend-first".
+
 ### Fix - 2025-07-22
 - **Résolution complète des erreurs Prisma backend :**
   - Correction de l'erreur `@prisma/client did not initialize yet` en exécutant `npx prisma generate`.

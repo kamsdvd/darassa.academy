@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
-import { AuthService } from '../../services/authService';
+import { authService } from '@/modules/auth/services/auth.service';
 import { getRedirectPath } from '../../utils/auth';
 
 interface ProtectedRouteProps {
