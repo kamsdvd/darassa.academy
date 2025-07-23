@@ -132,7 +132,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setError(null);
   };
 
-  const value = {
+  const value: AuthContextType = {
     user,
     isAuthenticated,
     loading,
@@ -143,7 +143,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     clearError
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 // Hook personnalisé

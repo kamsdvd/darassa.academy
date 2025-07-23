@@ -28,11 +28,13 @@ export interface AuthError {
 class AuthService {
   private static instance: AuthService;
   private baseURL: string;
-  private token: string | null = null;
+  private accessToken: string | null = null;
+  private refreshToken: string | null = null;
 
   private constructor() {
     this.baseURL = API_CONFIG.BASE_URL;
-    this.token = localStorage.getItem('token');
+    this.accessToken = localStorage.getItem('accessToken');
+    this.refreshToken = localStorage.getItem('refreshToken');
   }
 
   public static getInstance(): AuthService {
@@ -42,13 +44,26 @@ class AuthService {
     return AuthService.instance;
   }
 
+  private setTokens(tokens: AuthTokens) {
+    this.accessToken = tokens.accessToken;
+    this.refreshToken = tokens.refreshToken;
+    localStorage.setItem('accessToken', tokens.accessToken);
+    localStorage.setItem('refreshToken', tokens.refreshToken);
+  }
+
+  private clearTokens() {
+    this.accessToken = null;
+    this.refreshToken = null;
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+  }
+
   public async login(email: string, password: string): Promise<AuthResponse> {
     try {
       const response = await axios.post(`${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.LOGIN}`, { email, password });
       if (response.data.data) {
         const { user, tokens } = response.data.data;
-        this.token = tokens.accessToken;
-        localStorage.setItem('token', tokens.accessToken);
+        this.setTokens(tokens);
         return { user, tokens };
       }
       throw new Error('Format de réponse invalide');
@@ -62,8 +77,7 @@ class AuthService {
       const response = await axios.post(`${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.REGISTER}`, userData);
       if (response.data.data) {
         const { user, tokens } = response.data.data;
-        this.token = tokens.accessToken;
-        localStorage.setItem('token', tokens.accessToken);
+        this.setTokens(tokens);
         return { user, tokens };
       }
       throw new Error('Format de réponse invalide');
@@ -72,9 +86,30 @@ class AuthService {
     }
   }
 
+  public async refreshToken(): Promise<AuthTokens | null> {
+    const currentRefreshToken = this.getRefreshToken();
+    if (!currentRefreshToken) return null;
+
+    try {
+      const response = await axios.post(`${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.REFRESH}`, {
+        refreshToken: currentRefreshToken,
+      });
+
+      if (response.data.data && response.data.data.tokens) {
+        const { tokens } = response.data.data;
+        this.setTokens(tokens);
+        return tokens;
+      }
+      throw new Error('Format de réponse invalide pour le rafraîchissement du token');
+    } catch (error) {
+      this.logout(); // Si le refresh token est invalide, on déconnecte
+      throw this.handleError(error);
+    }
+  }
+
   public async getCurrentUser(): Promise<User | null> {
     try {
-      const token = this.getToken();
+      const token = this.getAccessToken();
       if (!token) return null;
       const response = await axios.get(`${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.ME}`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -92,16 +127,21 @@ class AuthService {
   }
 
   public logout(): void {
-    localStorage.removeItem('token');
-    this.token = null;
+    // Idéalement, on appellerait aussi l'endpoint de logout du backend ici
+    // await axios.post(`${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.LOGOUT}`, { refreshToken: this.getRefreshToken() });
+    this.clearTokens();
   }
 
-  public getToken(): string | null {
-    return this.token || localStorage.getItem('token');
+  public getAccessToken(): string | null {
+    return this.accessToken || localStorage.getItem('accessToken');
+  }
+
+  public getRefreshToken(): string | null {
+    return this.refreshToken || localStorage.getItem('refreshToken');
   }
 
   public isAuthenticated(): boolean {
-    return !!this.getToken();
+    return !!this.getAccessToken();
   }
 
   private handleError(error: unknown): AuthError {

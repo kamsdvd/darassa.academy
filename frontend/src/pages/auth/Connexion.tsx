@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import PageTransition from '../../components/shared/PageTransition';
-import { AuthService } from '../../services/authService';
+import { AuthService } from '../../modules/auth/services/auth.service';
 import { useStore } from '../../store/useStore';
 import { SocialLoginButtons } from '../../components/auth/SocialLoginButtons';
 

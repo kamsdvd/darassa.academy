@@ -36,6 +36,28 @@ try {
 
 > Pour plus de détails sur la structure des erreurs API, voir le README du backend. 
 
+## Flux d'Authentification
+
+### Flux d'Inscription (Frontend)
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant RegisterContainer as "RegisterContainer.tsx"
+    participant useAuth as "useAuth Hook"
+    participant AuthService as "auth.service.ts"
+    participant API as "Backend API"
+
+    User->>RegisterContainer: Remplit le formulaire et clique sur "S'inscrire"
+    RegisterContainer->>useAuth: Appelle la fonction register(formData)
+    useAuth->>AuthService: Appelle authService.register(formData)
+    AuthService->>API: Envoie une requête POST /api/auth/register
+    API-->>AuthService: Retourne { user, tokens }
+    AuthService-->>useAuth: Retourne la réponse
+    useAuth-->>RegisterContainer: Met à jour l'état (user, isAuthenticated)
+    RegisterContainer->>User: Redirige vers le /dashboard
+```
+
 ## Modules partagés
 
 ### Module `common`
