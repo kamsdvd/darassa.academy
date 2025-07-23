@@ -1,5 +1,5 @@
 import { IsEmail, IsString, MinLength, IsEnum, IsNotEmpty } from 'class-validator';
-import { UserType } from '@prisma/client';
+import { UserType } from '../generated/prisma';
 
 export class CreateUserDto {
   @IsEmail({}, { message: 'L'email doit être une adresse email valide.' })

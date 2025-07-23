@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import PageTransition from '../../components/shared/PageTransition';
-import { AuthService } from '../../modules/auth/services/auth.service';
+import { authService } from '../../modules/auth/services/auth.service';
 import { useStore } from '../../store/useStore';
 import { SocialLoginButtons } from '../../components/auth/SocialLoginButtons';
 
@@ -66,7 +66,6 @@ const Connexion: React.FC = () => {
     if (Object.keys(newErrors).length === 0) {
       setIsLoading(true);
       try {
-        const authService = AuthService.getInstance();
         const response = await authService.login(email, password);
         
         // Mettre à jour l'état global avec les données de l'utilisateur

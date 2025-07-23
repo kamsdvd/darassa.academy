@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import { AuthService } from '@/modules/auth/services/auth.service';
+import { authService } from '@/modules/auth/services/auth.service';
 import Layout from '@/components/layout/Layout';
 import { reportWebVitals } from '@/utils/webVitals';
 import NotFound from '@/pages/NotFound';
@@ -115,7 +115,7 @@ const AuthCheck: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const authService = AuthService.getInstance();
+      console.log('authService in App.tsx:', authService);
       if (!authService.getToken()) {
         setIsLoading(false);
         return;

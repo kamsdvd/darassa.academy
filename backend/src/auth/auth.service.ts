@@ -1,11 +1,11 @@
-import { PrismaClient, UserType } from '@prisma/client';
+import { PrismaClient, UserType } from '../generated/prisma';
 import bcrypt from 'bcrypt';
 import * as tokenService from './token.service';
-import { CreateUserDto } from '../dtos/create-user.dto';
+import { IRegisterUserDto } from '../dtos/iregister-user.dto';
 
 const prisma = new PrismaClient();
 
-export async function registerUser(userData: CreateUserDto) {
+export async function registerUser(userData: IRegisterUserDto) {
   const { email, password, firstName, lastName, userType } = userData;
 
   // 1. Vérifier si l'utilisateur existe déjà
