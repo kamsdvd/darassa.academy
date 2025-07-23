@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 
 // Lazy loading des pages
 const Home = lazy(() => import('../pages/Home'));
-const Register = lazy(() => import('../features/auth/containers/RegisterContainer'));
+const Register = lazy(() => import('../modules/auth/containers/RegisterContainer'));
 const Dashboard = lazy(() => import('../pages/Dashboard'));
 const Courses = lazy(() => import('../features/courses/containers/CoursesContainer'));
 const CourseDetail = lazy(() => import('../features/courses/containers/CourseDetailContainer'));
@@ -44,7 +44,7 @@ export const AppRoutes = () => {
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/connexion" element={<Connexion />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/inscription" element={<Register />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/courses/:id" element={<CourseDetail />} />
         </Route>

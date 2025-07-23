@@ -1,42 +1,50 @@
 import { useState, useEffect } from 'react';
-import { authService } from '../services/auth.service';
-import { LoginCredentials, RegisterCredentials, User } from '../types/auth.types';
+import { authService, User, AuthError } from '../services/auth.service';
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<AuthError | null>(null);
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser();
-    setUser(currentUser);
-    setIsLoading(false);
+    const fetchUser = async () => {
+      setIsLoading(true);
+      try {
+        const currentUser = await authService.getCurrentUser();
+        setUser(currentUser);
+      } catch (err) {
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchUser();
   }, []);
 
-  const login = async (credentials: LoginCredentials) => {
+  const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await authService.login(credentials);
+      const response = await authService.login(email, password);
       setUser(response.user);
       return response;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+      setError(err as AuthError);
       throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async (credentials: RegisterCredentials) => {
+  const register = async (data: { email: string; password: string; firstName: string; lastName: string; userType: string }) => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await authService.register(credentials);
+      const response = await authService.register(data);
       setUser(response.user);
       return response;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+      setError(err as AuthError);
       throw err;
     } finally {
       setIsLoading(false);

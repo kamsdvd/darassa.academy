@@ -21,7 +21,7 @@ import {
   Menu,
   X
 } from 'lucide-react';
-import { authService } from '../../services/auth.service';
+import { authService } from '@/modules/auth/services/auth.service';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -613,6 +613,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
                 <button
                   onClick={onToggle}
                   className="p-2 rounded-md hover:bg-gray-100 transition-colors"
+                  title="Réduire la barre latérale"
                 >
                   <Menu className="w-5 h-5 text-gray-600" />
                 </button>
@@ -621,6 +622,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
               <button
                 onClick={onToggle}
                 className="p-2 rounded-md hover:bg-gray-100 transition-colors w-full flex justify-center"
+                title="Ouvrir la barre latérale"
               >
                 <Menu className="w-5 h-5 text-gray-600" />
               </button>

@@ -1,45 +1,123 @@
-import axios from 'axios';
-import { LoginCredentials, RegisterCredentials, AuthResponse } from '../types/auth.types';
+import axios, { AxiosError } from 'axios';
+import { API_CONFIG } from '../../../config/api.config';
 
-const API_URL = import.meta.env.VITE_API_URL;
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  userType: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  tokens: AuthTokens;
+}
+
+export interface AuthError {
+  code: string;
+  message: string;
+  details?: any;
+}
 
 class AuthService {
-  async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await axios.post(`${API_URL}/auth/login`, credentials);
-    if (response.data.token) {
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-    }
-    return response.data;
+  private static instance: AuthService;
+  private baseURL: string;
+  private token: string | null = null;
+
+  private constructor() {
+    this.baseURL = API_CONFIG.BASE_URL;
+    this.token = localStorage.getItem('token');
   }
 
-  async register(credentials: RegisterCredentials): Promise<AuthResponse> {
-    const response = await axios.post(`${API_URL}/auth/register`, credentials);
-    if (response.data.token) {
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+  public static getInstance(): AuthService {
+    if (!AuthService.instance) {
+      AuthService.instance = new AuthService();
     }
-    return response.data;
+    return AuthService.instance;
   }
 
-  logout(): void {
+  public async login(email: string, password: string): Promise<AuthResponse> {
+    try {
+      const response = await axios.post(`${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.LOGIN}`, { email, password });
+      if (response.data.data) {
+        const { user, tokens } = response.data.data;
+        this.token = tokens.accessToken;
+        localStorage.setItem('token', tokens.accessToken);
+        return { user, tokens };
+      }
+      throw new Error('Format de réponse invalide');
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  public async register(userData: { email: string; password: string; firstName: string; lastName: string; userType: string }): Promise<AuthResponse> {
+    try {
+      const response = await axios.post(`${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.REGISTER}`, userData);
+      if (response.data.data) {
+        const { user, tokens } = response.data.data;
+        this.token = tokens.accessToken;
+        localStorage.setItem('token', tokens.accessToken);
+        return { user, tokens };
+      }
+      throw new Error('Format de réponse invalide');
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  public async getCurrentUser(): Promise<User | null> {
+    try {
+      const token = this.getToken();
+      if (!token) return null;
+      const response = await axios.get(`${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.ME}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.data.data && response.data.data.user) {
+        return response.data.data.user;
+      }
+      return null;
+    } catch (error) {
+      if (error instanceof AxiosError && (error.response?.status === 401 || error.response?.status === 403)) {
+        this.logout();
+      }
+      return null;
+    }
+  }
+
+  public logout(): void {
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    this.token = null;
   }
 
-  getCurrentUser() {
-    const userStr = localStorage.getItem('user');
-    if (userStr) return JSON.parse(userStr);
-    return null;
+  public getToken(): string | null {
+    return this.token || localStorage.getItem('token');
   }
 
-  getToken(): string | null {
-    return localStorage.getItem('token');
-  }
-
-  isAuthenticated(): boolean {
+  public isAuthenticated(): boolean {
     return !!this.getToken();
+  }
+
+  private handleError(error: unknown): AuthError {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError;
+      return {
+        code: axiosError.response?.status.toString() || 'UNKNOWN',
+        message: axiosError.response?.data?.message || 'Une erreur est survenue',
+        details: axiosError.response?.data
+      };
+    }
+    return {
+      code: 'UNKNOWN',
+      message: 'Une erreur inattendue est survenue'
+    };
   }
 }
 
-export const authService = new AuthService(); 
+export const authService = AuthService.getInstance(); 

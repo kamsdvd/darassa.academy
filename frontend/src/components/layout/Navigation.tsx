@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, Home, LogIn, LogOut, User, ChevronDown, GraduationCap, Briefcase, LayoutDashboard } from 'lucide-react';
 import { useStore } from '../../store/useStore';
-import { AuthService } from '../../services/authService';
+import { authService } from '@/modules/auth/services/auth.service';
 
 const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -36,7 +36,6 @@ const Navigation: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      const authService = AuthService.getInstance();
       await authService.logout();
       logout();
       setIsUserMenuOpen(false);

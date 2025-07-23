@@ -6,7 +6,6 @@ import { reportWebVitals } from '@/utils/webVitals';
 import NotFound from '@/pages/NotFound';
 import { ProtectedRoute } from '@/components/shared/ProtectedRoute';
 import { useStore } from '@/store/useStore';
-import { AuthService } from '@/services/authService';
 import LoadingFallback from '@/components/common/LoadingFallback';
 import AdminDashboard from '@/pages/admin/Dashboard';
 import UsersManagement from '@/pages/admin/UsersManagement';
@@ -58,7 +57,7 @@ const JobDetail = lazyWithPrefetch(() => import('@/pages/opportunites/JobDetail'
 const Entreprises = lazyWithPrefetch(() => import('@/pages/entreprises/Entreprises'));
 const InscriptionEntreprise = lazyWithPrefetch(() => import('@/pages/entreprises/Inscription'));
 const EntrepriseDashboard = lazyWithPrefetch(() => import('@/pages/entreprises/Dashboard'));
-const InscriptionParticulier = lazyWithPrefetch(() => import('@/pages/auth/Inscription'));
+const InscriptionParticulier = lazyWithPrefetch(() => import('@/modules/auth/containers/RegisterContainer'));
 const Connexion = lazyWithPrefetch(() => import('@/pages/auth/Connexion'), true);
 const APropos = lazyWithPrefetch(() => import('@/pages/a-propos/APropos'));
 const FAQ = lazyWithPrefetch(() => import('@/pages/faq/FAQ'));
