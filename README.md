@@ -62,7 +62,7 @@ Le frontend sera accessible à l'adresse : http://localhost:5173
 cd backend
 npm run dev
 ```
-Le backend sera accessible à l'adresse : http://localhost:3000
+Le backend sera accessible à l'adresse : http://localhost:5000
 
 ## 📝 Scripts Disponibles
 
